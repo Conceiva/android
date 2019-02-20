@@ -59,4 +59,9 @@ public interface OCFileListBottomSheetActions {
      * offers direct camera upload to the current folder.
      */
     void directCameraUpload();
+
+    /**
+     * offers launch image meter to upload to the current folder.
+     */
+    void imageMeterUpload();
 }

@@ -178,6 +178,7 @@ public class FileDisplayActivity extends HookActivity
     public static final int REQUEST_CODE__MOVE_FILES = REQUEST_CODE__LAST_SHARED + 3;
     public static final int REQUEST_CODE__COPY_FILES = REQUEST_CODE__LAST_SHARED + 4;
     public static final int REQUEST_CODE__UPLOAD_FROM_CAMERA = REQUEST_CODE__LAST_SHARED + 5;
+    public static final int REQUEST_CODE__IMAGE_METER = REQUEST_CODE__LAST_SHARED + 6;
 
     protected static final long DELAY_TO_REQUEST_REFRESH_OPERATION_LATER = DELAY_TO_REQUEST_OPERATIONS_LATER + 350;
 
@@ -1029,6 +1030,9 @@ public class FileDisplayActivity extends HookActivity
                     },
                     DELAY_TO_REQUEST_OPERATIONS_LATER
             );
+        } else if (requestCode == REQUEST_CODE__IMAGE_METER && resultCode == RESULT_OK) {
+            //
+
         } else {
             super.onActivityResult(requestCode, resultCode, data);
         }

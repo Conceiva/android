@@ -28,8 +28,12 @@ import android.accounts.AccountManager;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -426,6 +430,35 @@ public class OCFileListFragment extends ExtendedListFragment implements
                 .uploadFromCamera(fileDisplayActivity, FileDisplayActivity.REQUEST_CODE__UPLOAD_FROM_CAMERA);
         } else {
             DisplayUtils.showSnackMessage(getView(), getString(R.string.error_starting_direct_camera_upload));
+        }
+    }
+
+    @Override
+    public void imageMeterUpload() {
+        Intent launchIntent = getActivity().getPackageManager().getLaunchIntentForPackage("de.dirkfarin.imagemeter");
+        if (launchIntent != null) {
+            // extra "HANDWERKCLOUD_VERSION" : integer, with the current app version code, so that I know who is calling
+            try {
+                PackageInfo pInfo = getActivity().getPackageManager().getPackageInfo(getActivity().getPackageName(), 0);
+                int version = pInfo.versionCode;
+                launchIntent.putExtra("HANDWERKCLOUD_VERSION", version);
+            } catch (PackageManager.NameNotFoundException e) {
+                e.printStackTrace();
+            }
+            // extra "HANDWERKCLOUD_ACTION" : string, indicating what you want to do. E.g. "CAPTURE-IMAGE".
+            launchIntent.putExtra("HANDWERKCLOUD_ACTION", "CAPTURE-IMAGE");
+            // extra "HANDWERKCLOUD_FOLDER" : a path to the current folder you are in, so that I know where to put the image.
+            launchIntent.putExtra("HANDWERKCLOUD_FOLDER", mFile);
+            getActivity().startActivityForResult(launchIntent, FileDisplayActivity.REQUEST_CODE__IMAGE_METER);
+        }
+        else {
+            // not installed
+            final String appPackageName = "de.dirkfarin.imagemeter"; // getPackageName() from Context or Activity object
+            try {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
+            } catch (android.content.ActivityNotFoundException anfe) {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
+            }
         }
     }
 

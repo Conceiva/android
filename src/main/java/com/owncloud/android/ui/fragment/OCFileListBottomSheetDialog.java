@@ -118,6 +118,12 @@ public class OCFileListBottomSheetDialog extends BottomSheetDialog {
         dismiss();
     }
 
+    @OnClick(R.id.menu_image_meter)
+    public void imageMeterUpload() {
+        actions.imageMeterUpload();
+        dismiss();
+    }
+
     @OnClick(R.id.menu_upload_files)
     public void uploadFiles() {
         actions.uploadFiles();
