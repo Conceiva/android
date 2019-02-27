@@ -65,6 +65,7 @@ import com.owncloud.android.files.FileMenuFilter;
 import com.owncloud.android.lib.common.OwnCloudAccount;
 import com.owncloud.android.lib.common.OwnCloudClient;
 import com.owncloud.android.lib.common.OwnCloudClientManagerFactory;
+import com.owncloud.android.lib.common.OwnCloudCredentials;
 import com.owncloud.android.lib.common.operations.RemoteOperation;
 import com.owncloud.android.lib.common.operations.RemoteOperationResult;
 import com.owncloud.android.lib.common.utils.Log_OC;
@@ -437,6 +438,32 @@ public class OCFileListFragment extends ExtendedListFragment implements
     public void imageMeterUpload() {
         Intent launchIntent = getActivity().getPackageManager().getLaunchIntentForPackage("de.dirkfarin.imagemeter");
         if (launchIntent != null) {
+            Account account = AccountUtils.getCurrentOwnCloudAccount(getActivity());
+            AccountManager accountManager = AccountManager.get(getActivity());
+            String password = accountManager.getPassword(account);
+            OwnCloudAccount ocAccount = null;
+            try {
+                ocAccount = new OwnCloudAccount(account, getActivity());
+            } catch (com.owncloud.android.lib.common.accounts.AccountUtils.AccountNotFoundException e) {
+                e.printStackTrace();
+            }
+            try {
+                OwnCloudClient client = OwnCloudClientManagerFactory.getDefaultSingleton().getClientFor(ocAccount, getContext());
+                OwnCloudCredentials cred = client.getCredentials();
+                if (cred != null) {
+                    launchIntent.putExtra("USERNAME", cred.getUsername());
+                    launchIntent.putExtra("AUTH_TOKEN", cred.getAuthToken());
+                }
+            } catch (com.owncloud.android.lib.common.accounts.AccountUtils.AccountNotFoundException e) {
+                e.printStackTrace();
+            } catch (OperationCanceledException e) {
+                e.printStackTrace();
+            } catch (AuthenticatorException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
             // extra "HANDWERKCLOUD_VERSION" : integer, with the current app version code, so that I know who is calling
             try {
                 PackageInfo pInfo = getActivity().getPackageManager().getPackageInfo(getActivity().getPackageName(), 0);
@@ -448,7 +475,7 @@ public class OCFileListFragment extends ExtendedListFragment implements
             // extra "HANDWERKCLOUD_ACTION" : string, indicating what you want to do. E.g. "CAPTURE-IMAGE".
             launchIntent.putExtra("HANDWERKCLOUD_ACTION", "CAPTURE-IMAGE");
             // extra "HANDWERKCLOUD_FOLDER" : a path to the current folder you are in, so that I know where to put the image.
-            launchIntent.putExtra("HANDWERKCLOUD_FOLDER", mFile);
+            launchIntent.putExtra("HANDWERKCLOUD_FOLDER", mFile.getRemotePath());
             getActivity().startActivityForResult(launchIntent, FileDisplayActivity.REQUEST_CODE__IMAGE_METER);
         }
         else {
