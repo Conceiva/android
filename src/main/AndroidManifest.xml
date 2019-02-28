@@ -379,6 +379,15 @@
             android:name=".ui.activity.SsoGrantPermissionActivity"
             android:exported="true"
             android:theme="@style/Theme.ownCloud.Dialog.NoTitle" />
+
+        <activity
+            android:name="com.handwerkcloud.client.CredentialActivity"
+            android:exported="true"
+            android:theme="@style/Theme.ownCloud.Dialog.NoTitle" >
+            <intent-filter>
+                <action android:name="android.intent.action.GET_CONTENT" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

@@ -1,2 +1,3 @@
+include ':testcredentialquery'
 include ':'
 //include 'nextcloud-android-library'
