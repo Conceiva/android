@@ -12,9 +12,12 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Base64;
+import android.util.Log;
 import android.widget.TextView;
 
 import com.owncloud.android.MainApp;
+import com.owncloud.android.R;
 import com.owncloud.android.authentication.AccountUtils;
 import com.owncloud.android.authentication.AuthenticatorActivity;
 import com.owncloud.android.lib.common.OwnCloudAccount;
@@ -27,15 +30,32 @@ import com.owncloud.android.ui.activity.DrawerActivity;
 import com.owncloud.android.ui.activity.FileDisplayActivity;
 import com.owncloud.android.ui.activity.FirstRunActivity;
 import com.owncloud.android.ui.activity.RequestCredentialsActivity;
+import com.owncloud.android.utils.EncryptionUtils;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.crypto.Cipher;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import static com.owncloud.android.ui.activity.FirstRunActivity.EXTRA_EXIT;
 
 public class CredentialActivity extends AppCompatActivity {
 
     static final String TAG = "CredentialActivity";
+    static final String IMAGEMETER_PUBLIC_KEY = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC5CQnGP0zWBSvgMTyKOEXyNl8rpZMn4D5JNP3OLjqaDoVYP4VM7BIVvAhEeq4Ja+JJit5Xa0l2B6wQOj32MARL8vFXFWDXwHAnxWcNmZ1mFY+2CgmwoN69DS+9se2/50TW3Z6NIKjGZDjgEmDGdhvFyJXFdN8JYzS+p2vDEtkccQIDAQAB";
+    static final String IMAGEMETER_APPLICANT = "ImageMeter";
+    static Map<String, String> mPublicKeys = new HashMap<String, String>();
+    static String mApplicant = ""; // Currently only supports ImageMeter but we can add others in the future to support different keys
+    static final int AUTHENTICATE = 1;
 
     /**
      * Helper class handling a callback from the {@link AccountManager} after the creation of
@@ -115,20 +135,29 @@ public class CredentialActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         Intent intent = getIntent();
 
+        mPublicKeys.put(IMAGEMETER_APPLICANT, IMAGEMETER_PUBLIC_KEY);
+
+        if (intent.hasExtra("APPLICANT")) {
+            mApplicant = intent.getStringExtra("APPLICANT");
+        }
+
         Account account = AccountUtils.getCurrentOwnCloudAccount(this);
         if (account != null) {
             new MyTask(this).execute();
         }
         else if (intent.hasExtra("LOGIN_IF_ACCOUNT_UNAVAILABLE")){
-
-           AccountManager am = AccountManager.get(getApplicationContext());
+            Intent authIntent = new Intent(getApplicationContext(), AuthenticatorActivity.class);
+            authIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            authIntent.putExtra(EXTRA_EXIT, true);
+            startActivityForResult(authIntent, AUTHENTICATE);
+           /*AccountManager am = AccountManager.get(getApplicationContext());
             am.addAccount(MainApp.getAccountType(this),
                 null,
                 null,
                 null,
                 this,
                 new CredentialActivity.CredentialCreationCallback(true),
-                new Handler());
+                new Handler());*/
         }
         else {
 
@@ -140,10 +169,39 @@ public class CredentialActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // Check which request we're responding to
+        if (requestCode == AUTHENTICATE) {
+            returnCredentials(this);
+        }
+    }
+
+    static String encryptData(String txt)
+    {
+        String applicantKey = mPublicKeys.get(mApplicant);
+        String encoded = "";
+        byte[] encrypted = null;
+        try {
+            byte[] publicBytes = Base64.decode(applicantKey, Base64.DEFAULT);
+            X509EncodedKeySpec keySpec = new X509EncodedKeySpec(publicBytes);
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            PublicKey pubKey = keyFactory.generatePublic(keySpec);
+            Cipher cipher = Cipher.getInstance("RSA");
+            cipher.init(Cipher.ENCRYPT_MODE, pubKey);
+            encrypted = cipher.doFinal(txt.getBytes());
+            encoded = Base64.encodeToString(encrypted, Base64.DEFAULT);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        return encoded;
+    }
+
     public static void returnCredentials(AppCompatActivity context) {
 
         Intent resultIntent = new Intent();
-
+        resultIntent.putExtra("SERVER_URL", context.getString(R.string.server_url));
         Account account = AccountUtils.getCurrentOwnCloudAccount(context);
         if (account != null) {
 
@@ -158,8 +216,8 @@ public class CredentialActivity extends AppCompatActivity {
                 OwnCloudClient client = OwnCloudClientManagerFactory.getDefaultSingleton().getClientFor(ocAccount, context);
                 OwnCloudCredentials cred = client.getCredentials();
                 if (cred != null) {
-                    resultIntent.putExtra("USERNAME", cred.getUsername());
-                    resultIntent.putExtra("AUTH_TOKEN", cred.getAuthToken());
+                    resultIntent.putExtra("USERNAME", encryptData(cred.getUsername()));
+                    resultIntent.putExtra("AUTH_TOKEN", encryptData(cred.getAuthToken()));
                 }
             } catch (com.owncloud.android.lib.common.accounts.AccountUtils.AccountNotFoundException e) {
                 e.printStackTrace();

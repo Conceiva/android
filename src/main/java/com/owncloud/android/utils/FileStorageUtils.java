@@ -193,7 +193,7 @@ public final class FileStorageUtils {
             file.setEncrypted(remote.isEncrypted());
         }
         file.setMountType(remote.getMountType());
-        file.setPreviewAvailable(remote.isHasPreview());
+        file.setPreviewAvailable(remote.isHasPreview() || remote.getRemotePath().endsWith(".emi"));
         file.setUnreadCommentsCount(remote.getUnreadCommentsCount());
 
         return file;

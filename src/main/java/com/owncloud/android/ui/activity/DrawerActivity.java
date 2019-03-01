@@ -27,8 +27,12 @@ package com.owncloud.android.ui.activity;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.AccountManagerFuture;
+import android.accounts.AuthenticatorException;
+import android.accounts.OperationCanceledException;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.ColorDrawable;
@@ -66,6 +70,9 @@ import com.owncloud.android.db.PreferenceManager;
 import com.owncloud.android.lib.common.ExternalLink;
 import com.owncloud.android.lib.common.ExternalLinkType;
 import com.owncloud.android.lib.common.OwnCloudAccount;
+import com.owncloud.android.lib.common.OwnCloudClient;
+import com.owncloud.android.lib.common.OwnCloudClientManagerFactory;
+import com.owncloud.android.lib.common.OwnCloudCredentials;
 import com.owncloud.android.lib.common.Quota;
 import com.owncloud.android.lib.common.UserInfo;
 import com.owncloud.android.lib.common.accounts.ExternalLinksOperation;
@@ -98,6 +105,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.parceler.Parcels;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -396,12 +404,70 @@ public abstract class DrawerActivity extends ToolbarActivity implements DisplayU
         unsetAllDrawerMenuItems();
     }
 
+    public OCFile getFile() {
+        return null;
+    }
 
     private void selectNavigationItem(final MenuItem menuItem) {
 
         setDrawerMenuItemChecked(menuItem.getItemId());
 
         switch (menuItem.getItemId()) {
+            case R.id.nav_image_meter:
+                Intent launchIntent = getPackageManager().getLaunchIntentForPackage("de.dirkfarin.imagemeter");
+                if (launchIntent != null) {
+                    Account account = AccountUtils.getCurrentOwnCloudAccount(this);
+                    AccountManager accountManager = AccountManager.get(this);
+                    String password = accountManager.getPassword(account);
+                    OwnCloudAccount ocAccount = null;
+                    try {
+                        ocAccount = new OwnCloudAccount(account, this);
+                    } catch (com.owncloud.android.lib.common.accounts.AccountUtils.AccountNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                    try {
+                        OwnCloudClient client = OwnCloudClientManagerFactory.getDefaultSingleton().getClientFor(ocAccount, this);
+                        OwnCloudCredentials cred = client.getCredentials();
+                        if (cred != null) {
+                            launchIntent.putExtra("USERNAME", cred.getUsername());
+                            launchIntent.putExtra("AUTH_TOKEN", cred.getAuthToken());
+                        }
+                    } catch (com.owncloud.android.lib.common.accounts.AccountUtils.AccountNotFoundException e) {
+                        e.printStackTrace();
+                    } catch (OperationCanceledException e) {
+                        e.printStackTrace();
+                    } catch (AuthenticatorException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    // extra "HANDWERKCLOUD_VERSION" : integer, with the current app version code, so that I know who is calling
+                    try {
+                        PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+                        int version = pInfo.versionCode;
+                        launchIntent.putExtra("HANDWERKCLOUD_VERSION", version);
+                    } catch (PackageManager.NameNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                    // extra "HANDWERKCLOUD_ACTION" : string, indicating what you want to do. E.g. "CAPTURE-IMAGE".
+                    launchIntent.putExtra("HANDWERKCLOUD_ACTION", "CAPTURE-IMAGE");
+                    // extra "HANDWERKCLOUD_FOLDER" : a path to the current folder you are in, so that I know where to put the image.
+                    if (getFile() != null) {
+                        launchIntent.putExtra("HANDWERKCLOUD_FOLDER", getFile().getRemotePath());
+                    }
+                    startActivityForResult(launchIntent, FileDisplayActivity.REQUEST_CODE__IMAGE_METER);
+                }
+                else {
+                    // not installed
+                    final String appPackageName = "de.dirkfarin.imagemeter"; // getPackageName() from Context or Activity object
+                    try {
+                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
+                    } catch (android.content.ActivityNotFoundException anfe) {
+                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
+                    }
+                }
+                break;
             case R.id.nav_all_files:
                 showFiles(false);
                 EventBus.getDefault().post(new ChangeMenuEvent());

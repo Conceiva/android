@@ -26,6 +26,11 @@
         android:id="@+id/drawer_menu_standard"
         android:checkableBehavior="single">
         <item
+            android:id="@+id/nav_image_meter"
+            android:icon="@drawable/ic_action_imagemeter"
+            android:orderInCategory="0"
+            android:title="@string/imagemeter"/>
+        <item
             android:id="@+id/nav_all_files"
             android:icon="@drawable/nav_all_files"
             android:orderInCategory="0"

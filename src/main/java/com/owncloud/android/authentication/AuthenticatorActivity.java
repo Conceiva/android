@@ -261,6 +261,7 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity
     private TextInputLayout mUsernameInputLayout;
     private TextInputLayout mPasswordInputLayout;
     private boolean forceOldLoginMethod;
+    private boolean mFinishAfterLogin = false;
 
     /**
      * {@inheritDoc}
@@ -276,6 +277,10 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity
         boolean directLogin = data != null && data.toString().startsWith(getString(R.string.login_data_own_scheme));
         if (savedInstanceState == null && !directLogin) {
             FirstRunActivity.runIfNeeded(this);
+        }
+
+        if (getIntent().getBooleanExtra(FirstRunActivity.EXTRA_EXIT, false)) {
+            mFinishAfterLogin = true;
         }
 
         basicTokenType = AccountTypeUtils.getAuthTokenTypePass(MainApp.getAccountType(this));
@@ -1773,11 +1778,12 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity
 
                 AccountUtils.setCurrentOwnCloudAccount(this, mAccount.name);
 
-                Intent i = new Intent(this, FileDisplayActivity.class);
-                i.setAction(FileDisplayActivity.RESTART);
-                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(i);
-
+                if (!mFinishAfterLogin) {
+                    Intent i = new Intent(this, FileDisplayActivity.class);
+                    i.setAction(FileDisplayActivity.RESTART);
+                    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(i);
+                }
             } else {
                 // init webView again
                 if (mLoginWebView != null) {

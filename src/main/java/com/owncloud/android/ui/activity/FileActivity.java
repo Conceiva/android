@@ -264,6 +264,7 @@ public abstract class FileActivity extends DrawerActivity
      *
      * @return  Main {@link OCFile} handled by the activity.
      */
+    @Override
     public OCFile getFile() {
         return mFile;
     }
