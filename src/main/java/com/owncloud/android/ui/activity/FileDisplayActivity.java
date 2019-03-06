@@ -179,6 +179,7 @@ public class FileDisplayActivity extends HookActivity
     public static final int REQUEST_CODE__COPY_FILES = REQUEST_CODE__LAST_SHARED + 4;
     public static final int REQUEST_CODE__UPLOAD_FROM_CAMERA = REQUEST_CODE__LAST_SHARED + 5;
     public static final int REQUEST_CODE__IMAGE_METER = REQUEST_CODE__LAST_SHARED + 6;
+    public static final int REQUEST_CODE__OCR = REQUEST_CODE__LAST_SHARED + 7;
 
     protected static final long DELAY_TO_REQUEST_REFRESH_OPERATION_LATER = DELAY_TO_REQUEST_OPERATIONS_LATER + 350;
 

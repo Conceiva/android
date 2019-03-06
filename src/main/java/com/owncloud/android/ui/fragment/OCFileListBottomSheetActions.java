@@ -64,4 +64,9 @@ public interface OCFileListBottomSheetActions {
      * offers launch image meter to upload to the current folder.
      */
     void imageMeterUpload();
+
+    /**
+     * offers ocr to upload to the current folder.
+     */
+    void ocrUpload();
 }

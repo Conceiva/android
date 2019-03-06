@@ -61,7 +61,7 @@ repositories {
 def versionMajor = 3
 def versionMinor = 5
 def versionPatch = 0
-def versionBuild = 4 // 0-50=Alpha / 51-98=RC / 90-99=stable
+def versionBuild = 5 // 0-50=Alpha / 51-98=RC / 90-99=stable
 
 def taskRequest = getGradle().getStartParameter().getTaskRequests().toString()
 if (taskRequest.contains("Gplay") || taskRequest.contains("findbugs") || taskRequest.contains("lint")) {
@@ -210,6 +210,8 @@ android {
 }
 
 dependencies {
+    implementation 'com.google.android.gms:play-services-vision:11.0.4'
+    implementation 'com.github.barteksc:android-pdf-viewer:2.8.2'
 
     // dependencies for app building
     implementation 'androidx.multidex:multidex:2.0.1'
@@ -332,6 +334,6 @@ tasks.register("combinedTestReport", JacocoReport) {
     sourceDirectories = files([mainSrc])
     classDirectories = files([debugTree])
     executionData = fileTree(dir: project.buildDir, includes: [
-        'jacoco/testGplayDebugUnitTest.exec', 'outputs/code-coverage/connected/flavors/GPLAY/*coverage.ec'
+            'jacoco/testGplayDebugUnitTest.exec', 'outputs/code-coverage/connected/flavors/GPLAY/*coverage.ec'
     ])
 }

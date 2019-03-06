@@ -53,6 +53,7 @@ import android.widget.RelativeLayout;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.snackbar.Snackbar;
+import com.handwerkcloud.client.OCRActivity;
 import com.owncloud.android.MainApp;
 import com.owncloud.android.R;
 import com.owncloud.android.authentication.AccountUtils;
@@ -434,6 +435,12 @@ public class OCFileListFragment extends ExtendedListFragment implements
         }
     }
 
+    @Override
+    public void ocrUpload() {
+        Intent i = new Intent(getActivity(), OCRActivity.class);
+        getActivity().startActivityForResult(i, FileDisplayActivity.REQUEST_CODE__SELECT_FILES_FROM_FILE_SYSTEM);
+
+    }
     @Override
     public void imageMeterUpload() {
         Intent launchIntent = getActivity().getPackageManager().getLaunchIntentForPackage("de.dirkfarin.imagemeter");
@@ -1020,6 +1027,8 @@ public class OCFileListFragment extends ExtendedListFragment implements
             mContainerActivity.onBrowsedDownTo(file);
             // save index and top position
             saveIndexAndTopPosition(position);
+        } else if (requestCode == FileDisplayActivity.REQUEST_CODE__OCR) {
+
         } else {
             super.onActivityResult(requestCode, resultCode, data);
         }

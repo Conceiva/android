@@ -124,6 +124,12 @@ public class OCFileListBottomSheetDialog extends BottomSheetDialog {
         dismiss();
     }
 
+    @OnClick(R.id.menu_ocr)
+    public void ocrUpload() {
+        actions.ocrUpload();
+        dismiss();
+    }
+
     @OnClick(R.id.menu_upload_files)
     public void uploadFiles() {
         actions.uploadFiles();
