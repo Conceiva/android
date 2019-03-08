@@ -846,4 +846,5 @@
     <string name="remove_notification_failed">Entfernen der Benachrichtigungen fehlgeschlagen.</string>
     <string name="notification_action_failed">Ausführen der Aktion fehlgeschlagen.</string>
     <string name="remove_push_notification">Entfernen</string>
+    <string name="ocr">Dokument scannen</string>
 </resources>

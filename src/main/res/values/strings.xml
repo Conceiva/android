@@ -864,5 +864,5 @@
     <string name="remove_push_notification">Remove</string>
     <string name="imagemeter">Image Meter</string>
     <string name="title_activity_ocr">OCRActivity</string>
-    <string name="ocr">Upload OCR capture</string>
+    <string name="ocr">Scan document</string>
 </resources>
