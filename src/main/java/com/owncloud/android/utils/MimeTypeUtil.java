@@ -213,7 +213,8 @@ public final class MimeTypeUtil {
      * @return 'True' if the mime type defines image
      */
     public static boolean isImage(String mimeType) {
-        return mimeType != null && mimeType.toLowerCase(Locale.ROOT).startsWith("image/") &&
+        return mimeType != null && (mimeType.toLowerCase(Locale.ROOT).startsWith("image/") ||
+            mimeType.toLowerCase(Locale.ROOT).equals("application/vnd.imagemeter.image+zip")) &&
                 !mimeType.toLowerCase(Locale.ROOT).contains("djvu");
     }
 
