@@ -481,6 +481,7 @@ public final class MimeTypeUtil {
         MIMETYPE_TO_ICON_MAPPING.put("application/xml", R.drawable.file_text);
         MIMETYPE_TO_ICON_MAPPING.put("application/yaml", R.drawable.file_code);
         MIMETYPE_TO_ICON_MAPPING.put("application/zip", R.drawable.file_zip);
+        MIMETYPE_TO_ICON_MAPPING.put("application/vnd.imagemeter.image+zip", R.drawable.file_image);
         MIMETYPE_TO_ICON_MAPPING.put("database", R.drawable.file);
         MIMETYPE_TO_ICON_MAPPING.put("httpd/unix-directory", R.drawable.folder);
         MIMETYPE_TO_ICON_MAPPING.put("image/svg+xml", R.drawable.file_image);
@@ -571,6 +572,7 @@ public final class MimeTypeUtil {
         FILE_EXTENSION_TO_MIMETYPE_MAPPING.put("ical", Collections.singletonList("text/calendar"));
         FILE_EXTENSION_TO_MIMETYPE_MAPPING.put("ics", Collections.singletonList("text/calendar"));
         FILE_EXTENSION_TO_MIMETYPE_MAPPING.put("iiq", Collections.singletonList("image/x-dcraw"));
+        FILE_EXTENSION_TO_MIMETYPE_MAPPING.put("imi", Collections.singletonList("application/vnd.imagemeter.image+zip"));
         FILE_EXTENSION_TO_MIMETYPE_MAPPING.put("impress", Collections.singletonList("text/impress"));
         FILE_EXTENSION_TO_MIMETYPE_MAPPING.put("jpeg", Collections.singletonList("image/jpeg"));
         FILE_EXTENSION_TO_MIMETYPE_MAPPING.put("jpg", Collections.singletonList("image/jpeg"));
