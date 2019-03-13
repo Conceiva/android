@@ -68,7 +68,8 @@
         tools:ignore="UnusedAttribute">
         <activity
             android:name="com.handwerkcloud.client.OCRActivity"
-            android:label="@string/title_activity_ocr"></activity>
+            android:label="@string/title_activity_ocr"
+            android:launchMode="singleInstance"></activity>
 
         <uses-library
             android:name="org.apache.http.legacy"

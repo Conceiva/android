@@ -35,6 +35,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.github.barteksc.pdfviewer.PDFView;
+import com.github.barteksc.pdfviewer.listener.OnLoadCompleteListener;
 import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.text.TextBlock;
@@ -59,6 +60,9 @@ import androidx.core.content.ContextCompat;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 
 public class OCRActivity extends Activity {
+    private static final String ACTION_DISPLAY_PREVIEW = "DISPLAY_PREVIEW";
+    private static final String EXTRA_FILENAME = "FILENAME";
+    private static final String EXTRA_PREVIEW_FILENAME = "PREVIEW_FILENAME";
     final boolean DEVELOPER_MODE = false;
     static final String TAG = "OCRActivity";
     private CameraSource mCameraSource;
@@ -70,7 +74,8 @@ public class OCRActivity extends Activity {
     String mPreviewFilename;
     PDFView pdfView;
     private final int STATE_CAPTURE = 0;
-    private final int STATE_PREVIEW = 1;
+    private final int STATE_CAPTURING = 1;
+    private final int STATE_PREVIEW = 2;
     int mState = STATE_CAPTURE;
 
     ProgressBar progressBar;
@@ -94,6 +99,7 @@ public class OCRActivity extends Activity {
         protected void onPreExecute() {
             super.onPreExecute();
             progressBar.setVisibility(View.VISIBLE);
+            mState = STATE_CAPTURING;
             mCameraSource.stop();
         }
 
@@ -149,7 +155,11 @@ public class OCRActivity extends Activity {
         protected void onPostExecute(String filename) {
             super.onPostExecute(filename);
             mPreviewFilename = filename.replace("/scan", "/Highlightscan");
-            displayPreview(mPreviewFilename);
+            Intent i = new Intent(OCRActivity.this, OCRActivity.class);
+            i.setAction(ACTION_DISPLAY_PREVIEW);
+            i.putExtra(EXTRA_FILENAME, filename);
+            i.putExtra(EXTRA_PREVIEW_FILENAME, mPreviewFilename);
+            startActivity(i);
         }
     }
 
@@ -165,6 +175,7 @@ public class OCRActivity extends Activity {
         acceptBtn.setVisibility(View.VISIBLE);
         textHighlightButton.setVisibility(View.VISIBLE);
     }
+
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
@@ -276,9 +287,28 @@ public class OCRActivity extends Activity {
                     mPreviewFilename = mFilename;
                     textHighlightButton.setColorFilter(Color.LTGRAY);
                 }
-                pdfView.fromFile(new File(mPreviewFilename)).load();
+                float zoom = pdfView.getZoom();
+                float x = pdfView.getCurrentXOffset();
+                float y = pdfView.getCurrentYOffset();
+                float positionOffset = pdfView.getPositionOffset();
+                pdfView.fromFile(new File(mPreviewFilename)).onLoad(new OnLoadCompleteListener() {
+                    @Override
+                    public void loadComplete(int nbPages) {
+                        pdfView.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (zoom != 1.0f) {
+                                    pdfView.zoomTo(zoom);
+                                    pdfView.moveTo(x, y);
+                                    pdfView.setPositionOffset(positionOffset);
+                                }
+                            }
+                        });
+                    }
+                }).load();
             }
         });
+
         if (!getBaseContext().getPackageManager().hasSystemFeature(
             PackageManager.FEATURE_CAMERA_FLASH)) {
             flashCameraButton.setVisibility(View.GONE);
@@ -288,7 +318,9 @@ public class OCRActivity extends Activity {
             mState = savedInstanceState.getInt("SCAN_STATE");
             mFilename = savedInstanceState.getString("FILENAME");
             mPreviewFilename = savedInstanceState.getString("PREVIEWFILENAME");
-            if (mState == STATE_PREVIEW) {
+            if (mState == STATE_CAPTURING) {
+                progressBar.setVisibility(View.VISIBLE);
+            } else if (mState == STATE_PREVIEW) {
                 if (mPreviewFilename.contains("Highlightscan")) {
                     textHighlightButton.setColorFilter(Color.WHITE);
                 }
@@ -297,6 +329,27 @@ public class OCRActivity extends Activity {
                 }
                 displayPreview(mPreviewFilename);
             }
+        }
+
+        handleIntent(getIntent());
+    }
+
+    @Override
+    protected void onNewIntent(Intent i) {
+        handleIntent(i);
+    }
+
+    void handleIntent(Intent i) {
+        if (i == null) {
+            return;
+        }
+
+        if (i.getAction() == ACTION_DISPLAY_PREVIEW) {
+            String filename = i.getStringExtra(EXTRA_FILENAME);
+            mFilename = filename;
+            String previewFilename = i.getStringExtra(EXTRA_PREVIEW_FILENAME);
+            mPreviewFilename = previewFilename;
+            displayPreview(previewFilename);
         }
     }
 
@@ -420,8 +473,12 @@ public class OCRActivity extends Activity {
         PrintedPdfDocument document = null;
         PrintedPdfDocument previewDocument = null;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            PrintAttributes.MediaSize customSize = new
+                PrintAttributes.MediaSize("HANDWERKCLOUD", "HANDWERKCLOUD", ((bitmap.getWidth() / 72) * 1000), ((bitmap.getHeight() / 72) * 1000));
+            customSize.asPortrait();
             PrintAttributes printAttributes = new PrintAttributes.Builder().
-                setMediaSize(PrintAttributes.MediaSize.ISO_A4).
+                setMediaSize(customSize).
+                setResolution(new PrintAttributes.Resolution("RESOLUTION_ID", "RESOLUTION_ID", 72, 72)).
                 setMinMargins(PrintAttributes.Margins.NO_MARGINS).
                 build();
             document = new PrintedPdfDocument(this,
@@ -429,9 +486,10 @@ public class OCRActivity extends Activity {
             previewDocument = new PrintedPdfDocument(this,
                 printAttributes);
 
+            PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(bitmap.getWidth(), bitmap.getHeight(), 0).create();
             // start a page
-            PdfDocument.Page page = document.startPage(0);
-            PdfDocument.Page previewPage = previewDocument.startPage(0);
+            PdfDocument.Page page = document.startPage(pageInfo);
+            PdfDocument.Page previewPage = previewDocument.startPage(pageInfo);
 
             // draw something on the page
             Canvas canvas = page.getCanvas();
@@ -469,21 +527,20 @@ public class OCRActivity extends Activity {
                     paint.setStyle(Paint.Style.STROKE);
                     paint.setColor(Color.RED);
                     highlightCanvas.drawRect(rect, paint);
-                    //paint.setStyle(Paint.Style.FILL);
 
                     canvas.save();
                     TextPaint textpaint = new TextPaint();
                     textSize = calculateMaxTextSize(text, textpaint, (rect.right - rect.left), (rect.bottom - rect.top));
                     textpaint.setTextSize(textSize);
 
-                    StaticLayout mTextLayout = new StaticLayout(text, textpaint, (rect.right - rect.left) + 1, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
-                    canvas.translate(rect.left, rect.top/* - (int)(textSize / 8)*/); // Adjust top position of the text based upon the font size
+                    StaticLayout mTextLayout = new StaticLayout(text, textpaint, (canvas.getWidth() - rect.left) + 1, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+                    canvas.translate(rect.left, rect.top);
                     mTextLayout.draw(canvas);
                     canvas.restore();
 
                     highlightCanvas.save();
                     textpaint.setColor(Color.YELLOW);
-                    highlightCanvas.translate(rect.left, rect.top/* - (int)(textSize / 8)*/); // Adjust top position of the text based upon the font size
+                    highlightCanvas.translate(rect.left, rect.top);
                     mTextLayout.draw(highlightCanvas);
                     highlightCanvas.restore();
                 }
@@ -501,7 +558,7 @@ public class OCRActivity extends Activity {
             folder.mkdirs();
 
             //create file
-            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+            String timeStamp = new SimpleDateFormat("yyyy-MM-dd_HHmmss").format(new Date());
             String FileName = "scan" + timeStamp + ".pdf";
             String PreviewFileName = "Highlightscan" + timeStamp + ".pdf";
             File file = new File(dir, FileName);

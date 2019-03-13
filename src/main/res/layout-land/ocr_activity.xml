@@ -28,6 +28,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_centerInParent="true"
+        android:layout_marginRight="5dp"
         android:background="@drawable/round_camera_button"
         android:src="@drawable/ic_camera"
         android:tint="@color/white"/>
