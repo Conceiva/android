@@ -354,6 +354,10 @@ public class OCRActivity extends Activity {
     }
 
     void returnToCamera() {
+        File previewFile = new File(mPreviewFilename);
+        previewFile.delete();
+        File file = new File(mFilename);
+        file.delete();
         pdfView.setVisibility(View.GONE);
         startCameraSource();
         mCameraView.setVisibility(View.VISIBLE);

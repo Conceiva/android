@@ -37,6 +37,7 @@ import android.os.IBinder;
 import android.view.View;
 
 import com.google.android.material.snackbar.Snackbar;
+import com.handwerkcloud.client.RegisterActivity;
 import com.owncloud.android.MainApp;
 import com.owncloud.android.R;
 import com.owncloud.android.authentication.AccountUtils;
@@ -194,6 +195,8 @@ public abstract class FileActivity extends DrawerActivity
             bindService(new Intent(this, FileUploader.class), mUploadServiceConnection,
                     Context.BIND_AUTO_CREATE);
         }
+
+        RegisterActivity.runIfNeeded(this);
     }
 
     @Override

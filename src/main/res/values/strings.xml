@@ -865,4 +865,22 @@
     <string name="imagemeter">Image Meter</string>
     <string name="title_activity_ocr">OCRActivity</string>
     <string name="ocr">Scan document</string>
+    <string name="title_activity_register">RegisterActivity</string>
+    <string name="action_settings">Settings</string>
+    <string name="personalize">Personalize based upon profession</string>
+    <string name="personalize_desc">To enhance and personalize your Handwerk Cloud experience, please choose your profession during the next step.</string>
+    <string name="role">Role</string>
+    <string name="company">Company</string>
+    <string name="default_industry">Default</string>
+    <string name="construction_industry">Construction</string>
+    <string name="electrical_industry">Electrician</string>
+    <string name="landscaping_industry">Gardening and landscaping</string>
+    <string name="industrial_industry">Industry</string>
+    <string name="metal_industry">Metalworker</string>
+    <string name="plumbing_industry">Plumbing and HVAC engineers</string>
+    <string name="carpenters_industry">Carpenters and masons</string>
+    <string name="start_trial">Start your trial of Handwerk Cloud</string>
+    <string name="company_hint">Company name</string>
+    <string name="role_hint">E.g. Employee</string>
+    <string name="phonenumber_hint">Enter phone number</string>
 </resources>

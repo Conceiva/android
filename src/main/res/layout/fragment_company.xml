@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/primary"
+    tools:context=".CompanyFragment">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:layout_editor_absoluteX="40dp"
+        tools:layout_editor_absoluteY="59dp">
+
+        <ImageView
+            android:id="@+id/account_circle"
+            android:layout_width="128dp"
+            android:layout_height="128dp"
+            android:layout_centerHorizontal="true"
+            android:src="@drawable/ic_account_circle" />
+
+        <ImageView
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_alignRight="@+id/account_circle"
+            android:layout_alignBottom="@+id/account_circle"
+            android:layout_marginRight="-26dp"
+            android:layout_marginBottom="-26dp"
+            android:src="@drawable/ic_settings_white" />
+
+        <TextView
+            android:id="@+id/companyLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/account_circle"
+            android:layout_marginTop="30dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:textColor="@color/white"
+            android:text="@string/company"/>
+
+        <EditText
+            android:id="@+id/company"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/companyLabel"
+            android:background="@color/white"
+            android:singleLine="true"
+            android:hint="@string/company_hint"
+            android:layout_margin="10dp"/>
+
+        <TextView
+            android:id="@+id/roleLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/company"
+            android:layout_margin="10dp"
+            android:textColor="@color/white"
+            android:text="@string/role"/>
+
+        <EditText
+            android:id="@+id/role"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/roleLabel"
+            android:background="@color/white"
+            android:singleLine="true"
+            android:hint="@string/role_hint"
+            android:layout_margin="10dp"/>
+
+        <TextView
+            android:id="@+id/phonenumberLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/role"
+            android:layout_margin="10dp"
+            android:textColor="@color/white"
+            android:text="@string/user_info_phone"/>
+
+        <EditText
+            android:id="@+id/phonenumber"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/phonenumberLabel"
+            android:background="@color/white"
+            android:singleLine="true"
+            android:hint="@string/phonenumber_hint"
+            android:layout_margin="10dp"/>
+
+        <ImageButton
+            android:id="@+id/startTrial"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_above="@+id/personalize_desc"
+            android:src="@drawable/ic_navigate_next"
+            android:background="@color/transparent"/>
+
+        <TextView
+            android:id="@+id/personalize_desc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_margin="20dp"
+            android:text="@string/start_trial"
+            android:textAlignment="center"
+            android:textColor="@color/white"
+            android:textSize="20sp" />
+    </RelativeLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

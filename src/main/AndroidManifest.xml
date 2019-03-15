@@ -67,9 +67,13 @@
         android:theme="@style/Theme.ownCloud.Toolbar"
         tools:ignore="UnusedAttribute">
         <activity
+            android:name="com.handwerkcloud.client.RegisterActivity"
+            android:label="@string/title_activity_register"
+            android:launchMode="singleInstance"></activity>
+        <activity
             android:name="com.handwerkcloud.client.OCRActivity"
             android:label="@string/title_activity_ocr"
-            android:launchMode="singleInstance"></activity>
+            android:launchMode="singleInstance" />
 
         <uses-library
             android:name="org.apache.http.legacy"
@@ -138,7 +142,7 @@
         </activity>
         <activity
             android:name=".ui.activity.Preferences"
-            android:theme="@style/Theme.ownCloud"></activity>
+            android:theme="@style/Theme.ownCloud" />
         <activity
             android:name=".ui.preview.PreviewImageActivity"
             android:theme="@style/Theme.ownCloud.Overlay" />
@@ -149,7 +153,7 @@
 
         <service
             android:name=".jobs.NContentObserverJob"
-            android:permission="android.permission.BIND_JOB_SERVICE"></service>
+            android:permission="android.permission.BIND_JOB_SERVICE" />
         <service
             android:name=".authentication.AccountAuthenticatorService"
             android:exported="true">
@@ -242,7 +246,7 @@
         <provider
             android:name=".providers.DiskLruImageCacheFileProvider"
             android:authorities="@string/image_cache_provider_authority"
-            android:exported="true"></provider>
+            android:exported="true" />
 
         <activity
             android:name=".authentication.AuthenticatorActivity"
@@ -356,7 +360,7 @@
         <service
             android:name=".services.AccountManagerService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true" />
 
         <activity
             android:name=".ui.activity.SsoGrantPermissionActivity"
