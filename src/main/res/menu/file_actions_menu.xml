@@ -132,6 +132,12 @@
         android:showAsAction="never" />
 
     <item
+        android:id="@+id/action_edit_in_imagemeter"
+        android:title="@string/edit_in_imagemeter"
+        app:showAsAction="never"
+        android:showAsAction="never" />
+
+    <item
         android:id="@+id/action_remove_file"
         android:title="@string/common_remove"
         app:showAsAction="never"

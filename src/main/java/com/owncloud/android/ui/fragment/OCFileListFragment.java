@@ -474,7 +474,7 @@ public class OCFileListFragment extends ExtendedListFragment implements
             // extra "HANDWERKCLOUD_VERSION" : integer, with the current app version code, so that I know who is calling
             try {
                 PackageInfo pInfo = getActivity().getPackageManager().getPackageInfo(getActivity().getPackageName(), 0);
-                int version = pInfo.versionCode;
+                String version = pInfo.versionName;
                 launchIntent.putExtra("HANDWERKCLOUD_VERSION", version);
             } catch (PackageManager.NameNotFoundException e) {
                 e.printStackTrace();
@@ -1080,6 +1080,59 @@ public class OCFileListFragment extends ExtendedListFragment implements
                 }
                 case R.id.action_set_as_wallpaper: {
                     mContainerActivity.getFileOperationsHelper().setPictureAs(singleFile, getView());
+                    return true;
+                }
+                case R.id.action_edit_in_imagemeter: {
+                    Intent launchIntent = getActivity().getPackageManager().getLaunchIntentForPackage("de.dirkfarin.imagemeter");
+                    if (launchIntent != null) {
+                        Account account = AccountUtils.getCurrentOwnCloudAccount(getActivity());
+                        AccountManager accountManager = AccountManager.get(getActivity());
+                        String password = accountManager.getPassword(account);
+                        OwnCloudAccount ocAccount = null;
+                        try {
+                            ocAccount = new OwnCloudAccount(account, getActivity());
+                        } catch (com.owncloud.android.lib.common.accounts.AccountUtils.AccountNotFoundException e) {
+                            e.printStackTrace();
+                        }
+                        try {
+                            OwnCloudClient client = OwnCloudClientManagerFactory.getDefaultSingleton().getClientFor(ocAccount, getContext());
+                            OwnCloudCredentials cred = client.getCredentials();
+                            if (cred != null) {
+                                launchIntent.putExtra("USERNAME", cred.getUsername());
+                                launchIntent.putExtra("AUTH_TOKEN", cred.getAuthToken());
+                            }
+                        } catch (com.owncloud.android.lib.common.accounts.AccountUtils.AccountNotFoundException e) {
+                            e.printStackTrace();
+                        } catch (OperationCanceledException e) {
+                            e.printStackTrace();
+                        } catch (AuthenticatorException e) {
+                            e.printStackTrace();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                        // extra "HANDWERKCLOUD_VERSION" : integer, with the current app version code, so that I know who is calling
+                        try {
+                            PackageInfo pInfo = getActivity().getPackageManager().getPackageInfo(getActivity().getPackageName(), 0);
+                            String version = pInfo.versionName;
+                            launchIntent.putExtra("HANDWERKCLOUD_VERSION", version);
+                        } catch (PackageManager.NameNotFoundException e) {
+                            e.printStackTrace();
+                        }
+
+                        launchIntent.setAction(Intent.ACTION_SEND);
+                        launchIntent.setData(singleFile.getExposedFileUri(getActivity()));
+                        getActivity().startActivityForResult(launchIntent, FileDisplayActivity.REQUEST_CODE__IMAGE_METER);
+                    }
+                    else {
+                        // not installed
+                        final String appPackageName = "de.dirkfarin.imagemeter"; // getPackageName() from Context or Activity object
+                        try {
+                            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
+                        } catch (android.content.ActivityNotFoundException anfe) {
+                            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
+                        }
+                    }
                     return true;
                 }
                 case R.id.action_encrypted: {

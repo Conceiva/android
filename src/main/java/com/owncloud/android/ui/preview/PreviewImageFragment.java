@@ -19,8 +19,14 @@
 package com.owncloud.android.ui.preview;
 
 import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.accounts.AuthenticatorException;
+import android.accounts.OperationCanceledException;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -29,6 +35,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.PictureDrawable;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -52,10 +59,16 @@ import com.github.chrisbanes.photoview.PhotoView;
 import com.google.android.material.snackbar.Snackbar;
 import com.owncloud.android.MainApp;
 import com.owncloud.android.R;
+import com.owncloud.android.authentication.AccountUtils;
 import com.owncloud.android.datamodel.OCFile;
 import com.owncloud.android.datamodel.ThumbnailsCacheManager;
 import com.owncloud.android.files.FileMenuFilter;
+import com.owncloud.android.lib.common.OwnCloudAccount;
+import com.owncloud.android.lib.common.OwnCloudClient;
+import com.owncloud.android.lib.common.OwnCloudClientManagerFactory;
+import com.owncloud.android.lib.common.OwnCloudCredentials;
 import com.owncloud.android.lib.common.utils.Log_OC;
+import com.owncloud.android.ui.activity.FileDisplayActivity;
 import com.owncloud.android.ui.dialog.ConfirmationDialogFragment;
 import com.owncloud.android.ui.dialog.RemoveFilesDialogFragment;
 import com.owncloud.android.ui.fragment.FileFragment;
@@ -380,6 +393,60 @@ public class PreviewImageFragment extends FileFragment {
 
             case R.id.action_set_as_wallpaper:
                 mContainerActivity.getFileOperationsHelper().setPictureAs(getFile(), getImageView());
+                return true;
+
+            case R.id.action_edit_in_imagemeter:
+                Intent launchIntent = getActivity().getPackageManager().getLaunchIntentForPackage("de.dirkfarin.imagemeter");
+
+                if (launchIntent != null) {
+                    Account account = AccountUtils.getCurrentOwnCloudAccount(getActivity());
+                    AccountManager accountManager = AccountManager.get(getActivity());
+                    String password = accountManager.getPassword(account);
+                    OwnCloudAccount ocAccount = null;
+                    try {
+                        ocAccount = new OwnCloudAccount(account, getActivity());
+                    } catch (com.owncloud.android.lib.common.accounts.AccountUtils.AccountNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                    try {
+                        OwnCloudClient client = OwnCloudClientManagerFactory.getDefaultSingleton().getClientFor(ocAccount, getContext());
+                        OwnCloudCredentials cred = client.getCredentials();
+                        if (cred != null) {
+                            launchIntent.putExtra("USERNAME", cred.getUsername());
+                            launchIntent.putExtra("AUTH_TOKEN", cred.getAuthToken());
+                        }
+                    } catch (com.owncloud.android.lib.common.accounts.AccountUtils.AccountNotFoundException e) {
+                        e.printStackTrace();
+                    } catch (OperationCanceledException e) {
+                        e.printStackTrace();
+                    } catch (AuthenticatorException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    // extra "HANDWERKCLOUD_VERSION" : integer, with the current app version code, so that I know who is calling
+                    try {
+                        PackageInfo pInfo = getActivity().getPackageManager().getPackageInfo(getActivity().getPackageName(), 0);
+                        String version = pInfo.versionName;
+                        launchIntent.putExtra("HANDWERKCLOUD_VERSION", version);
+                    } catch (PackageManager.NameNotFoundException e) {
+                        e.printStackTrace();
+                    }
+
+                    launchIntent.setAction(Intent.ACTION_SEND);
+                    launchIntent.setData(getFile().getExposedFileUri(getActivity()));
+                    getActivity().startActivityForResult(launchIntent, FileDisplayActivity.REQUEST_CODE__IMAGE_METER);
+                }
+                else {
+                    // not installed
+                    final String appPackageName = "de.dirkfarin.imagemeter"; // getPackageName() from Context or Activity object
+                    try {
+                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
+                    } catch (android.content.ActivityNotFoundException anfe) {
+                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
+                    }
+                }
                 return true;
 
             default:

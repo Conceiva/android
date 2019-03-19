@@ -183,6 +183,7 @@ public class FileMenuFilter {
         filterEncrypt(toShow, toHide, endToEndEncryptionEnabled);
         filterUnsetEncrypted(toShow, toHide, endToEndEncryptionEnabled);
         filterSetPictureAs(toShow, toHide);
+        filterEditInImageMeter(toShow, toHide);
         filterStream(toShow, toHide);
         filterOpenAsRichDocument(toShow, toHide, capability);
     }
@@ -244,6 +245,15 @@ public class FileMenuFilter {
             toShow.add(R.id.action_set_as_wallpaper);
         } else {
             toHide.add(R.id.action_set_as_wallpaper);
+        }
+    }
+
+    private void filterEditInImageMeter(List<Integer> toShow, List<Integer> toHide) {
+        if (isSingleImage() && !MimeTypeUtil.isSVG(mFiles.iterator().next())) {
+            toShow.add(R.id.action_edit_in_imagemeter);
+        }
+        else {
+            toHide.add(R.id.action_edit_in_imagemeter);
         }
     }
 
