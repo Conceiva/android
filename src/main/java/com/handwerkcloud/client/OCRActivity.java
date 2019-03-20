@@ -3,6 +3,7 @@ package com.handwerkcloud.client;
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -27,13 +28,19 @@ import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.KeyEvent;
 import android.view.SurfaceHolder;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.esafirm.imagepicker.features.ImagePicker;
+import com.esafirm.imagepicker.model.Image;
 import com.github.barteksc.pdfviewer.PDFView;
 import com.github.barteksc.pdfviewer.listener.OnLoadCompleteListener;
 import com.google.android.gms.vision.Detector;
@@ -56,6 +63,7 @@ import java.util.List;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.exifinterface.media.ExifInterface;
 
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 
@@ -88,6 +96,8 @@ public class OCRActivity extends Activity {
     private int rotation;
     private boolean flashmode;
     private ImageButton textHighlightButton;
+    private ImageButton galleryButton;
+    private EditText filenameEdit;
 
     //AsyncTask<Params, Progress, Result>
     //Params: type passed in the execute() call, and received in the doInBackground method
@@ -131,6 +141,80 @@ public class OCRActivity extends Activity {
                 }
 
                 mFilename = filename;
+                int permissionCheck = ContextCompat.checkSelfPermission(OCRActivity.this,
+                    READ_EXTERNAL_STORAGE);
+
+                if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(
+                        OCRActivity.this,
+                        new String[]{READ_EXTERNAL_STORAGE},
+                        PERMISSION_CODE
+                    );
+
+                    return filename;
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return filename;
+        }
+
+        @Override
+        protected void onPostExecute(String filename) {
+            super.onPostExecute(filename);
+            filenameEdit.setText(filename.substring(filename.lastIndexOf('/') + 1));
+            mPreviewFilename = filename.substring(0, filename.lastIndexOf('/') + 1) + "/Highlightscan.pdf";
+            Intent i = new Intent(OCRActivity.this, OCRActivity.class);
+            i.setAction(ACTION_DISPLAY_PREVIEW);
+            i.putExtra(EXTRA_FILENAME, filename);
+            i.putExtra(EXTRA_PREVIEW_FILENAME, mPreviewFilename);
+            startActivity(i);
+        }
+    }
+
+    //AsyncTask<Params, Progress, Result>
+    //Params: type passed in the execute() call, and received in the doInBackground method
+    //Progress: type of object passed in publishProgress calls
+    //Result: object type returned by the doInBackground method, and received by onPostExecute()
+    private class ImageTask extends AsyncTask<String, Integer, String> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progressBar.setVisibility(View.VISIBLE);
+            mState = STATE_CAPTURING;
+            mCameraSource.stop();
+        }
+
+        @Override
+        protected String doInBackground(String... params) {
+            String filename = null;
+            String path = params[0];
+            try {
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+                Bitmap bitmap = BitmapFactory.decodeFile(path, options);
+                ExifInterface exif = new ExifInterface(path);
+                rotation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+
+                // rotate Image
+                if (rotation != 0) {
+                    Matrix rotateMatrix = new Matrix();
+                    rotateMatrix.postRotate(rotation);
+                    Bitmap rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0,
+                        bitmap.getWidth(), bitmap.getHeight(),
+                        rotateMatrix, false);
+                    bitmap = rotatedBitmap;
+                }
+
+                SparseArray<TextBlock> items = textRecognizer.detect(new Frame.Builder().setBitmap(bitmap).build());
+                filename = savePDF(items, bitmap);
+                if (filename == null) {
+                    return filename;
+                }
+
+                mFilename = filename;
 
                 int permissionCheck = ContextCompat.checkSelfPermission(OCRActivity.this,
                     READ_EXTERNAL_STORAGE);
@@ -154,7 +238,8 @@ public class OCRActivity extends Activity {
         @Override
         protected void onPostExecute(String filename) {
             super.onPostExecute(filename);
-            mPreviewFilename = filename.replace("/scan", "/Highlightscan");
+            filenameEdit.setText(filename.substring(filename.lastIndexOf('/') + 1));
+            mPreviewFilename = filename.substring(0, filename.lastIndexOf('/') + 1) + "/Highlightscan.pdf";
             Intent i = new Intent(OCRActivity.this, OCRActivity.class);
             i.setAction(ACTION_DISPLAY_PREVIEW);
             i.putExtra(EXTRA_FILENAME, filename);
@@ -171,6 +256,7 @@ public class OCRActivity extends Activity {
         }
         mState = STATE_PREVIEW;
         pdfView.setVisibility(View.VISIBLE);
+        filenameEdit.setVisibility(View.VISIBLE);
         cancelBtn.setVisibility(View.VISIBLE);
         acceptBtn.setVisibility(View.VISIBLE);
         textHighlightButton.setVisibility(View.VISIBLE);
@@ -182,6 +268,7 @@ public class OCRActivity extends Activity {
         super.onRestoreInstanceState(savedInstanceState);
         mState = savedInstanceState.getInt("SCAN_STATE");
         mFilename = savedInstanceState.getString("FILENAME");
+        filenameEdit.setText(mFilename.substring(mFilename.lastIndexOf('/')));
         mPreviewFilename = savedInstanceState.getString("PREVIEWFILENAME");
     }
 
@@ -219,7 +306,26 @@ public class OCRActivity extends Activity {
         acceptBtn = findViewById(R.id.acceptBtn);
         progressBar = findViewById(R.id.pBar);
         textHighlightButton = findViewById(R.id.textHighlightBtn);
+        galleryButton = findViewById(R.id.gallery);
+        filenameEdit = findViewById(R.id.filenameEdit);
 
+        filenameEdit.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
+                if (i == EditorInfo.IME_ACTION_DONE) {
+                    File current = new File(mFilename);
+                    String newFilename = current.getParent();
+                    newFilename += "/" + textView.getText();
+                    File dest = new File(newFilename);
+                    current.renameTo(dest);
+                    mFilename = newFilename;
+                    InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(textView.getWindowToken(), 0);
+                    return true;
+                }
+                return false;
+            }
+        });
         flashCameraButton = (ImageButton) findViewById(R.id.flash);
         capture.setOnClickListener(new View.OnClickListener() {
             private long mLastClickTime;
@@ -236,6 +342,7 @@ public class OCRActivity extends Activity {
             }
         });
 
+        filenameEdit.setVisibility(View.GONE);
         cancelBtn.setVisibility(View.GONE);
         acceptBtn.setVisibility(View.GONE);
         textHighlightButton.setVisibility(View.GONE);
@@ -278,9 +385,9 @@ public class OCRActivity extends Activity {
         textHighlightButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                boolean visible = mPreviewFilename.contains("Highlightscan");
+                boolean visible = mPreviewFilename.contains("Highlight");
                 if (!visible) {
-                    mPreviewFilename = mFilename.replace("/scan", "/Highlightscan");
+                    mPreviewFilename = mFilename.substring(0, mFilename.lastIndexOf('/') + 1) + "/Highlightscan.pdf";
                     textHighlightButton.setColorFilter(Color.WHITE);
                 }
                 else {
@@ -309,10 +416,24 @@ public class OCRActivity extends Activity {
             }
         });
 
+        galleryButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mCameraSource.stop();
+                ImagePicker.create(OCRActivity.this)// Activity or Fragment
+                    .imageLoader(new GlideImageLoader())
+                    .single()
+                    .theme(R.style.ImagePickerTheme)
+                    .showCamera(false) // show camera or not (true by default)
+                    .start();
+            }
+        });
+
         if (!getBaseContext().getPackageManager().hasSystemFeature(
             PackageManager.FEATURE_CAMERA_FLASH)) {
             flashCameraButton.setVisibility(View.GONE);
         }
+
         startCameraSource();
         if (savedInstanceState != null) {
             mState = savedInstanceState.getInt("SCAN_STATE");
@@ -321,7 +442,7 @@ public class OCRActivity extends Activity {
             if (mState == STATE_CAPTURING) {
                 progressBar.setVisibility(View.VISIBLE);
             } else if (mState == STATE_PREVIEW) {
-                if (mPreviewFilename.contains("Highlightscan")) {
+                if (mPreviewFilename.contains("/Highlightscan.pdf")) {
                     textHighlightButton.setColorFilter(Color.WHITE);
                 }
                 else {
@@ -332,6 +453,16 @@ public class OCRActivity extends Activity {
         }
 
         handleIntent(getIntent());
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, final int resultCode, Intent data) {
+        if (ImagePicker.shouldHandle(requestCode, resultCode, data)) {
+            // get a single image only
+            Image image = ImagePicker.getFirstImageOrNull(data);
+            new ImageTask().execute(image.getPath());
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
@@ -361,6 +492,7 @@ public class OCRActivity extends Activity {
         pdfView.setVisibility(View.GONE);
         startCameraSource();
         mCameraView.setVisibility(View.VISIBLE);
+        filenameEdit.setVisibility(View.GONE);
         cancelBtn.setVisibility(View.GONE);
         acceptBtn.setVisibility(View.GONE);
         textHighlightButton.setVisibility(View.GONE);
@@ -432,7 +564,7 @@ public class OCRActivity extends Activity {
                 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
                 PDFView pdfView = findViewById(R.id.pdfView);
-                mPreviewFilename = mFilename.replace("/scan", "/Highlightscan");
+                mPreviewFilename = mFilename.substring(0, mFilename.lastIndexOf('/') + 1) + "/Highlightscan.pdf";
                 pdfView.fromFile(new File(mPreviewFilename)).load();
                 pdfView.setVisibility(View.VISIBLE);
             }
@@ -564,7 +696,7 @@ public class OCRActivity extends Activity {
             //create file
             String timeStamp = new SimpleDateFormat("yyyy-MM-dd_HHmmss").format(new Date());
             String FileName = "scan" + timeStamp + ".pdf";
-            String PreviewFileName = "Highlightscan" + timeStamp + ".pdf";
+            String PreviewFileName = "Highlightscan.pdf";
             File file = new File(dir, FileName);
             File previewFile = new File(dir, PreviewFileName);
 

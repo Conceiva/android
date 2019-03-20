@@ -23,6 +23,7 @@ import android.accounts.AccountManager;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -76,7 +77,9 @@ import com.owncloud.android.utils.BitmapUtils;
 import com.owncloud.android.utils.DisplayUtils;
 import com.owncloud.android.utils.MimeType;
 import com.owncloud.android.utils.MimeTypeUtil;
+import com.owncloud.android.utils.UriUtils;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -85,6 +88,7 @@ import java.lang.ref.WeakReference;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import pl.droidsonroids.gif.GifDrawable;
@@ -399,6 +403,27 @@ public class PreviewImageFragment extends FileFragment {
                 Intent launchIntent = getActivity().getPackageManager().getLaunchIntentForPackage("de.dirkfarin.imagemeter");
 
                 if (launchIntent != null) {
+                    launchIntent = new Intent(Intent.ACTION_SEND);
+                    Uri uri;
+                    if (getFile().isDown()) {
+                        File externalFile = new File(getFile().getStoragePath());
+
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            launchIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                            uri = FileProvider.getUriForFile(getActivity(),
+                                getActivity().getResources().getString(R.string.file_provider_authority), externalFile);
+                        } else {
+                            uri = Uri.fromFile(externalFile);
+                        }
+                    } else {
+                        uri = Uri.parse(UriUtils.URI_CONTENT_SCHEME +
+                            getActivity().getResources().getString(R.string.image_cache_provider_authority) +
+                            getFile().getRemotePath());
+                    }
+                    launchIntent.setType("image/*");
+                    launchIntent.putExtra(Intent.EXTRA_STREAM, uri);
+                    launchIntent.setPackage("de.dirkfarin.imagemeter");
+
                     Account account = AccountUtils.getCurrentOwnCloudAccount(getActivity());
                     AccountManager accountManager = AccountManager.get(getActivity());
                     String password = accountManager.getPassword(account);
@@ -434,8 +459,6 @@ public class PreviewImageFragment extends FileFragment {
                         e.printStackTrace();
                     }
 
-                    launchIntent.setAction(Intent.ACTION_SEND);
-                    launchIntent.setData(getFile().getExposedFileUri(getActivity()));
                     getActivity().startActivityForResult(launchIntent, FileDisplayActivity.REQUEST_CODE__IMAGE_METER);
                 }
                 else {

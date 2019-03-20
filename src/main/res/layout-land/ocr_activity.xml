@@ -46,6 +46,18 @@
         android:gravity="center"
         android:tint="@color/white" />
 
+    <ImageButton
+        android:id="@+id/gallery"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_weight="4"
+        android:src="@drawable/image_32dp"
+        android:background="@color/transparent"
+        android:gravity="center"
+        android:tint="@color/white" />
+
     <com.github.barteksc.pdfviewer.PDFView
         android:id="@+id/pdfView"
         android:layout_width="match_parent"
@@ -66,6 +78,16 @@
             android:background="@android:color/transparent"
             android:src="@drawable/ic_arrow_back"
             android:tint="@color/white"/>
+        <EditText
+            android:id="@+id/filenameEdit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/cancelBtn"
+            android:layout_toLeftOf="@+id/textHighlightBtn"
+            android:inputType="text"
+            android:singleLine="true"
+            android:imeOptions="actionDone"
+            android:textColor="@color/white"/>
         <ImageButton
             android:id="@+id/textHighlightBtn"
             android:layout_width="50dp"

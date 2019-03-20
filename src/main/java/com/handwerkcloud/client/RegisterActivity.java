@@ -40,10 +40,10 @@ public class RegisterActivity extends FragmentActivity {
         boolean firstRun = false;
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(fileActivity);
        firstRun = preferences.getBoolean(FIRSTRUN_SHARED_PREFERENCE, true);
-        /*if (account != null && firstRun) {
+        if (account != null && firstRun) {
             Intent i = new Intent(fileActivity, RegisterActivity.class);
             fileActivity.startActivity(i);
-        }*/
+        }
     }
 
     @Override

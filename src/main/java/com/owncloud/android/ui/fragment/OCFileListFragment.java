@@ -104,6 +104,7 @@ import com.owncloud.android.utils.EncryptionUtils;
 import com.owncloud.android.utils.FileSortOrder;
 import com.owncloud.android.utils.MimeTypeUtil;
 import com.owncloud.android.utils.ThemeUtils;
+import com.owncloud.android.utils.UriUtils;
 
 import org.apache.commons.httpclient.HttpStatus;
 import org.greenrobot.eventbus.EventBus;
@@ -123,6 +124,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.ActionBar;
+import androidx.core.content.FileProvider;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -1083,8 +1085,30 @@ public class OCFileListFragment extends ExtendedListFragment implements
                     return true;
                 }
                 case R.id.action_edit_in_imagemeter: {
+                    // Check if Image Meter is installed
                     Intent launchIntent = getActivity().getPackageManager().getLaunchIntentForPackage("de.dirkfarin.imagemeter");
                     if (launchIntent != null) {
+                        launchIntent = new Intent(Intent.ACTION_SEND);
+                        Uri uri;
+                        if (singleFile.isDown()) {
+                            File externalFile = new File(singleFile.getStoragePath());
+
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                                launchIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                                uri = FileProvider.getUriForFile(getActivity(),
+                                    getActivity().getResources().getString(R.string.file_provider_authority), externalFile);
+                            } else {
+                                uri = Uri.fromFile(externalFile);
+                            }
+                        } else {
+                            uri = Uri.parse(UriUtils.URI_CONTENT_SCHEME +
+                                getActivity().getResources().getString(R.string.image_cache_provider_authority) +
+                                singleFile.getRemotePath());
+                        }
+                        launchIntent.setType("image/*");
+                        launchIntent.putExtra(Intent.EXTRA_STREAM, uri);
+                        launchIntent.setPackage("de.dirkfarin.imagemeter");
+
                         Account account = AccountUtils.getCurrentOwnCloudAccount(getActivity());
                         AccountManager accountManager = AccountManager.get(getActivity());
                         String password = accountManager.getPassword(account);
@@ -1120,8 +1144,6 @@ public class OCFileListFragment extends ExtendedListFragment implements
                             e.printStackTrace();
                         }
 
-                        launchIntent.setAction(Intent.ACTION_SEND);
-                        launchIntent.setData(singleFile.getExposedFileUri(getActivity()));
                         getActivity().startActivityForResult(launchIntent, FileDisplayActivity.REQUEST_CODE__IMAGE_METER);
                     }
                     else {
