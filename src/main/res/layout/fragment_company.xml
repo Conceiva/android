@@ -4,108 +4,142 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/primary"
+    android:background="@color/white"
     tools:context=".CompanyFragment">
 
-    <RelativeLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:layout_editor_absoluteX="40dp"
-        tools:layout_editor_absoluteY="59dp">
-
-        <ImageView
-            android:id="@+id/account_circle"
-            android:layout_width="128dp"
-            android:layout_height="128dp"
-            android:layout_centerHorizontal="true"
-            android:src="@drawable/ic_account_circle" />
-
-        <ImageView
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:layout_alignRight="@+id/account_circle"
-            android:layout_alignBottom="@+id/account_circle"
-            android:layout_marginRight="-26dp"
-            android:layout_marginBottom="-26dp"
-            android:src="@drawable/ic_settings_white" />
-
-        <TextView
-            android:id="@+id/companyLabel"
+        android:layout_height="match_parent">
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/account_circle"
-            android:layout_marginTop="30dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:textColor="@color/white"
-            android:text="@string/company"/>
+            android:layout_height="match_parent"
+            tools:layout_editor_absoluteX="40dp"
+            tools:layout_editor_absoluteY="59dp">
 
-        <EditText
-            android:id="@+id/company"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/companyLabel"
-            android:background="@color/white"
-            android:singleLine="true"
-            android:hint="@string/company_hint"
-            android:layout_margin="10dp"/>
 
-        <TextView
-            android:id="@+id/roleLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/company"
-            android:layout_margin="10dp"
-            android:textColor="@color/white"
-            android:text="@string/role"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:background="@color/primary"
+                android:gravity="center">
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:src="@drawable/ic_launcher_foreground"
+                    android:tint="@color/white"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/app_name"
+                    android:textColor="@color/white"
+                    android:layout_marginLeft="5dp"
+                    />
+            </LinearLayout>
 
-        <EditText
-            android:id="@+id/role"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/roleLabel"
-            android:background="@color/white"
-            android:singleLine="true"
-            android:hint="@string/role_hint"
-            android:layout_margin="10dp"/>
 
-        <TextView
-            android:id="@+id/phonenumberLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/role"
-            android:layout_margin="10dp"
-            android:textColor="@color/white"
-            android:text="@string/user_info_phone"/>
+            <TextView
+                android:id="@+id/companyLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="60dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:textColor="@color/black"
+                android:text="@string/company"/>
 
-        <EditText
-            android:id="@+id/phonenumber"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/phonenumberLabel"
-            android:background="@color/white"
-            android:singleLine="true"
-            android:hint="@string/phonenumber_hint"
-            android:layout_margin="10dp"/>
+            <EditText
+                android:id="@+id/company"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/companyLabel"
+                android:singleLine="true"
+                android:hint="@string/company_hint"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"/>
 
-        <ImageButton
-            android:id="@+id/startTrial"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_above="@+id/personalize_desc"
-            android:src="@drawable/ic_navigate_next"
-            android:background="@color/transparent"/>
+            <TextView
+                android:id="@+id/roleLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/company"
+                android:layout_marginTop="20dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:textColor="@color/black"
+                android:text="@string/role"/>
 
-        <TextView
-            android:id="@+id/personalize_desc"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_margin="20dp"
-            android:text="@string/start_trial"
-            android:textAlignment="center"
-            android:textColor="@color/white"
-            android:textSize="20sp" />
-    </RelativeLayout>
+            <EditText
+                android:id="@+id/role"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/roleLabel"
+                android:singleLine="true"
+                android:hint="@string/role_hint"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"/>
+
+            <TextView
+                android:id="@+id/phonenumberLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/role"
+                android:layout_marginTop="20dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:textColor="@color/black"
+                android:text="@string/user_info_phone"/>
+
+            <EditText
+                android:id="@+id/phonenumber"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/phonenumberLabel"
+                android:singleLine="true"
+                android:hint="@string/phonenumber_hint"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"/>
+
+            <TextView
+                android:id="@+id/addressLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/phonenumber"
+                android:layout_marginTop="20dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:textColor="@color/black"
+                android:text="@string/user_info_address"/>
+
+            <EditText
+                android:id="@+id/address"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/addressLabel"
+                android:singleLine="true"
+                android:hint="@string/address_hint"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"/>
+
+            <ImageButton
+                android:id="@+id/startTrial"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_below="@+id/address"
+                android:src="@drawable/ic_navigate_next"
+                android:tint="@color/primary"
+                android:background="@color/transparent"/>
+
+            <TextView
+                android:id="@+id/personalize_desc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/startTrial"
+                android:layout_margin="20dp"
+                android:text="@string/start_trial"
+                android:textAlignment="center"
+                android:textColor="@color/black"
+                android:textSize="20sp" />
+        </RelativeLayout>
+    </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

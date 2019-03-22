@@ -71,6 +71,7 @@ public class UpdateOCVersionOperation extends RemoteOperation {
 
         try {
             getMethod = new GetMethod(statUrl);
+            getMethod.addRequestHeader("X-ClientType", "HandwerkCloud");
             int status = client.executeMethod(getMethod);
             if (status != HttpStatus.SC_OK) {
                 result = new RemoteOperationResult(false, getMethod);

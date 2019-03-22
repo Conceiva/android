@@ -21,6 +21,7 @@ public class CompanyFragment extends Fragment {
     private EditText mCompany;
     private EditText mRole;
     private EditText mPhonenumber;
+    private EditText mAddress;
 
     public CompanyFragment() {
     }
@@ -34,6 +35,7 @@ public class CompanyFragment extends Fragment {
         mCompany = view.findViewById(R.id.company);
         mRole = view.findViewById(R.id.role);
         mPhonenumber = view.findViewById(R.id.phonenumber);
+        mAddress = view.findViewById(R.id.address);
 
         startTrial.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -43,6 +45,7 @@ public class CompanyFragment extends Fragment {
                 i.putExtra(RegisterActivity.EXTRA_COMPANY, mCompany.getText().toString());
                 i.putExtra(RegisterActivity.EXTRA_ROLE, mRole.getText().toString());
                 i.putExtra(RegisterActivity.EXTRA_PHONENUMBER, mPhonenumber.getText().toString());
+                i.putExtra(RegisterActivity.EXTRA_ADDRESS, mAddress.getText().toString());
                 getActivity().startActivity(i);
             }
         });

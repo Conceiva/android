@@ -250,10 +250,10 @@ public class FileMenuFilter {
 
     private void filterEditInImageMeter(List<Integer> toShow, List<Integer> toHide) {
         if (isSingleImage() && !MimeTypeUtil.isSVG(mFiles.iterator().next())) {
-            toShow.add(R.id.action_edit_in_imagemeter);
+            toShow.add(R.id.action_add_to_imagemeter);
         }
         else {
-            toHide.add(R.id.action_edit_in_imagemeter);
+            toHide.add(R.id.action_add_to_imagemeter);
         }
     }
 

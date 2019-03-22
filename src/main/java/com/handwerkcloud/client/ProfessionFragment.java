@@ -1,7 +1,9 @@
 package com.handwerkcloud.client;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -20,97 +22,121 @@ public class ProfessionFragment extends Fragment {
     public ProfessionFragment() {
     }
 
+    void showConfirmDialog(int value, String type) {
+        String selection = String.format(getString(R.string.your_selection), getString(value));
+        new AlertDialog.Builder(getActivity())
+            .setMessage(R.string.confirm_selection)
+            .setTitle(selection)
+            .setPositiveButton(R.string.proceed, new DialogInterface.OnClickListener() {
+
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    Intent i = new Intent(getActivity(), RegisterActivity.class);
+                    i.setAction(RegisterActivity.REGISTER_COMPANY);
+                    i.putExtra(RegisterActivity.EXTRA_INDUSTRY, type);
+                    getActivity().startActivity(i);
+                }})
+            .setNegativeButton(R.string.change, null).show();
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         View view = inflater.inflate(R.layout.fragment_profession, container, false);
 
-        LinearLayout defaultIndustry = view.findViewById(R.id.default_industry);
-        defaultIndustry.setOnClickListener(new View.OnClickListener() {
+        LinearLayout carpenter = view.findViewById(R.id.carpenter);
+        carpenter.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent i = new Intent(getActivity(), RegisterActivity.class);
-                i.setAction(RegisterActivity.REGISTER_COMPANY);
-                i.putExtra(RegisterActivity.EXTRA_INDUSTRY, RegisterActivity.DEFAULT_INDUSTRY);
-                getActivity().startActivity(i);
+                showConfirmDialog(R.string.carpenter, RegisterActivity.CARPENTER);
             }
         });
 
-        LinearLayout constructionIndustry = view.findViewById(R.id.construction_industry);
-        constructionIndustry.setOnClickListener(new View.OnClickListener() {
+        LinearLayout stovebuilder = view.findViewById(R.id.stovebuilder);
+        stovebuilder.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent i = new Intent(getActivity(), RegisterActivity.class);
-                i.setAction(RegisterActivity.REGISTER_COMPANY);
-                i.putExtra(RegisterActivity.EXTRA_INDUSTRY, RegisterActivity.CONSTRUCTION_INDUSTRY);
-                getActivity().startActivity(i);
+                showConfirmDialog(R.string.stovebuilder, RegisterActivity.STOVEBUILDER);
             }
         });
 
-        LinearLayout electricalIndustry = view.findViewById(R.id.electrical_industry);
-        electricalIndustry.setOnClickListener(new View.OnClickListener() {
+        LinearLayout windowbuilder = view.findViewById(R.id.windowbuilder);
+        windowbuilder.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent i = new Intent(getActivity(), RegisterActivity.class);
-                i.setAction(RegisterActivity.REGISTER_COMPANY);
-                i.putExtra(RegisterActivity.EXTRA_INDUSTRY, RegisterActivity.ELECTRICAL_INDUSTRY);
-                getActivity().startActivity(i);
+                showConfirmDialog(R.string.windowbuilder, RegisterActivity.WINDOWBUILDER);
             }
         });
 
-        LinearLayout landscaping = view.findViewById(R.id.landscaping_industry);
-        landscaping.setOnClickListener(new View.OnClickListener() {
+        LinearLayout installer = view.findViewById(R.id.installer);
+        installer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent i = new Intent(getActivity(), RegisterActivity.class);
-                i.setAction(RegisterActivity.REGISTER_COMPANY);
-                i.putExtra(RegisterActivity.EXTRA_INDUSTRY, RegisterActivity.LANDSCAPING_INDUSTRY);
-                getActivity().startActivity(i);
+                showConfirmDialog(R.string.installer, RegisterActivity.INSTALLER);
             }
         });
 
-        LinearLayout industrialIndustry = view.findViewById(R.id.industrial_industry);
-        industrialIndustry.setOnClickListener(new View.OnClickListener() {
+        LinearLayout electrician = view.findViewById(R.id.electrician);
+        electrician.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent i = new Intent(getActivity(), RegisterActivity.class);
-                i.setAction(RegisterActivity.REGISTER_COMPANY);
-                i.putExtra(RegisterActivity.EXTRA_INDUSTRY, RegisterActivity.INDUSTRIAL_INDUSTRY);
-                getActivity().startActivity(i);
+                showConfirmDialog(R.string.electrician, RegisterActivity.ELECTRICIAN);
             }
         });
 
-        LinearLayout metalIndustry = view.findViewById(R.id.metal_industry);
-        metalIndustry.setOnClickListener(new View.OnClickListener() {
+        LinearLayout painter = view.findViewById(R.id.painter);
+        painter.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent i = new Intent(getActivity(), RegisterActivity.class);
-                i.setAction(RegisterActivity.REGISTER_COMPANY);
-                i.putExtra(RegisterActivity.EXTRA_INDUSTRY, RegisterActivity.METAL_INDUSTRY);
-                getActivity().startActivity(i);
+                showConfirmDialog(R.string.painter, RegisterActivity.PAINTER);
             }
         });
 
-        LinearLayout plumbingIndustry = view.findViewById(R.id.plumbing_industry);
-        plumbingIndustry.setOnClickListener(new View.OnClickListener() {
+        LinearLayout flasher = view.findViewById(R.id.flasher);
+        flasher.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent i = new Intent(getActivity(), RegisterActivity.class);
-                i.setAction(RegisterActivity.REGISTER_COMPANY);
-                i.putExtra(RegisterActivity.EXTRA_INDUSTRY, RegisterActivity.PLUMBING_INDUSTRY);
-                getActivity().startActivity(i);
+                showConfirmDialog(R.string.flasher, RegisterActivity.FLASHER);
             }
         });
 
-        LinearLayout carpentersIndustry = view.findViewById(R.id.carpenters_industry);
-        carpentersIndustry.setOnClickListener(new View.OnClickListener() {
+        LinearLayout bricklayer = view.findViewById(R.id.bricklayer);
+        bricklayer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent i = new Intent(getActivity(), RegisterActivity.class);
-                i.setAction(RegisterActivity.REGISTER_COMPANY);
-                i.putExtra(RegisterActivity.EXTRA_INDUSTRY, RegisterActivity.CARPENTERS_INDUSTRY);
-                getActivity().startActivity(i);
+                showConfirmDialog(R.string.bricklayer, RegisterActivity.BRICKLAYER);
+            }
+        });
+
+        LinearLayout roofer = view.findViewById(R.id.roofer);
+        roofer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showConfirmDialog(R.string.roofer, RegisterActivity.ROOFER);
+            }
+        });
+
+        LinearLayout stuccoer = view.findViewById(R.id.stuccoer);
+        stuccoer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showConfirmDialog(R.string.stuccoer, RegisterActivity.STUCCOER);
+            }
+        });
+
+        LinearLayout architect = view.findViewById(R.id.architect);
+        architect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showConfirmDialog(R.string.architect, RegisterActivity.ARCHITECT);
+            }
+        });
+
+        LinearLayout other = view.findViewById(R.id.other);
+        other.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showConfirmDialog(R.string.other, RegisterActivity.OTHER);
             }
         });
         return view;

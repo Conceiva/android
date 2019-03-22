@@ -132,8 +132,8 @@
         android:showAsAction="never" />
 
     <item
-        android:id="@+id/action_edit_in_imagemeter"
-        android:title="@string/edit_in_imagemeter"
+        android:id="@+id/action_add_to_imagemeter"
+        android:title="@string/add_to_imagemeter"
         app:showAsAction="never"
         android:showAsAction="never" />
 

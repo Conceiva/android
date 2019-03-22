@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="dots_height">30dp</dimen>
+    <dimen name="dots_margin_bottom">20dp</dimen>
+    <dimen name="icon_size">36dp</dimen>
+    <dimen name="intro_margin_top">40dp</dimen>
+    <dimen name="timesaving_margin_top">10dp</dimen>
+</resources>

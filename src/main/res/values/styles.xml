@@ -285,7 +285,6 @@
 		<item name="textAllCaps">false</item>
 	</style>
 
-
     <style name="ImagePickerTheme" parent="ef_BaseTheme">
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryDark">@color/primary_dark</item>

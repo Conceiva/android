@@ -1084,7 +1084,7 @@ public class OCFileListFragment extends ExtendedListFragment implements
                     mContainerActivity.getFileOperationsHelper().setPictureAs(singleFile, getView());
                     return true;
                 }
-                case R.id.action_edit_in_imagemeter: {
+                case R.id.action_add_to_imagemeter: {
                     // Check if Image Meter is installed
                     Intent launchIntent = getActivity().getPackageManager().getLaunchIntentForPackage("de.dirkfarin.imagemeter");
                     if (launchIntent != null) {

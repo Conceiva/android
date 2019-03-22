@@ -399,7 +399,7 @@ public class PreviewImageFragment extends FileFragment {
                 mContainerActivity.getFileOperationsHelper().setPictureAs(getFile(), getImageView());
                 return true;
 
-            case R.id.action_edit_in_imagemeter:
+            case R.id.action_add_to_imagemeter:
                 Intent launchIntent = getActivity().getPackageManager().getLaunchIntentForPackage("de.dirkfarin.imagemeter");
 
                 if (launchIntent != null) {

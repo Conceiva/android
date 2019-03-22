@@ -88,6 +88,7 @@ import android.widget.TextView.OnEditorActionListener;
 import com.blikoon.qrcodescanner.QrCodeActivity;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
+import com.handwerkcloud.client.IntroActivity;
 import com.owncloud.android.MainApp;
 import com.owncloud.android.R;
 import com.owncloud.android.authentication.SsoWebViewClient.SsoWebViewClientListener;
@@ -277,6 +278,8 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity
         boolean directLogin = data != null && data.toString().startsWith(getString(R.string.login_data_own_scheme));
         if (savedInstanceState == null && !directLogin) {
             FirstRunActivity.runIfNeeded(this);
+
+            IntroActivity.runIfNeeded(this);
         }
 
         if (getIntent().getBooleanExtra(FirstRunActivity.EXTRA_EXIT, false)) {
