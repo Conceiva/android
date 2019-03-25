@@ -13,10 +13,13 @@ import android.widget.LinearLayout;
 
 import com.owncloud.android.R;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * A placeholder fragment containing a simple view.
  */
-public class CompanyFragment extends Fragment {
+public class CompanyFragment extends Fragment implements RegisterActivity.OnUserDataReceivedListener {
 
     private EditText mCompany;
     private EditText mRole;
@@ -30,6 +33,7 @@ public class CompanyFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
+        ((RegisterActivity)getActivity()).setAboutDataListener(this);
         View view = inflater.inflate(R.layout.fragment_company, container, false);
         ImageButton startTrial = view.findViewById(R.id.startTrial);
         mCompany = view.findViewById(R.id.company);
@@ -51,5 +55,20 @@ public class CompanyFragment extends Fragment {
         });
 
         return view;
+    }
+
+    @Override
+    public void onDataReceived(JSONObject data) {
+        try {
+            String displayname = data.getString("displayname");
+            String phone = data.getString("phone");
+            mPhonenumber.setText(phone);
+            String address = data.getString("address");
+            mAddress.setText(address);
+            String company = data.getString("company");
+            mCompany.setText(company);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 }

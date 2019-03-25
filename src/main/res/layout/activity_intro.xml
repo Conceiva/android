@@ -4,10 +4,21 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <com.handwerkcloud.client.RegistrationViewPager
+    <androidx.viewpager.widget.ViewPager
         android:id="@+id/pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/primary"/>
+
+    <LinearLayout
+        android:id="@+id/layoutDots"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dots_height"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="@dimen/dots_margin_bottom"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+    </LinearLayout>
 
 </RelativeLayout>

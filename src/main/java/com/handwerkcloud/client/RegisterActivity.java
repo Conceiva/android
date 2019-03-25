@@ -29,7 +29,10 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Iterator;
 
+import androidx.core.util.Pair;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
@@ -74,29 +77,37 @@ public class RegisterActivity extends FragmentActivity {
      * The pager widget, which handles animation and allows swiping horizontally to access previous
      * and next wizard steps.
      */
-    private ViewPager mPager;
+    private RegistrationViewPager mPager;
 
     /**
      * The pager adapter, which provides the pages to the view pager widget.
      */
     private PagerAdapter pagerAdapter;
-    private LinearLayout dotsLayout;
-    private TextView[] dots;
     private String mProfession;
     private String mCompany;
     private String mRole;
     private String mPhonenumber;
     private String mAddress;
+    public ArrayList<OnUserDataReceivedListener> mUserDataListener = new ArrayList<>();
+
+    public interface OnUserDataReceivedListener {
+        void onDataReceived(JSONObject data);
+    }
+
+    public void setAboutDataListener(OnUserDataReceivedListener listener) {
+        this.mUserDataListener.add(listener);
+    }
 
     //AsyncTask<Params, Progress, Result>
     //Params: type passed in the execute() call, and received in the doInBackground method
     //Progress: type of object passed in publishProgress calls
     //Result: object type returned by the doInBackground method, and received by onPostExecute()
-    static class RegisterTask extends AsyncTask<Void, Integer, String> {
+    static class RegisterTask extends AsyncTask<String, Integer, JSONObject> {
         WeakReference<Context> mContext = null;
-
-        RegisterTask(Context context) {
+        WeakReference<RegisterActivity> mRegisterActivity = null;
+        RegisterTask(Context context, RegisterActivity activity) {
             mContext = new WeakReference<>(context);
+            mRegisterActivity = new WeakReference<>(activity);
         }
 
         @Override
@@ -104,23 +115,18 @@ public class RegisterActivity extends FragmentActivity {
         }
 
         @Override
-        protected String doInBackground(Void... params) {
-            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext.get());
+        protected JSONObject doInBackground(String... params) {
+            String operation = params[0];
+            Account account = AccountUtils.getCurrentOwnCloudAccount(mContext.get());
+            OwnCloudAccount ocAccount = null;
 
-            String company = preferences.getString(EXTRA_COMPANY, "");
-            String phone = preferences.getString(EXTRA_PHONENUMBER, "");
-            String role = preferences.getString(EXTRA_ROLE, "");
-            String address = preferences.getString(EXTRA_ADDRESS, "");
-            String industry = preferences.getString(EXTRA_INDUSTRY, "");
-
-            if (company.length() != 0) {
-                Account account = AccountUtils.getCurrentOwnCloudAccount(mContext.get());
-                OwnCloudAccount ocAccount = null;
+            if (account != null) {
                 try {
                     ocAccount = new OwnCloudAccount(account, mContext.get());
                 } catch (com.owncloud.android.lib.common.accounts.AccountUtils.AccountNotFoundException e) {
                     e.printStackTrace();
                 }
+
                 OwnCloudClient client = null;
                 try {
                     client = OwnCloudClientManagerFactory.getDefaultSingleton().
@@ -134,48 +140,77 @@ public class RegisterActivity extends FragmentActivity {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                JSONObject jObjectData = new JSONObject();
-                try {
-                    jObjectData.put("company", company);
-                    jObjectData.put("phone", phone);
-                    jObjectData.put("address", address);
-                    jObjectData.put("businesstype", industry);
-                    //jObjectData.put("role", role);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+
                 AccountManager mAccountMgr = AccountManager.get(mContext.get());
                 String userId = mAccountMgr.getUserData(account,
                     com.owncloud.android.lib.common.accounts.AccountUtils.Constants.KEY_USER_ID);
-                //UserProfileDataOperation gfo = new UserProfileDataOperation(userId, null);
-                //RemoteOperationResult getresult = gfo.execute(client);
 
-                String fields = jObjectData.toString();
-                UserProfileDataOperation sfo = new UserProfileDataOperation(client.getCredentials().getUsername(), fields);
-                RemoteOperationResult result = sfo.execute(client);
+                if (operation == "GET") {
+                    UserProfileDataOperation gfo = new UserProfileDataOperation(userId, null);
+                    RemoteOperationResult getresult = gfo.execute(client);
 
-                if (result.isSuccess()) {
-                    SharedPreferences.Editor editor = preferences.edit();
-                    editor.putString(EXTRA_COMPANY, "");
-                    editor.putString(EXTRA_PHONENUMBER, "");
-                    editor.putString(EXTRA_ROLE, "");
-                    editor.putString(EXTRA_ADDRESS, "");
-                    editor.putString(EXTRA_INDUSTRY, "");
-                    editor.commit();
+                    if (getresult.isSuccess()) {
+                        JSONObject data = (JSONObject) getresult.getData().get(0);
+
+                        return data;
+
+                    }
+                }
+                else if (operation == "POST") {
+                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext.get());
+                    String company = preferences.getString(EXTRA_COMPANY, "");
+                    String phone = preferences.getString(EXTRA_PHONENUMBER, "");
+                    String role = preferences.getString(EXTRA_ROLE, "");
+                    String address = preferences.getString(EXTRA_ADDRESS, "");
+                    String industry = preferences.getString(EXTRA_INDUSTRY, "");
+
+                    if (company.length() != 0) {
+                        JSONObject jObjectData = new JSONObject();
+                        try {
+                            jObjectData.put("company", company);
+                            jObjectData.put("phone", phone);
+                            jObjectData.put("address", address);
+                            jObjectData.put("businesstype", industry);
+                            //jObjectData.put("role", role);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        String fields = jObjectData.toString();
+                        UserProfileDataOperation sfo = new UserProfileDataOperation(client.getCredentials().getUsername(), fields);
+                        RemoteOperationResult result = sfo.execute(client);
+
+                        if (result.isSuccess()) {
+                            SharedPreferences.Editor editor = preferences.edit();
+                            editor.putString(EXTRA_COMPANY, "");
+                            editor.putString(EXTRA_PHONENUMBER, "");
+                            editor.putString(EXTRA_ROLE, "");
+                            editor.putString(EXTRA_ADDRESS, "");
+                            editor.putString(EXTRA_INDUSTRY, "");
+                            editor.commit();
+                        }
+                    }
                 }
             }
             return null;
         }
 
         @Override
-        protected void onPostExecute(String filename) {
-            super.onPostExecute(filename);
+        protected void onPostExecute(JSONObject data) {
+            super.onPostExecute(data);
+            if (mRegisterActivity.get() != null) {
+                Iterator it = mRegisterActivity.get().mUserDataListener.iterator();
+                while (((Iterator) it).hasNext()) {
+                    OnUserDataReceivedListener listener = (OnUserDataReceivedListener)it.next();
+                    listener.onDataReceived(data);
+                }
+            }
+
 
         }
     }
 
     public static void runIfNeeded(Activity activity) {
-        new RegisterTask(activity).execute();
+        new RegisterTask(activity, null).execute("POST");
     }
 
     /**
@@ -205,57 +240,20 @@ public class RegisterActivity extends FragmentActivity {
             return NUM_PAGES;
         }
     }
-    ViewPager.OnPageChangeListener viewPagerPageChangeListener = new ViewPager.OnPageChangeListener() {
-
-        @Override
-        public void onPageSelected(int position) {
-            addBottomDots(position);
-        }
-
-        @Override
-        public void onPageScrolled(int arg0, float arg1, int arg2) {
-
-        }
-
-        @Override
-        public void onPageScrollStateChanged(int arg0) {
-
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
+        new RegisterTask(this, this).execute("GET");
 
         // Instantiate a ViewPager and a PagerAdapter.
-        mPager = (ViewPager) findViewById(R.id.pager);
+        mPager = (RegistrationViewPager) findViewById(R.id.pager);
         pagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
         mPager.setAdapter(pagerAdapter);
-        mPager.addOnPageChangeListener(viewPagerPageChangeListener);
-
-        dotsLayout = (LinearLayout) findViewById(R.id.layoutDots);
-
-        // adding bottom dots
-        addBottomDots(0);
+        mPager.setPagingEnabled(false);
 
         handleIntent(getIntent());
-    }
-
-    private void addBottomDots(int currentPage) {
-        dots = new TextView[NUM_PAGES];
-
-        dotsLayout.removeAllViews();
-        for (int i = 0; i < dots.length; i++) {
-            dots[i] = new TextView(this);
-            dots[i].setText(Html.fromHtml("&#8226;"));
-            dots[i].setTextSize(35);
-            dots[i].setTextColor(getResources().getColor(R.color.color_accent));
-            dotsLayout.addView(dots[i]);
-        }
-
-        if (dots.length > 0)
-            dots[currentPage].setTextColor(getResources().getColor(R.color.primary));
     }
 
     @Override

@@ -51,6 +51,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.google.gson.Gson;
+import com.handwerkcloud.client.RegisterActivity;
 import com.owncloud.android.R;
 import com.owncloud.android.authentication.AccountUtils;
 import com.owncloud.android.datamodel.ArbitraryDataProvider;
@@ -98,6 +99,7 @@ public class UserInfoActivity extends FileActivity {
     private static final String KEY_DIRECT_REMOVE = "DIRECT_REMOVE";
 
     private static final int KEY_DELETE_CODE = 101;
+    private static final int EDIT_ACCOUNT_RESULT = 102;
 
     @BindView(R.id.empty_list_view) protected LinearLayout emptyContentContainer;
     @BindView(R.id.empty_list_view_text) protected TextView emptyContentMessage;
@@ -176,6 +178,9 @@ public class UserInfoActivity extends FileActivity {
             case R.id.delete_account:
                 openAccountRemovalConfirmationDialog(account, getSupportFragmentManager(), false);
                 break;
+            case R.id.edit_account:
+                Intent i = new Intent(this, RegisterActivity.class);
+                startActivityForResult(i, EDIT_ACCOUNT_RESULT);
             default:
                 retval = super.onOptionsItemSelected(item);
                 break;

@@ -32,6 +32,8 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
+import androidx.core.util.Pair;
+
 public class UserProfileDataOperation extends OCSRemoteOperation {
     private static final String TAG = UserProfileDataOperation.class.getSimpleName();
     private static final int SYNC_READ_TIMEOUT = 40000;
@@ -58,7 +60,7 @@ public class UserProfileDataOperation extends OCSRemoteOperation {
             PostMethod postMethod = null;
 
             try {
-                postMethod = new PostMethod(client.getBaseUri() + PROFILE_DATA_URL + "/" + userID);
+                postMethod = new PostMethod(client.getBaseUri() + PROFILE_DATA_URL + "/" + userID + JSON_FORMAT);
                 postMethod.setParameter("data", fields);
 
                 // remote request
@@ -71,12 +73,9 @@ public class UserProfileDataOperation extends OCSRemoteOperation {
 
                     // Parse the response
                     JSONObject respJSON = new JSONObject(response);
-                    String url = respJSON.getJSONObject(NODE_OCS).getJSONObject(NODE_DATA).getString(NODE_URL);
+                    JSONObject data = respJSON.getJSONObject(NODE_OCS).getJSONObject(NODE_DATA).getJSONObject(NODE_DATA);
 
                     result = new RemoteOperationResult(true, postMethod);
-                    ArrayList<Object> urlArray = new ArrayList<>();
-                    urlArray.add(url);
-                    result.setData(urlArray);
                 } else {
                     result = new RemoteOperationResult(false, postMethod);
                     client.exhaustResponse(postMethod.getResponseBodyAsStream());
@@ -95,7 +94,7 @@ public class UserProfileDataOperation extends OCSRemoteOperation {
             GetMethod getMethod = null;
 
             try {
-                getMethod = new GetMethod(client.getBaseUri() + PROFILE_DATA_URL + "/" + userID);
+                getMethod = new GetMethod(client.getBaseUri() + PROFILE_DATA_URL + "/" + userID + JSON_FORMAT);
 
                 // remote request
                 getMethod.addRequestHeader(OCS_API_HEADER, OCS_API_HEADER_VALUE);
@@ -107,19 +106,19 @@ public class UserProfileDataOperation extends OCSRemoteOperation {
 
                     // Parse the response
                     JSONObject respJSON = new JSONObject(response);
-                    String url = respJSON.getJSONObject(NODE_OCS).getJSONObject(NODE_DATA).getString(NODE_URL);
+                    JSONObject data = respJSON.getJSONObject(NODE_OCS).getJSONObject(NODE_DATA).getJSONObject(NODE_DATA);
 
                     result = new RemoteOperationResult(true, getMethod);
-                    ArrayList<Object> urlArray = new ArrayList<>();
-                    urlArray.add(url);
-                    result.setData(urlArray);
+                    ArrayList<Object> dataArray = new ArrayList<>();
+                    dataArray.add(data);
+                    result.setData(dataArray);
                 } else {
                     result = new RemoteOperationResult(false, getMethod);
                     client.exhaustResponse(getMethod.getResponseBodyAsStream());
                 }
             } catch (Exception e) {
                 result = new RemoteOperationResult(e);
-                Log_OC.e(TAG, "Set profile data for user with id " + userID + " failed: " + result.getLogMessage(),
+                Log_OC.e(TAG, "Get profile data for user with id " + userID + " failed: " + result.getLogMessage(),
                     result.getException());
             } finally {
                 if (getMethod != null) {
