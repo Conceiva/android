@@ -862,7 +862,7 @@
     <string name="remove_notification_failed">Failed to remove notification.</string>
     <string name="notification_action_failed">Failed to execute action.</string>
     <string name="remove_push_notification">Remove</string>
-    <string name="imagemeter">Image Meter</string>
+    <string name="imagemeter">ImageMeter</string>
     <string name="title_activity_ocr">OCRActivity</string>
     <string name="ocr">Scan document</string>
     <string name="title_activity_intro">IntroActivity</string>
@@ -901,7 +901,7 @@
     <string name="role_hint">E.g. Employee</string>
     <string name="phonenumber_hint">Enter phone number</string>
     <string name="address_hint">Enter address</string>
-    <string name="add_to_imagemeter">Add to Image Meter</string>
+    <string name="add_to_imagemeter">Add to ImageMeter</string>
     <string name="string_next">Next</string>
     <string name="your_selection">Your selection: %1$s</string>
     <string name="confirm_selection">Is that correct? Click Next to continue.</string>

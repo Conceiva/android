@@ -25,6 +25,9 @@ package com.owncloud.android.ui.activity;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.accounts.AuthenticatorException;
+import android.accounts.OperationCanceledException;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ContentResolver;
@@ -52,10 +55,14 @@ import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.google.gson.Gson;
 import com.handwerkcloud.client.RegisterActivity;
+import com.handwerkcloud.client.UserProfileDataOperation;
 import com.owncloud.android.R;
 import com.owncloud.android.authentication.AccountUtils;
 import com.owncloud.android.datamodel.ArbitraryDataProvider;
 import com.owncloud.android.datamodel.PushConfigurationState;
+import com.owncloud.android.lib.common.OwnCloudAccount;
+import com.owncloud.android.lib.common.OwnCloudClient;
+import com.owncloud.android.lib.common.OwnCloudClientManagerFactory;
 import com.owncloud.android.lib.common.UserInfo;
 import com.owncloud.android.lib.common.operations.RemoteOperation;
 import com.owncloud.android.lib.common.operations.RemoteOperationResult;
@@ -69,8 +76,11 @@ import com.owncloud.android.utils.ThemeUtils;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.parceler.Parcels;
 
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -120,6 +130,7 @@ public class UserInfoActivity extends FileActivity {
 
     private UserInfo userInfo;
     private Account account;
+    private JSONObject extraUserInfo;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -161,6 +172,18 @@ public class UserInfoActivity extends FileActivity {
     }
 
     @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == EDIT_ACCOUNT_RESULT) {
+            if (resultCode == Activity.RESULT_OK) {
+                userInfo = null;
+                setMultiListLoadingMessage();
+                fetchAndSetData();
+            }
+        }
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.user_info_menu, menu);
@@ -180,6 +203,7 @@ public class UserInfoActivity extends FileActivity {
                 break;
             case R.id.edit_account:
                 Intent i = new Intent(this, RegisterActivity.class);
+                i.putExtra(RegisterActivity.EXTRA_WAIT_FOR_UPDATE, true);
                 startActivityForResult(i, EDIT_ACCOUNT_RESULT);
             default:
                 retval = super.onOptionsItemSelected(item);
@@ -291,6 +315,11 @@ public class UserInfoActivity extends FileActivity {
     private List<UserInfoDetailsItem> createUserInfoDetails(UserInfo userInfo) {
         List<UserInfoDetailsItem> result = new LinkedList<>();
 
+        try {
+            addToListIfNeeded(result, R.drawable.baseline_business_24, extraUserInfo.getString("company"), R.string.company);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         addToListIfNeeded(result, R.drawable.ic_phone, userInfo.getPhone(), R.string.user_info_phone);
         addToListIfNeeded(result, R.drawable.ic_email, userInfo.getEmail(), R.string.user_info_email);
         addToListIfNeeded(result, R.drawable.ic_map_marker, userInfo.getAddress(), R.string.user_info_address);
@@ -413,10 +442,49 @@ public class UserInfoActivity extends FileActivity {
         }
     }
 
+    private void fetchExtraData() {
+        OwnCloudAccount ocAccount = null;
+        try {
+            ocAccount = new OwnCloudAccount(account, this);
+        } catch (com.owncloud.android.lib.common.accounts.AccountUtils.AccountNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        OwnCloudClient client = null;
+        try {
+            client = OwnCloudClientManagerFactory.getDefaultSingleton().
+                getClientFor(ocAccount, this);
+        } catch (com.owncloud.android.lib.common.accounts.AccountUtils.AccountNotFoundException e) {
+            e.printStackTrace();
+        } catch (OperationCanceledException e) {
+            e.printStackTrace();
+        } catch (AuthenticatorException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        AccountManager mAccountMgr = AccountManager.get(this);
+        String userId = mAccountMgr.getUserData(account,
+            com.owncloud.android.lib.common.accounts.AccountUtils.Constants.KEY_USER_ID);
+        UserProfileDataOperation gfo = new UserProfileDataOperation(userId, null);
+        RemoteOperationResult getresult = gfo.execute(client);
+
+        if (getresult.isSuccess()) {
+            JSONObject data = (JSONObject) getresult.getData().get(0);
+
+            extraUserInfo = data;
+
+        }
+
+    }
     private void fetchAndSetData() {
         Thread t = new Thread(() -> {
             RemoteOperation getRemoteUserInfoOperation = new GetRemoteUserInfoOperation();
             RemoteOperationResult result = getRemoteUserInfoOperation.execute(account, this);
+
+            // Handwerkcloud specific data
+            fetchExtraData();
 
             if (result.isSuccess() && result.getData() != null) {
                 userInfo = (UserInfo) result.getData().get(0);

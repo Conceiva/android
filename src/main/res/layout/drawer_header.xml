@@ -130,7 +130,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
                 android:contentDescription="@string/drawer_manage_accounts"
-                android:src="@drawable/ic_down"/>
+                android:src="@drawable/ic_down" />
 
         </LinearLayout>
 

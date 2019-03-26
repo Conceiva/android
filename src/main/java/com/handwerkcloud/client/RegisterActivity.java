@@ -12,7 +12,9 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.Html;
+import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.owncloud.android.R;
@@ -66,6 +68,7 @@ public class RegisterActivity extends FragmentActivity {
     public static final String EXTRA_ROLE = "EXTRA_ROLE";
     public static final String EXTRA_PHONENUMBER = "EXTRA_PHONENUMBER";
     public static final String EXTRA_ADDRESS = "EXTRA_ADDRESS";
+    public static final String EXTRA_WAIT_FOR_UPDATE = "EXTRA_WAIT_FOR_UPDATE";
     static final String FIRSTRUN_SHARED_PREFERENCE = "FIRSTRUN_SHARED_PREF";
 
     /**
@@ -89,6 +92,8 @@ public class RegisterActivity extends FragmentActivity {
     private String mPhonenumber;
     private String mAddress;
     public ArrayList<OnUserDataReceivedListener> mUserDataListener = new ArrayList<>();
+    private boolean mUpdateBeforeFinish;
+    private ProgressBar mLoading;
 
     public interface OnUserDataReceivedListener {
         void onDataReceived(JSONObject data);
@@ -176,7 +181,7 @@ public class RegisterActivity extends FragmentActivity {
                             e.printStackTrace();
                         }
                         String fields = jObjectData.toString();
-                        UserProfileDataOperation sfo = new UserProfileDataOperation(client.getCredentials().getUsername(), fields);
+                        UserProfileDataOperation sfo = new UserProfileDataOperation(userId, fields);
                         RemoteOperationResult result = sfo.execute(client);
 
                         if (result.isSuccess()) {
@@ -198,10 +203,15 @@ public class RegisterActivity extends FragmentActivity {
         protected void onPostExecute(JSONObject data) {
             super.onPostExecute(data);
             if (mRegisterActivity.get() != null) {
-                Iterator it = mRegisterActivity.get().mUserDataListener.iterator();
-                while (((Iterator) it).hasNext()) {
-                    OnUserDataReceivedListener listener = (OnUserDataReceivedListener)it.next();
-                    listener.onDataReceived(data);
+                if (mRegisterActivity.get().mUpdateBeforeFinish && data == null) {
+                    mRegisterActivity.get().finish();
+                }
+                else {
+                    Iterator it = mRegisterActivity.get().mUserDataListener.iterator();
+                    while (((Iterator) it).hasNext()) {
+                        OnUserDataReceivedListener listener = (OnUserDataReceivedListener) it.next();
+                        listener.onDataReceived(data);
+                    }
                 }
             }
 
@@ -252,6 +262,7 @@ public class RegisterActivity extends FragmentActivity {
         pagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
         mPager.setAdapter(pagerAdapter);
         mPager.setPagingEnabled(false);
+        mLoading = findViewById(R.id.loading);
 
         handleIntent(getIntent());
     }
@@ -263,6 +274,10 @@ public class RegisterActivity extends FragmentActivity {
     }
 
     void handleIntent(Intent i) {
+        if (i.hasExtra(EXTRA_WAIT_FOR_UPDATE)) {
+            mUpdateBeforeFinish = true;
+        }
+
        if (i.getAction() == NEXT) {
             if (mPager.getCurrentItem() != NUM_PAGES - 1) {
                 mPager.setCurrentItem(mPager.getCurrentItem() + 1);
@@ -288,8 +303,15 @@ public class RegisterActivity extends FragmentActivity {
            editor.putString(EXTRA_ADDRESS, mAddress);
            editor.putString(EXTRA_INDUSTRY, mProfession);
            editor.commit();
+           setResult(Activity.RESULT_OK);
 
-           finish();
+           if (mUpdateBeforeFinish) {
+               new RegisterTask(this, this).execute("POST");
+               mLoading.setVisibility(View.VISIBLE);
+           }
+           else {
+               finish();
+           }
        }
     }
 }

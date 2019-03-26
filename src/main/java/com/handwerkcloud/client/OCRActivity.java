@@ -36,6 +36,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -64,19 +65,23 @@ import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.exifinterface.media.ExifInterface;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentStatePagerAdapter;
+import androidx.viewpager.widget.PagerAdapter;
+import androidx.viewpager.widget.ViewPager;
 
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 
-public class OCRActivity extends Activity {
-    private static final String ACTION_DISPLAY_PREVIEW = "DISPLAY_PREVIEW";
-    private static final String EXTRA_FILENAME = "FILENAME";
-    private static final String EXTRA_PREVIEW_FILENAME = "PREVIEW_FILENAME";
+public class OCRActivity extends FragmentActivity {
+    public static final String ACTION_CAPTURE_STARTED = "ACTION_CAPTURE_STARTED";
+    public static final String ACTION_DISPLAY_PREVIEW = "DISPLAY_PREVIEW";
+    public static final String EXTRA_FILENAME = "FILENAME";
+    public static final String EXTRA_PREVIEW_FILENAME = "PREVIEW_FILENAME";
     final boolean DEVELOPER_MODE = false;
     static final String TAG = "OCRActivity";
-    private CameraSource mCameraSource;
-    private int requestPermissionID = 1;
-    private CameraOverlaySurfaceView mCameraView;
-    ImageButton capture = null;
+    public static int requestPermissionID = 1;
     public static final int PERMISSION_CODE = 42042;
     String mFilename;
     String mPreviewFilename;
@@ -85,92 +90,88 @@ public class OCRActivity extends Activity {
     private final int STATE_CAPTURING = 1;
     private final int STATE_PREVIEW = 2;
     int mState = STATE_CAPTURE;
+    private TextRecognizer textRecognizer;
 
     ProgressBar progressBar;
     ImageButton cancelBtn;
     ImageButton acceptBtn;
-    ImageButton flashCameraButton;
-    private TextRecognizer textRecognizer;
-    private int cameraWidth = 1600;
-    int cameraHeight = 1200;
-    private int rotation;
-    private boolean flashmode;
     private ImageButton textHighlightButton;
     private ImageButton galleryButton;
     private EditText filenameEdit;
+    private OnCaptureEventListener mCaptureEventListener;
 
-    //AsyncTask<Params, Progress, Result>
-    //Params: type passed in the execute() call, and received in the doInBackground method
-    //Progress: type of object passed in publishProgress calls
-    //Result: object type returned by the doInBackground method, and received by onPostExecute()
-    private class CaptureTask extends AsyncTask<byte[], Integer, String> {
+    /**
+     * The number of pages (wizard steps) to show
+     */
+    private static final int NUM_PAGES = 2;
 
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            progressBar.setVisibility(View.VISIBLE);
-            mState = STATE_CAPTURING;
-            mCameraSource.stop();
+    /**
+     * The pager widget, which handles animation and allows swiping horizontally to access previous
+     * and next wizard steps.
+     */
+    private ViewPager mPager;
+
+    /**
+     * The pager adapter, which provides the pages to the view pager widget.
+     */
+    private PagerAdapter pagerAdapter;
+
+    /**
+     * A simple pager adapter that represents 5 ScreenSlidePageFragment objects, in
+     * sequence.
+     */
+    private class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {
+        public ScreenSlidePagerAdapter(FragmentManager fm) {
+            super(fm);
         }
 
         @Override
-        protected String doInBackground(byte[]... params) {
-            String filename = null;
-            byte[] bytes = params[0];
-            try {
-                // convert byte array into bitmap
-                Bitmap bitmap = null;
-                bitmap = BitmapFactory.decodeByteArray(bytes, 0,
-                    bytes.length);
-                rotation = Exif.getOrientation(bytes);
-
-                // rotate Image
-                if (rotation != 0) {
-                    Matrix rotateMatrix = new Matrix();
-                    rotateMatrix.postRotate(rotation);
-                    Bitmap rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0,
-                        bitmap.getWidth(), bitmap.getHeight(),
-                        rotateMatrix, false);
-                    bitmap = rotatedBitmap;
-                }
-
-                SparseArray<TextBlock> items = textRecognizer.detect(new Frame.Builder().setBitmap(bitmap).build());
-                filename = savePDF(items, bitmap);
-                if (filename == null) {
-                    return filename;
-                }
-
-                mFilename = filename;
-                int permissionCheck = ContextCompat.checkSelfPermission(OCRActivity.this,
-                    READ_EXTERNAL_STORAGE);
-
-                if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(
-                        OCRActivity.this,
-                        new String[]{READ_EXTERNAL_STORAGE},
-                        PERMISSION_CODE
-                    );
-
-                    return filename;
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
+        public Fragment getItem(int position) {
+            if (position == 0) {
+                CaptureFragment fragment = new CaptureFragment();
+                fragment.setTextRecognizer(textRecognizer);
+                return fragment;
             }
-            return filename;
+            else if (position == 1) {
+                Fragment fragment = new GalleryFragment();
+
+                return fragment;
+            }
+            return null;
         }
 
         @Override
-        protected void onPostExecute(String filename) {
-            super.onPostExecute(filename);
-            filenameEdit.setText(filename.substring(filename.lastIndexOf('/') + 1));
-            mPreviewFilename = filename.substring(0, filename.lastIndexOf('/') + 1) + "/Highlightscan.pdf";
-            Intent i = new Intent(OCRActivity.this, OCRActivity.class);
-            i.setAction(ACTION_DISPLAY_PREVIEW);
-            i.putExtra(EXTRA_FILENAME, filename);
-            i.putExtra(EXTRA_PREVIEW_FILENAME, mPreviewFilename);
-            startActivity(i);
+        public int getCount() {
+            return NUM_PAGES;
         }
+    }
+    ViewPager.OnPageChangeListener viewPagerPageChangeListener = new ViewPager.OnPageChangeListener() {
+
+        @Override
+        public void onPageSelected(int position) {
+            //addBottomDots(position);
+        }
+
+        @Override
+        public void onPageScrolled(int arg0, float arg1, int arg2) {
+
+        }
+
+        @Override
+        public void onPageScrollStateChanged(int arg0) {
+
+        }
+    };
+
+    public interface OnCaptureEventListener {
+        void onInitialize();
+        void onCaptureStarted();
+        void onDisplayPreview();
+        void onPreviewCancel();
+    }
+
+    public void setAboutDataListener(OnCaptureEventListener listener) {
+        this.mCaptureEventListener = listener;
     }
 
     //AsyncTask<Params, Progress, Result>
@@ -179,12 +180,13 @@ public class OCRActivity extends Activity {
     //Result: object type returned by the doInBackground method, and received by onPostExecute()
     private class ImageTask extends AsyncTask<String, Integer, String> {
 
+        private int rotation;
+
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
             progressBar.setVisibility(View.VISIBLE);
             mState = STATE_CAPTURING;
-            mCameraSource.stop();
         }
 
         @Override
@@ -209,7 +211,7 @@ public class OCRActivity extends Activity {
                 }
 
                 SparseArray<TextBlock> items = textRecognizer.detect(new Frame.Builder().setBitmap(bitmap).build());
-                filename = savePDF(items, bitmap);
+                filename = savePDF(items, bitmap, getApplicationContext());
                 if (filename == null) {
                     return filename;
                 }
@@ -249,7 +251,7 @@ public class OCRActivity extends Activity {
     }
 
     void displayPreview(String filename) {
-        mCameraView.setVisibility(View.GONE);
+        mCaptureEventListener.onDisplayPreview();
         progressBar.setVisibility(View.GONE);
         if (filename != null) {
             pdfView.fromFile(new File(filename)).load();
@@ -280,6 +282,19 @@ public class OCRActivity extends Activity {
         super.onSaveInstanceState(outState);
     }
 
+    void renamePdf() {
+        File current = new File(mFilename);
+        String originalName = current.getName();
+        String editName = filenameEdit.getText().toString();
+        if (editName.compareTo(originalName) != 0) {
+            String newFilename = current.getParent();
+            newFilename += "/" + filenameEdit.getText();
+            File dest = new File(newFilename);
+            current.renameTo(dest);
+            mFilename = newFilename;
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         if (DEVELOPER_MODE) {
@@ -298,47 +313,32 @@ public class OCRActivity extends Activity {
         }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.ocr_activity);
-        mCameraView = findViewById(R.id.surfaceView);
         pdfView = findViewById(R.id.pdfView);
-        capture = findViewById(R.id.capture);
-        capture.setEnabled(false);
         cancelBtn = findViewById(R.id.cancelBtn);
         acceptBtn = findViewById(R.id.acceptBtn);
         progressBar = findViewById(R.id.pBar);
         textHighlightButton = findViewById(R.id.textHighlightBtn);
-        galleryButton = findViewById(R.id.gallery);
         filenameEdit = findViewById(R.id.filenameEdit);
+
+        // Instantiate a ViewPager and a PagerAdapter.
+        mPager = (ViewPager) findViewById(R.id.pager);
+        pagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
+        mPager.setAdapter(pagerAdapter);
+        mPager.addOnPageChangeListener(viewPagerPageChangeListener);
+
+        //Create the TextRecognizer
+        textRecognizer = new TextRecognizer.Builder(getApplicationContext()).build();
 
         filenameEdit.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
                 if (i == EditorInfo.IME_ACTION_DONE) {
-                    File current = new File(mFilename);
-                    String newFilename = current.getParent();
-                    newFilename += "/" + textView.getText();
-                    File dest = new File(newFilename);
-                    current.renameTo(dest);
-                    mFilename = newFilename;
+
                     InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(textView.getWindowToken(), 0);
                     return true;
                 }
                 return false;
-            }
-        });
-        flashCameraButton = (ImageButton) findViewById(R.id.flash);
-        capture.setOnClickListener(new View.OnClickListener() {
-            private long mLastClickTime;
-
-            @Override
-            public void onClick(View view) {
-
-                // mis-clicking prevention, using threshold of 1000 ms
-                if (SystemClock.elapsedRealtime() - mLastClickTime < 1000){
-                    return;
-                }
-                mLastClickTime = SystemClock.elapsedRealtime();
-                takePicture();
             }
         });
 
@@ -357,28 +357,13 @@ public class OCRActivity extends Activity {
         acceptBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                renamePdf();
                 Intent resultIntent = new Intent();
                 File previewFile = new File(mPreviewFilename);
                 previewFile.delete();
                 resultIntent.putExtra(UploadFilesActivity.EXTRA_CHOSEN_FILES, new String[]{mFilename});
                 setResult(UploadFilesActivity.RESULT_OK_AND_MOVE, resultIntent);
                 finish();
-            }
-        });
-
-        flashCameraButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (flashmode) {
-                    flashCameraButton.setImageResource(R.drawable.ic_flash_off);
-                    mCameraSource.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
-                } else {
-                    flashCameraButton.setImageResource(R.drawable.ic_flash_on);
-                    mCameraSource.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
-                }
-
-                flashmode = !flashmode;
-
             }
         });
 
@@ -416,25 +401,6 @@ public class OCRActivity extends Activity {
             }
         });
 
-        galleryButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mCameraSource.stop();
-                ImagePicker.create(OCRActivity.this)// Activity or Fragment
-                    .imageLoader(new GlideImageLoader())
-                    .single()
-                    .theme(R.style.ImagePickerTheme)
-                    .showCamera(false) // show camera or not (true by default)
-                    .start();
-            }
-        });
-
-        if (!getBaseContext().getPackageManager().hasSystemFeature(
-            PackageManager.FEATURE_CAMERA_FLASH)) {
-            flashCameraButton.setVisibility(View.GONE);
-        }
-
-        startCameraSource();
         if (savedInstanceState != null) {
             mState = savedInstanceState.getInt("SCAN_STATE");
             mFilename = savedInstanceState.getString("FILENAME");
@@ -480,7 +446,14 @@ public class OCRActivity extends Activity {
             mFilename = filename;
             String previewFilename = i.getStringExtra(EXTRA_PREVIEW_FILENAME);
             mPreviewFilename = previewFilename;
+            filenameEdit.setText(filename.substring(filename.lastIndexOf('/') + 1));
             displayPreview(previewFilename);
+        }
+        else if (i.getAction() == ACTION_CAPTURE_STARTED) {
+
+            progressBar.setVisibility(View.VISIBLE);
+            mState = STATE_CAPTURING;
+            mCaptureEventListener.onCaptureStarted();
         }
     }
 
@@ -490,14 +463,12 @@ public class OCRActivity extends Activity {
         File file = new File(mFilename);
         file.delete();
         pdfView.setVisibility(View.GONE);
-        startCameraSource();
-        mCameraView.setVisibility(View.VISIBLE);
         filenameEdit.setVisibility(View.GONE);
         cancelBtn.setVisibility(View.GONE);
         acceptBtn.setVisibility(View.GONE);
         textHighlightButton.setVisibility(View.GONE);
         textHighlightButton.setColorFilter(Color.WHITE);
-        flashCameraButton.setImageResource(R.drawable.ic_flash_off);
+        mCaptureEventListener.onPreviewCancel();
         mState = STATE_CAPTURE;
     }
 
@@ -511,30 +482,7 @@ public class OCRActivity extends Activity {
         }
     }
 
-    private void showFlashButton(Camera.Parameters params) {
-        boolean showFlash = (getPackageManager().hasSystemFeature(
-            PackageManager.FEATURE_CAMERA_FLASH) && params.getFlashMode() != null)
-            && params.getSupportedFlashModes() != null
-            && params.getSupportedFocusModes().size() > 1;
-
-        flashCameraButton.setVisibility(showFlash ? View.VISIBLE
-            : View.INVISIBLE);
-
-    }
-
-    void takePicture() {
-        mCameraSource.takePicture(null, new CameraSource.PictureCallback() {
-
-            private File imageFile;
-            @Override
-            public void onPictureTaken(byte[] bytes) {
-                new CaptureTask().execute(bytes);
-            }
-        });
-
-    }
-
-    private Bitmap resize(Bitmap image, int maxWidth, int maxHeight) {
+    public static Bitmap resize(Bitmap image, int maxWidth, int maxHeight) {
         if (maxHeight > 0 && maxWidth > 0) {
             int width = image.getWidth();
             int height = image.getHeight();
@@ -573,7 +521,7 @@ public class OCRActivity extends Activity {
             // If request is cancelled, the result arrays are empty.
             if (grantResults.length > 0
                 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                startCameraSource();
+                mCaptureEventListener.onInitialize();
             } else {
                 // permission denied, boo! Disable the
                 // functionality that depends on this permission.
@@ -597,7 +545,7 @@ public class OCRActivity extends Activity {
         }
     };
 
-    private String savePDF(SparseArray<TextBlock> items, Bitmap bitmap) {
+    public static String savePDF(SparseArray<TextBlock> items, Bitmap bitmap, Context context) {
         if (items == null) {
             return null;
         }
@@ -617,9 +565,9 @@ public class OCRActivity extends Activity {
                 setResolution(new PrintAttributes.Resolution("RESOLUTION_ID", "RESOLUTION_ID", 72, 72)).
                 setMinMargins(PrintAttributes.Margins.NO_MARGINS).
                 build();
-            document = new PrintedPdfDocument(this,
+            document = new PrintedPdfDocument(context,
                 printAttributes);
-            previewDocument = new PrintedPdfDocument(this,
+            previewDocument = new PrintedPdfDocument(context,
                 printAttributes);
 
             PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(bitmap.getWidth(), bitmap.getHeight(), 0).create();
@@ -761,106 +709,4 @@ public class OCRActivity extends Activity {
         }
     }
 
-    private void startCameraSource() {
-        if (ActivityCompat.checkSelfPermission(getApplicationContext(),
-            Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-
-            ActivityCompat.requestPermissions(OCRActivity.this,
-                new String[]{Manifest.permission.CAMERA},
-                requestPermissionID);
-            return;
-        }
-
-        //Create the TextRecognizer
-        textRecognizer = new TextRecognizer.Builder(getApplicationContext()).build();
-
-        if (!textRecognizer.isOperational()) {
-            Log.w(TAG, "Detector dependencies not loaded yet");
-        } else {
-            int numCameras=Camera.getNumberOfCameras();
-            for (int i=0;i<numCameras;i++)
-            {
-                Camera.CameraInfo cameraInfo=new Camera.CameraInfo();
-                Camera.getCameraInfo(i,cameraInfo);
-                if (cameraInfo.facing== Camera.CameraInfo.CAMERA_FACING_BACK)
-                {
-                    Camera camera= Camera.open(i);
-                    Camera.Parameters cameraParams=camera.getParameters();
-                    List<Camera.Size> sizes= cameraParams.getSupportedPreviewSizes();
-                    cameraWidth=sizes.get(0).width;
-                    cameraHeight=sizes.get(0).height;
-                    camera.release();
-                }
-            }
-            //Initialize camerasource to use high resolution and set Autofocus on.
-            mCameraSource = new CameraSource.Builder(getApplicationContext(), textRecognizer)
-                .setFacing(CameraSource.CAMERA_FACING_BACK)
-                .setRequestedPreviewSize(cameraWidth, cameraHeight)
-                .setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)
-                .setRequestedFps(2.0f)
-                .build();
-
-            /**
-             * Add call back to SurfaceView and check if camera permission is granted.
-             * If permission is granted we can start our cameraSource and pass it to surfaceView
-             */
-            mCameraView.getHolder().addCallback(new SurfaceHolder.Callback() {
-                @Override
-                public void surfaceCreated(SurfaceHolder holder) {
-                    try {
-
-                        if (ActivityCompat.checkSelfPermission(getApplicationContext(),
-                            Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-
-                            ActivityCompat.requestPermissions(OCRActivity.this,
-                                new String[]{Manifest.permission.CAMERA},
-                                requestPermissionID);
-                            return;
-                        }
-                        mCameraSource.start(mCameraView.getHolder());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                @Override
-                public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-                }
-
-                /**
-                 * Release resources for cameraSource
-                 */
-                @Override
-                public void surfaceDestroyed(SurfaceHolder holder) {
-                    mCameraSource.stop();
-                }
-            });
-
-            //Set the TextRecognizer's Processor.
-            textRecognizer.setProcessor(new Detector.Processor<TextBlock>() {
-                @Override
-                public void release() {
-                }
-
-                /**
-                 * Detect all the text from camera using TextBlock and the values into a stringBuilder
-                 * which will then be set to the textView.
-                 * */
-                @Override
-                public void receiveDetections(Detector.Detections<TextBlock> detections) {
-                    final SparseArray<TextBlock> items = detections.getDetectedItems();
-                    capture.setEnabled(true);
-                    mCameraView.setItems(items.clone());
-                }
-            });
-        }
-
-        try {
-            if (mCameraView.getHolder().getSurface().isValid()) {
-                mCameraSource.start(mCameraView.getHolder());
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 }

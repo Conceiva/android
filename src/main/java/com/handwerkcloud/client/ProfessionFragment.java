@@ -30,7 +30,18 @@ public class ProfessionFragment extends Fragment implements RegisterActivity.OnU
 
     Map<Integer, String> mSelectedProfessions = new HashMap<Integer, String>();
     private TextView next;
-
+    LinearLayout carpenter;
+    LinearLayout stovebuilder;
+    LinearLayout windowbuilder;
+    LinearLayout installer;
+    LinearLayout electrician;
+    LinearLayout painter;
+    LinearLayout flasher;
+    LinearLayout bricklayer;
+    LinearLayout roofer;
+    LinearLayout stuccoer;
+    LinearLayout architect;
+    LinearLayout other;
     public ProfessionFragment() {
     }
 
@@ -93,7 +104,7 @@ public class ProfessionFragment extends Fragment implements RegisterActivity.OnU
             }
         });
 
-        LinearLayout carpenter = view.findViewById(R.id.carpenter);
+        carpenter = view.findViewById(R.id.carpenter);
         carpenter.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -101,7 +112,7 @@ public class ProfessionFragment extends Fragment implements RegisterActivity.OnU
             }
         });
 
-        LinearLayout stovebuilder = view.findViewById(R.id.stovebuilder);
+        stovebuilder = view.findViewById(R.id.stovebuilder);
         stovebuilder.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -109,7 +120,7 @@ public class ProfessionFragment extends Fragment implements RegisterActivity.OnU
             }
         });
 
-        LinearLayout windowbuilder = view.findViewById(R.id.windowbuilder);
+        windowbuilder = view.findViewById(R.id.windowbuilder);
         windowbuilder.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -117,7 +128,7 @@ public class ProfessionFragment extends Fragment implements RegisterActivity.OnU
             }
         });
 
-        LinearLayout installer = view.findViewById(R.id.installer);
+        installer = view.findViewById(R.id.installer);
         installer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -125,7 +136,7 @@ public class ProfessionFragment extends Fragment implements RegisterActivity.OnU
             }
         });
 
-        LinearLayout electrician = view.findViewById(R.id.electrician);
+        electrician = view.findViewById(R.id.electrician);
         electrician.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -133,7 +144,7 @@ public class ProfessionFragment extends Fragment implements RegisterActivity.OnU
             }
         });
 
-        LinearLayout painter = view.findViewById(R.id.painter);
+        painter = view.findViewById(R.id.painter);
         painter.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -141,7 +152,7 @@ public class ProfessionFragment extends Fragment implements RegisterActivity.OnU
             }
         });
 
-        LinearLayout flasher = view.findViewById(R.id.flasher);
+        flasher = view.findViewById(R.id.flasher);
         flasher.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -149,7 +160,7 @@ public class ProfessionFragment extends Fragment implements RegisterActivity.OnU
             }
         });
 
-        LinearLayout bricklayer = view.findViewById(R.id.bricklayer);
+        bricklayer = view.findViewById(R.id.bricklayer);
         bricklayer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -157,7 +168,7 @@ public class ProfessionFragment extends Fragment implements RegisterActivity.OnU
             }
         });
 
-        LinearLayout roofer = view.findViewById(R.id.roofer);
+        roofer = view.findViewById(R.id.roofer);
         roofer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -165,7 +176,7 @@ public class ProfessionFragment extends Fragment implements RegisterActivity.OnU
             }
         });
 
-        LinearLayout stuccoer = view.findViewById(R.id.stuccoer);
+        stuccoer = view.findViewById(R.id.stuccoer);
         stuccoer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -173,7 +184,7 @@ public class ProfessionFragment extends Fragment implements RegisterActivity.OnU
             }
         });
 
-        LinearLayout architect = view.findViewById(R.id.architect);
+        architect = view.findViewById(R.id.architect);
         architect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -181,7 +192,7 @@ public class ProfessionFragment extends Fragment implements RegisterActivity.OnU
             }
         });
 
-        LinearLayout other = view.findViewById(R.id.other);
+        other = view.findViewById(R.id.other);
         other.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -196,6 +207,45 @@ public class ProfessionFragment extends Fragment implements RegisterActivity.OnU
         try {
             String businesstype = data.getString("businesstype");
             // parse the businesstype and set the selected professions
+            String[] values = businesstype.split(",");
+            for (int i = 0; i < values.length; i++) {
+                if (values[i].compareTo(RegisterActivity.CARPENTER) == 0) {
+                    selectProfession(R.string.carpenter, RegisterActivity.CARPENTER, carpenter);
+                }
+                else if (values[i].compareTo(RegisterActivity.STOVEBUILDER) == 0) {
+                    selectProfession(R.string.stovebuilder, RegisterActivity.STOVEBUILDER, stovebuilder);
+                }
+                else if (values[i].compareTo(RegisterActivity.WINDOWBUILDER) == 0) {
+                    selectProfession(R.string.windowbuilder, RegisterActivity.WINDOWBUILDER, windowbuilder);
+                }
+                else if (values[i].compareTo(RegisterActivity.INSTALLER) == 0) {
+                    selectProfession(R.string.installer, RegisterActivity.INSTALLER, installer);
+                }
+                else if (values[i].compareTo(RegisterActivity.ELECTRICIAN) == 0) {
+                    selectProfession(R.string.electrician, RegisterActivity.ELECTRICIAN, electrician);
+                }
+                else if (values[i].compareTo(RegisterActivity.PAINTER) == 0) {
+                    selectProfession(R.string.painter, RegisterActivity.PAINTER, painter);
+                }
+                else if (values[i].compareTo(RegisterActivity.FLASHER) == 0) {
+                    selectProfession(R.string.flasher, RegisterActivity.FLASHER, flasher);
+                }
+                else if (values[i].compareTo(RegisterActivity.BRICKLAYER) == 0) {
+                    selectProfession(R.string.bricklayer, RegisterActivity.BRICKLAYER, bricklayer);
+                }
+                else if (values[i].compareTo(RegisterActivity.ROOFER) == 0) {
+                    selectProfession(R.string.roofer, RegisterActivity.ROOFER, roofer);
+                }
+                else if (values[i].compareTo(RegisterActivity.STUCCOER) == 0) {
+                    selectProfession(R.string.stuccoer, RegisterActivity.STUCCOER, stuccoer);
+                }
+                else if (values[i].compareTo(RegisterActivity.ARCHITECT) == 0) {
+                    selectProfession(R.string.architect, RegisterActivity.ARCHITECT, architect);
+                }
+                else if (values[i].compareTo(RegisterActivity.OTHER) == 0) {
+                    selectProfession(R.string.other, RegisterActivity.OTHER, other);
+                }
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }

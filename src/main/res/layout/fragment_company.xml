@@ -55,6 +55,7 @@
                 android:singleLine="true"
                 android:backgroundTint="@color/primary"
                 android:textColorHint="@android:color/darker_gray"
+                android:textCursorDrawable="@null"
                 android:hint="@string/company_hint"
                 android:layout_marginLeft="20dp"
                 android:layout_marginRight="20dp"/>
@@ -78,6 +79,7 @@
                 android:singleLine="true"
                 android:backgroundTint="@color/primary"
                 android:textColorHint="@android:color/darker_gray"
+                android:textCursorDrawable="@null"
                 android:hint="@string/role_hint"
                 android:layout_marginLeft="20dp"
                 android:layout_marginRight="20dp"/>
@@ -101,6 +103,7 @@
                 android:singleLine="true"
                 android:backgroundTint="@color/primary"
                 android:textColorHint="@android:color/darker_gray"
+                android:textCursorDrawable="@null"
                 android:hint="@string/phonenumber_hint"
                 android:layout_marginLeft="20dp"
                 android:layout_marginRight="20dp"/>
@@ -124,6 +127,7 @@
                 android:singleLine="true"
                 android:backgroundTint="@color/primary"
                 android:textColorHint="@android:color/darker_gray"
+                android:textCursorDrawable="@null"
                 android:hint="@string/address_hint"
                 android:layout_marginLeft="20dp"
                 android:layout_marginRight="20dp"/>

@@ -6,61 +6,34 @@
     android:orientation="vertical"
     android:weightSum="5"
     tools:context="com.handwerkcloud.client.OCRActivity">
-    <com.handwerkcloud.client.CameraOverlaySurfaceView
-        android:id="@+id/surfaceView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-    <TextView
-        android:id="@+id/text_view"
+
+    <androidx.viewpager.widget.ViewPager
+        android:id="@+id/pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_margin="8dp"
-        android:layout_weight="1"
-        android:gravity="center"
-        android:textStyle="bold"
-        android:text="text"
-        android:textColor="@android:color/black"
-        android:visibility="gone"
-        android:textSize="20sp" />
-    <ImageButton
-        android:id="@+id/capture"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerInParent="true"
-        android:layout_marginBottom="5dp"
-        android:background="@drawable/round_camera_button"
-        android:src="@drawable/ic_camera"
-        android:tint="@color/white"/>
+        android:background="@color/primary"/>
 
-    <ImageButton
-        android:id="@+id/flash"
-        android:layout_width="60dp"
+    <!--<LinearLayout
+        android:id="@+id/pageLabels"
+        android:layout_width="match_parent"
         android:layout_height="40dp"
-        android:layout_alignBaseline="@+id/capture"
-        android:layout_alignBottom="@+id/capture"
-        android:layout_marginLeft="27dp"
-        android:layout_marginRight="27dp"
-        android:layout_marginBottom="5dp"
-        android:layout_toLeftOf="@+id/capture"
-        android:layout_toStartOf="@+id/capture"
-        android:layout_weight="4"
-        android:src="@drawable/ic_flash_off"
-        android:background="@color/transparent"
-        android:gravity="center"
-        android:tint="@color/white" />
-
-    <ImageButton
-        android:id="@+id/gallery"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_weight="4"
-        android:src="@drawable/image_32dp"
-        android:background="@color/transparent"
-        android:gravity="center"
-        android:tint="@color/white" />
+        android:weightSum="1">
+        <TextView
+            android:id="@+id/cameraFragment"
+            android:layout_width="0dp"
+            android:layout_weight="0.5"
+            android:layout_height="match_parent"
+            android:text="Camera"/>
+
+        <TextView
+            android:id="@+id/galleryFragment"
+            android:layout_width="0dp"
+            android:layout_weight="0.5"
+            android:layout_height="match_parent"
+            android:text="Gallery"/>
+
+    </LinearLayout>-->
 
     <com.github.barteksc.pdfviewer.PDFView
         android:id="@+id/pdfView"

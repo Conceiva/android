@@ -884,6 +884,6 @@
     <string name="role_hint">E.g. Employee</string>
     <string name="phonenumber_hint">Enter phone number</string>
     <string name="address_hint">Enter address</string>
-    <string name="add_to_imagemeter">Add to Image Meter</string>
+    <string name="add_to_imagemeter">Add to ImageMeter</string>
     <string name="string_next">Weiter</string>
 </resources>
