@@ -31,6 +31,7 @@ import com.owncloud.android.R;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.List;
 
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
@@ -50,7 +51,7 @@ public class CaptureFragment extends Fragment implements OCRActivity.OnCaptureEv
     int cameraHeight = 1200;
 
     //Create the TextRecognizer
-    TextRecognizer textRecognizer;
+    WeakReference<TextRecognizer> textRecognizer;
 
     //AsyncTask<Params, Progress, Result>
     //Params: type passed in the execute() call, and received in the doInBackground method
@@ -65,6 +66,7 @@ public class CaptureFragment extends Fragment implements OCRActivity.OnCaptureEv
             super.onPreExecute();
             Intent i = new Intent(getActivity(), OCRActivity.class);
             i.setAction(OCRActivity.ACTION_CAPTURE_STARTED);
+            startActivity(i);
         }
 
         @Override
@@ -88,7 +90,7 @@ public class CaptureFragment extends Fragment implements OCRActivity.OnCaptureEv
                     bitmap = rotatedBitmap;
                 }
 
-                SparseArray<TextBlock> items = textRecognizer.detect(new Frame.Builder().setBitmap(bitmap).build());
+                SparseArray<TextBlock> items = textRecognizer.get().detect(new Frame.Builder().setBitmap(bitmap).build());
                 filename = OCRActivity.savePDF(items, bitmap, getContext());
                 if (filename == null) {
                     return filename;
@@ -129,20 +131,17 @@ public class CaptureFragment extends Fragment implements OCRActivity.OnCaptureEv
 
     }
 
-    public void setTextRecognizer(TextRecognizer textRecognizer) {
-        this.textRecognizer = textRecognizer;
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         View view = inflater.inflate(R.layout.fragment_capture, container, false);
 
-        ((OCRActivity)getActivity()).setAboutDataListener(this);
+        ((OCRActivity)getActivity()).setCaptureEventListener(this);
+        textRecognizer = new WeakReference<TextRecognizer>(((OCRActivity)getActivity()).getTextRecognizer());
         mCameraView = view.findViewById(R.id.surfaceView);
         capture = view.findViewById(R.id.capture);
-        capture.setEnabled(false);
+
         flashCameraButton = (ImageButton) view.findViewById(R.id.flash);
         capture.setOnClickListener(new View.OnClickListener() {
             private long mLastClickTime;
@@ -240,7 +239,7 @@ public class CaptureFragment extends Fragment implements OCRActivity.OnCaptureEv
             return;
         }
 
-        if (!textRecognizer.isOperational()) {
+        if (!textRecognizer.get().isOperational()) {
             Log.w(TAG, "Detector dependencies not loaded yet");
         } else {
             int numCameras=Camera.getNumberOfCameras();
@@ -259,7 +258,7 @@ public class CaptureFragment extends Fragment implements OCRActivity.OnCaptureEv
                 }
             }
             //Initialize camerasource to use high resolution and set Autofocus on.
-            mCameraSource = new CameraSource.Builder(getActivity().getApplicationContext(), textRecognizer)
+            mCameraSource = new CameraSource.Builder(getActivity().getApplicationContext(), textRecognizer.get())
                 .setFacing(CameraSource.CAMERA_FACING_BACK)
                 .setRequestedPreviewSize(cameraWidth, cameraHeight)
                 .setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)
@@ -299,24 +298,6 @@ public class CaptureFragment extends Fragment implements OCRActivity.OnCaptureEv
                 @Override
                 public void surfaceDestroyed(SurfaceHolder holder) {
                     mCameraSource.stop();
-                }
-            });
-
-            //Set the TextRecognizer's Processor.
-            textRecognizer.setProcessor(new Detector.Processor<TextBlock>() {
-                @Override
-                public void release() {
-                }
-
-                /**
-                 * Detect all the text from camera using TextBlock and the values into a stringBuilder
-                 * which will then be set to the textView.
-                 * */
-                @Override
-                public void receiveDetections(Detector.Detections<TextBlock> detections) {
-                    final SparseArray<TextBlock> items = detections.getDetectedItems();
-                    capture.setEnabled(true);
-                    mCameraView.setItems(items.clone());
                 }
             });
         }

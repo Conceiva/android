@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <com.handwerkcloud.client.CameraOverlaySurfaceView
+        android:id="@+id/surfaceView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+    <TextView
+        android:id="@+id/text_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="8dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:textStyle="bold"
+        android:text="text"
+        android:textColor="@android:color/black"
+        android:visibility="gone"
+        android:textSize="20sp" />
+    <ImageButton
+        android:id="@+id/capture"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerInParent="true"
+        android:layout_marginRight="5dp"
+        android:background="@drawable/round_camera_button"
+        android:src="@drawable/ic_camera"
+        android:tint="@color/white"/>
+
+    <ImageButton
+        android:id="@+id/flash"
+        android:layout_width="40dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="27dp"
+        android:layout_marginRight="5dp"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/capture"
+        android:src="@drawable/ic_flash_off"
+        android:background="@color/transparent"
+        android:gravity="center"
+        android:tint="@color/white" />
+
+
+</RelativeLayout>

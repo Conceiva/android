@@ -78,8 +78,13 @@ public final class MediaProvider {
         Cursor cursorFolders = null;
         if ((activity != null && PermissionUtil.checkSelfPermission(activity.getApplicationContext(),
                 Manifest.permission.WRITE_EXTERNAL_STORAGE)) || getWithoutActivity) {
-            cursorFolders = contentResolver.query(IMAGES_MEDIA_URI, IMAGES_FOLDER_PROJECTION, null, null,
+            try {
+                cursorFolders = contentResolver.query(IMAGES_MEDIA_URI, IMAGES_FOLDER_PROJECTION, null, null,
                     IMAGES_FOLDER_SORT_ORDER);
+            }
+            catch (SecurityException e) {
+                e.printStackTrace();
+            }
         }
 
         List<MediaFolder> mediaFolders = new ArrayList<>();

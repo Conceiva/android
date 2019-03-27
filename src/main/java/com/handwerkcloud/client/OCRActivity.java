@@ -39,6 +39,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.esafirm.imagepicker.features.ImagePicker;
 import com.esafirm.imagepicker.model.Image;
@@ -59,6 +60,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import androidx.annotation.NonNull;
@@ -70,6 +72,7 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.viewpager.widget.PagerAdapter;
+import androidx.viewpager.widget.PagerTabStrip;
 import androidx.viewpager.widget.ViewPager;
 
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
@@ -79,6 +82,7 @@ public class OCRActivity extends FragmentActivity {
     public static final String ACTION_DISPLAY_PREVIEW = "DISPLAY_PREVIEW";
     public static final String EXTRA_FILENAME = "FILENAME";
     public static final String EXTRA_PREVIEW_FILENAME = "PREVIEW_FILENAME";
+    public static final String ACTION_SCAN_FAILED = "ACTION_SCAN_FAILED";
     final boolean DEVELOPER_MODE = false;
     static final String TAG = "OCRActivity";
     public static int requestPermissionID = 1;
@@ -98,7 +102,7 @@ public class OCRActivity extends FragmentActivity {
     private ImageButton textHighlightButton;
     private ImageButton galleryButton;
     private EditText filenameEdit;
-    private OnCaptureEventListener mCaptureEventListener;
+    private ArrayList<OnCaptureEventListener> mCaptureEventListener = new ArrayList<>();
 
     /**
      * The number of pages (wizard steps) to show
@@ -116,6 +120,10 @@ public class OCRActivity extends FragmentActivity {
      */
     private PagerAdapter pagerAdapter;
 
+    public TextRecognizer getTextRecognizer() {
+        return textRecognizer;
+    }
+
     /**
      * A simple pager adapter that represents 5 ScreenSlidePageFragment objects, in
      * sequence.
@@ -126,15 +134,23 @@ public class OCRActivity extends FragmentActivity {
         }
 
         @Override
+        public CharSequence getPageTitle (int position) {
+            if (position == 0) {
+                return getString(R.string.camera);
+            }
+            else {
+                return getString(R.string.gallery);
+            }
+        }
+
+        @Override
         public Fragment getItem(int position) {
             if (position == 0) {
                 CaptureFragment fragment = new CaptureFragment();
-                fragment.setTextRecognizer(textRecognizer);
                 return fragment;
             }
             else if (position == 1) {
-                Fragment fragment = new GalleryFragment();
-
+                GalleryFragment fragment = new GalleryFragment();
                 return fragment;
             }
             return null;
@@ -170,88 +186,16 @@ public class OCRActivity extends FragmentActivity {
         void onPreviewCancel();
     }
 
-    public void setAboutDataListener(OnCaptureEventListener listener) {
-        this.mCaptureEventListener = listener;
-    }
-
-    //AsyncTask<Params, Progress, Result>
-    //Params: type passed in the execute() call, and received in the doInBackground method
-    //Progress: type of object passed in publishProgress calls
-    //Result: object type returned by the doInBackground method, and received by onPostExecute()
-    private class ImageTask extends AsyncTask<String, Integer, String> {
-
-        private int rotation;
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            progressBar.setVisibility(View.VISIBLE);
-            mState = STATE_CAPTURING;
-        }
-
-        @Override
-        protected String doInBackground(String... params) {
-            String filename = null;
-            String path = params[0];
-            try {
-                BitmapFactory.Options options = new BitmapFactory.Options();
-                options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-                Bitmap bitmap = BitmapFactory.decodeFile(path, options);
-                ExifInterface exif = new ExifInterface(path);
-                rotation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-
-                // rotate Image
-                if (rotation != 0) {
-                    Matrix rotateMatrix = new Matrix();
-                    rotateMatrix.postRotate(rotation);
-                    Bitmap rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0,
-                        bitmap.getWidth(), bitmap.getHeight(),
-                        rotateMatrix, false);
-                    bitmap = rotatedBitmap;
-                }
-
-                SparseArray<TextBlock> items = textRecognizer.detect(new Frame.Builder().setBitmap(bitmap).build());
-                filename = savePDF(items, bitmap, getApplicationContext());
-                if (filename == null) {
-                    return filename;
-                }
-
-                mFilename = filename;
-
-                int permissionCheck = ContextCompat.checkSelfPermission(OCRActivity.this,
-                    READ_EXTERNAL_STORAGE);
-
-                if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(
-                        OCRActivity.this,
-                        new String[]{READ_EXTERNAL_STORAGE},
-                        PERMISSION_CODE
-                    );
-
-                    return filename;
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return filename;
-        }
-
-        @Override
-        protected void onPostExecute(String filename) {
-            super.onPostExecute(filename);
-            filenameEdit.setText(filename.substring(filename.lastIndexOf('/') + 1));
-            mPreviewFilename = filename.substring(0, filename.lastIndexOf('/') + 1) + "/Highlightscan.pdf";
-            Intent i = new Intent(OCRActivity.this, OCRActivity.class);
-            i.setAction(ACTION_DISPLAY_PREVIEW);
-            i.putExtra(EXTRA_FILENAME, filename);
-            i.putExtra(EXTRA_PREVIEW_FILENAME, mPreviewFilename);
-            startActivity(i);
-        }
+    public void setCaptureEventListener(OnCaptureEventListener listener) {
+        this.mCaptureEventListener.add(listener);
     }
 
     void displayPreview(String filename) {
-        mCaptureEventListener.onDisplayPreview();
+        Iterator iter = mCaptureEventListener.iterator();
+        while (iter.hasNext()) {
+            OnCaptureEventListener listener = (OnCaptureEventListener) iter.next();
+            listener.onDisplayPreview();
+        }
         progressBar.setVisibility(View.GONE);
         if (filename != null) {
             pdfView.fromFile(new File(filename)).load();
@@ -270,7 +214,9 @@ public class OCRActivity extends FragmentActivity {
         super.onRestoreInstanceState(savedInstanceState);
         mState = savedInstanceState.getInt("SCAN_STATE");
         mFilename = savedInstanceState.getString("FILENAME");
-        filenameEdit.setText(mFilename.substring(mFilename.lastIndexOf('/')));
+        if (mFilename != null) {
+            filenameEdit.setText(mFilename.substring(mFilename.lastIndexOf('/')));
+        }
         mPreviewFilename = savedInstanceState.getString("PREVIEWFILENAME");
     }
 
@@ -293,6 +239,11 @@ public class OCRActivity extends FragmentActivity {
             current.renameTo(dest);
             mFilename = newFilename;
         }
+    }
+
+    private String getFragmentTag(int viewPagerId, int fragmentPosition)
+    {
+        return "android:switcher:" + viewPagerId + ":" + fragmentPosition;
     }
 
     @Override
@@ -422,16 +373,6 @@ public class OCRActivity extends FragmentActivity {
     }
 
     @Override
-    protected void onActivityResult(int requestCode, final int resultCode, Intent data) {
-        if (ImagePicker.shouldHandle(requestCode, resultCode, data)) {
-            // get a single image only
-            Image image = ImagePicker.getFirstImageOrNull(data);
-            new ImageTask().execute(image.getPath());
-        }
-        super.onActivityResult(requestCode, resultCode, data);
-    }
-
-    @Override
     protected void onNewIntent(Intent i) {
         handleIntent(i);
     }
@@ -449,11 +390,20 @@ public class OCRActivity extends FragmentActivity {
             filenameEdit.setText(filename.substring(filename.lastIndexOf('/') + 1));
             displayPreview(previewFilename);
         }
+        else if (i.getAction() == ACTION_SCAN_FAILED) {
+            mState = STATE_CAPTURE;
+            progressBar.setVisibility(View.GONE);
+            Toast.makeText(this, R.string.scan_failed, Toast.LENGTH_LONG).show();
+        }
         else if (i.getAction() == ACTION_CAPTURE_STARTED) {
 
             progressBar.setVisibility(View.VISIBLE);
             mState = STATE_CAPTURING;
-            mCaptureEventListener.onCaptureStarted();
+            Iterator iter = mCaptureEventListener.iterator();
+            while (iter.hasNext()) {
+                OnCaptureEventListener listener = (OnCaptureEventListener) iter.next();
+                listener.onCaptureStarted();
+            }
         }
     }
 
@@ -468,7 +418,11 @@ public class OCRActivity extends FragmentActivity {
         acceptBtn.setVisibility(View.GONE);
         textHighlightButton.setVisibility(View.GONE);
         textHighlightButton.setColorFilter(Color.WHITE);
-        mCaptureEventListener.onPreviewCancel();
+        Iterator iter = mCaptureEventListener.iterator();
+        while (iter.hasNext()) {
+            OnCaptureEventListener listener = (OnCaptureEventListener) iter.next();
+            listener.onPreviewCancel();
+        }
         mState = STATE_CAPTURE;
     }
 
@@ -521,7 +475,11 @@ public class OCRActivity extends FragmentActivity {
             // If request is cancelled, the result arrays are empty.
             if (grantResults.length > 0
                 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                mCaptureEventListener.onInitialize();
+                Iterator iter = mCaptureEventListener.iterator();
+                while (iter.hasNext()) {
+                    OnCaptureEventListener listener = (OnCaptureEventListener) iter.next();
+                    listener.onInitialize();
+                }
             } else {
                 // permission denied, boo! Disable the
                 // functionality that depends on this permission.

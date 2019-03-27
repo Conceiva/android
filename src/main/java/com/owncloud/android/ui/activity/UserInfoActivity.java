@@ -98,6 +98,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 
+import static com.handwerkcloud.client.ProfessionFragment.getBusinessTypeString;
+
 /**
  * This Activity presents the user information.
  */
@@ -317,6 +319,8 @@ public class UserInfoActivity extends FileActivity {
 
         try {
             addToListIfNeeded(result, R.drawable.baseline_business_24, extraUserInfo.getString("company"), R.string.company);
+            addToListIfNeeded(result, R.drawable.baseline_build_24, getBusinessTypeString(extraUserInfo.getString("businesstype"), this), R.string.businesstype);
+            addToListIfNeeded(result, R.drawable.ic_user, extraUserInfo.getString("role"), R.string.role);
         } catch (JSONException e) {
             e.printStackTrace();
         }

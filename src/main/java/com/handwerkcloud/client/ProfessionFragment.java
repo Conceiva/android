@@ -3,6 +3,7 @@ package com.handwerkcloud.client;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -46,13 +47,19 @@ public class ProfessionFragment extends Fragment implements RegisterActivity.OnU
     }
 
     void selectProfession(int value, String type, View view) {
+        int paddingBottom = view.getPaddingBottom();
+        int paddingTop = view.getPaddingTop();
+        int paddingLeft = view.getPaddingLeft();
+        int paddingRight = view.getPaddingRight();
         if (mSelectedProfessions.containsKey(value)) {
             mSelectedProfessions.remove(value);
             view.setBackgroundResource(0);
+            view.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
         }
         else {
             mSelectedProfessions.put(value, type);
             view.setBackgroundResource(R.drawable.boxborder);
+            view.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
         }
 
         next.setVisibility(mSelectedProfessions.size() != 0 ? View.VISIBLE : View.GONE);
@@ -202,8 +209,62 @@ public class ProfessionFragment extends Fragment implements RegisterActivity.OnU
         return view;
     }
 
+    public static String getBusinessTypeString(String value, Context context) {
+        String retVal = "";
+        String businesstype = value;
+        // parse the businesstype and set the selected professions
+        String[] values = businesstype.split(",");
+        for (int i = 0; i < values.length; i++) {
+            if (retVal.length() != 0) {
+                retVal += ", ";
+            }
+
+            if (values[i].compareTo(RegisterActivity.CARPENTER) == 0) {
+                retVal += context.getString(R.string.carpenter);
+            }
+            else if (values[i].compareTo(RegisterActivity.STOVEBUILDER) == 0) {
+                retVal += context.getString(R.string.stovebuilder);
+            }
+            else if (values[i].compareTo(RegisterActivity.WINDOWBUILDER) == 0) {
+                retVal += context.getString(R.string.windowbuilder);
+            }
+            else if (values[i].compareTo(RegisterActivity.INSTALLER) == 0) {
+                retVal += context.getString(R.string.installer);
+            }
+            else if (values[i].compareTo(RegisterActivity.ELECTRICIAN) == 0) {
+                retVal += context.getString(R.string.electrician);
+            }
+            else if (values[i].compareTo(RegisterActivity.PAINTER) == 0) {
+                retVal += context.getString(R.string.painter);
+            }
+            else if (values[i].compareTo(RegisterActivity.FLASHER) == 0) {
+                retVal += context.getString(R.string.flasher);
+            }
+            else if (values[i].compareTo(RegisterActivity.BRICKLAYER) == 0) {
+                retVal += context.getString(R.string.bricklayer);
+            }
+            else if (values[i].compareTo(RegisterActivity.ROOFER) == 0) {
+                retVal += context.getString(R.string.roofer);
+            }
+            else if (values[i].compareTo(RegisterActivity.STUCCOER) == 0) {
+                retVal += context.getString(R.string.stuccoer);
+            }
+            else if (values[i].compareTo(RegisterActivity.ARCHITECT) == 0) {
+                retVal += context.getString(R.string.architect);
+            }
+            else if (values[i].compareTo(RegisterActivity.OTHER) == 0) {
+                retVal += context.getString(R.string.other);
+            }
+        }
+        return retVal;
+    }
+
     @Override
     public void onDataReceived(JSONObject data) {
+        if (data == null) {
+            return;
+        }
+
         try {
             String businesstype = data.getString("businesstype");
             // parse the businesstype and set the selected professions

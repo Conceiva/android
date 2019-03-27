@@ -906,6 +906,10 @@
     <string name="your_selection">Your selection: %1$s</string>
     <string name="confirm_selection">Is that correct? Click Next to continue.</string>
     <string name="change">Change</string>
-    <string name="proceed">Proceed</string>
+    <string name="proceed">Next</string>
     <string name="edit_account">Edit Account</string>
+    <string name="camera">Camera</string>
+    <string name="gallery">Gallery</string>
+    <string name="businesstype">Profession</string>
+    <string name="scan_failed">Failed to scan image</string>
 </resources>
