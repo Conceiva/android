@@ -41,6 +41,7 @@ import android.view.WindowManager;
 import com.evernote.android.job.JobManager;
 import com.evernote.android.job.JobRequest;
 import com.handwerkcloud.client.RegisterActivity;
+import com.handwerkcloud.client.TrialActivity;
 import com.owncloud.android.authentication.AccountUtils;
 import com.owncloud.android.authentication.PassCodeManager;
 import com.owncloud.android.datamodel.ArbitraryDataProvider;
@@ -190,6 +191,7 @@ public class MainApp extends MultiDexApplication {
                 WhatsNewActivity.runIfNeeded(activity);
                 PassCodeManager.getPassCodeManager().onActivityCreated(activity);
                 RegisterActivity.runIfNeeded(activity);
+                TrialActivity.runIfNeeded(activity);
             }
 
             @Override
@@ -224,6 +226,8 @@ public class MainApp extends MultiDexApplication {
                 Log_OC.d(activity.getClass().getSimpleName(), "onDestroy() ending");
             }
         });
+
+        TrialActivity.clearLastCheck(this);
     }
 
     public static void initContactsBackup() {

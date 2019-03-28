@@ -29,4 +29,20 @@
         <item>ppsm</item>
         <item>mdb</item>
     </array>
+    <string-array name="roles_array">
+        <item>Owner</item>
+        <item>Employee</item>
+        <item>Contractor/self-employed</item>
+    </string-array>
+    <string-array name="businesssize">
+        <item>1-4</item>
+        <item>5-9</item>
+        <item>10-19</item>
+        <item>20-49</item>
+        <item>50-99</item>
+        <item>100-249</item>
+        <item>250-499</item>
+        <item>500-999</item>
+        <item>1000+</item>
+    </string-array>
 </resources>

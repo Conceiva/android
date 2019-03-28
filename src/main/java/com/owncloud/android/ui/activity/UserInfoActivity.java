@@ -54,6 +54,8 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.google.gson.Gson;
+import com.handwerkcloud.client.CompanyFragment;
+import com.handwerkcloud.client.FeaturesOperation;
 import com.handwerkcloud.client.RegisterActivity;
 import com.handwerkcloud.client.UserProfileDataOperation;
 import com.owncloud.android.R;
@@ -81,8 +83,14 @@ import org.json.JSONObject;
 import org.parceler.Parcels;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.TimeZone;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.DrawableRes;
@@ -133,6 +141,7 @@ public class UserInfoActivity extends FileActivity {
     private UserInfo userInfo;
     private Account account;
     private JSONObject extraUserInfo;
+    private JSONObject featuresInfo;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -314,13 +323,35 @@ public class UserInfoActivity extends FileActivity {
         }
     }
 
+    public static Date fromISO8601UTC(String dateStr) {
+        TimeZone tz = TimeZone.getDefault();
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        df.setTimeZone(tz);
+
+        try {
+            return df.parse(dateStr);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
     private List<UserInfoDetailsItem> createUserInfoDetails(UserInfo userInfo) {
         List<UserInfoDetailsItem> result = new LinkedList<>();
 
         try {
+            if (featuresInfo.getBoolean("is_trial") && featuresInfo.has("trial_end")) {
+                Date endDate = fromISO8601UTC(featuresInfo.getString("trial_end"));
+                DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getApplicationContext());
+                String endDateString = dateFormat.format(endDate);
+                result.add(new UserInfoDetailsItem(R.drawable.ic_information_outline, getResources().getString(R.string.trial_active), getResources().getString(R.string.trial_active)));
+                addToListIfNeeded(result, R.drawable.baseline_calendar_today_24, String.format(getResources().getString(R.string.trial_end), endDateString), R.string.trial_end_date);
+            }
             addToListIfNeeded(result, R.drawable.baseline_business_24, extraUserInfo.getString("company"), R.string.company);
             addToListIfNeeded(result, R.drawable.baseline_build_24, getBusinessTypeString(extraUserInfo.getString("businesstype"), this), R.string.businesstype);
-            addToListIfNeeded(result, R.drawable.ic_user, extraUserInfo.getString("role"), R.string.role);
+            addToListIfNeeded(result, R.drawable.ic_user, CompanyFragment.getRoleString(this, extraUserInfo.getString("role")), R.string.role);
+            addToListIfNeeded(result, R.drawable.ic_user, CompanyFragment.getBusinessSizeString(this, extraUserInfo.getString("businesssize")), R.string.businesssize);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -480,7 +511,14 @@ public class UserInfoActivity extends FileActivity {
             extraUserInfo = data;
 
         }
+        FeaturesOperation gfeato = new FeaturesOperation(userId);
+        RemoteOperationResult getFeatresult = gfeato.execute(client);
 
+        if (getFeatresult.isSuccess()) {
+            JSONObject data = (JSONObject) getFeatresult.getData().get(0);
+
+            featuresInfo = data;
+        }
     }
     private void fetchAndSetData() {
         Thread t = new Thread(() -> {

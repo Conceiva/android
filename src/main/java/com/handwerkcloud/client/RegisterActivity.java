@@ -69,6 +69,7 @@ public class RegisterActivity extends FragmentActivity {
     public static final String EXTRA_PHONENUMBER = "EXTRA_PHONENUMBER";
     public static final String EXTRA_ADDRESS = "EXTRA_ADDRESS";
     public static final String EXTRA_WAIT_FOR_UPDATE = "EXTRA_WAIT_FOR_UPDATE";
+    public static final String EXTRA_BUSINESSSIZE = "EXTRA_BUSINESSSIZE";
     static final String FIRSTRUN_SHARED_PREFERENCE = "FIRSTRUN_SHARED_PREF";
 
     /**
@@ -91,6 +92,7 @@ public class RegisterActivity extends FragmentActivity {
     private String mRole;
     private String mPhonenumber;
     private String mAddress;
+    private int mBusinesssize;
     public ArrayList<OnUserDataReceivedListener> mUserDataListener = new ArrayList<>();
     private boolean mUpdateBeforeFinish;
     private ProgressBar mLoading;
@@ -168,6 +170,7 @@ public class RegisterActivity extends FragmentActivity {
                     String role = preferences.getString(EXTRA_ROLE, "");
                     String address = preferences.getString(EXTRA_ADDRESS, "");
                     String industry = preferences.getString(EXTRA_INDUSTRY, "");
+                    int businesssize = preferences.getInt(EXTRA_BUSINESSSIZE, 1);
 
                     if (company.length() != 0) {
                         JSONObject jObjectData = new JSONObject();
@@ -176,6 +179,8 @@ public class RegisterActivity extends FragmentActivity {
                             jObjectData.put("phone", phone);
                             jObjectData.put("address", address);
                             jObjectData.put("businesstype", industry);
+                            jObjectData.put("role", role);
+                            jObjectData.put("businesssize", businesssize);
                             //jObjectData.put("role", role);
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -191,6 +196,7 @@ public class RegisterActivity extends FragmentActivity {
                             editor.putString(EXTRA_ROLE, "");
                             editor.putString(EXTRA_ADDRESS, "");
                             editor.putString(EXTRA_INDUSTRY, "");
+                            editor.putInt(EXTRA_BUSINESSSIZE, 0);
                             editor.commit();
                         }
                     }
@@ -295,6 +301,7 @@ public class RegisterActivity extends FragmentActivity {
            mRole = i.getStringExtra(EXTRA_ROLE);
            mPhonenumber = i.getStringExtra(EXTRA_PHONENUMBER);
            mAddress = i.getStringExtra(EXTRA_ADDRESS);
+           mBusinesssize = i.getIntExtra(EXTRA_BUSINESSSIZE, 1);
            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
            SharedPreferences.Editor editor = preferences.edit();
            editor.putString(EXTRA_COMPANY, mCompany);
@@ -302,6 +309,7 @@ public class RegisterActivity extends FragmentActivity {
            editor.putString(EXTRA_ROLE, mRole);
            editor.putString(EXTRA_ADDRESS, mAddress);
            editor.putString(EXTRA_INDUSTRY, mProfession);
+           editor.putInt(EXTRA_BUSINESSSIZE, mBusinesssize);
            editor.commit();
            setResult(Activity.RESULT_OK);
 

@@ -66,18 +66,19 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ownCloud.Toolbar"
         tools:ignore="UnusedAttribute">
+        <activity android:name="com.handwerkcloud.client.TrialActivity"></activity>
         <activity
             android:name="com.handwerkcloud.client.IntroActivity"
-            android:label="@string/title_activity_intro"
             android:configChanges="orientation|screenSize"
-            android:theme="@style/Theme.ownCloud.noActionBar.Login"
-            android:launchMode="singleInstance"></activity>
+            android:label="@string/title_activity_intro"
+            android:launchMode="singleInstance"
+            android:theme="@style/Theme.ownCloud.noActionBar.Login" />
         <activity
             android:name="com.handwerkcloud.client.RegisterActivity"
-            android:label="@string/title_activity_intro"
             android:configChanges="orientation|screenSize"
-            android:theme="@style/Theme.ownCloud.noActionBar.Login"
-            android:launchMode="singleInstance"></activity>
+            android:label="@string/title_activity_intro"
+            android:launchMode="singleInstance"
+            android:theme="@style/Theme.ownCloud.noActionBar.Login" />
         <activity
             android:name="com.handwerkcloud.client.OCRActivity"
             android:label="@string/title_activity_ocr"

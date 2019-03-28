@@ -911,5 +911,31 @@
     <string name="camera">Camera</string>
     <string name="gallery">Gallery</string>
     <string name="businesstype">Profession</string>
+    <string name="businesssize">Number of employees</string>
+    <string name="size_1_to_4">1-4</string>
+    <string name="size_5_to_9">5-9</string>
+    <string name="size_10_to_19">10-19</string>
+    <string name="size_20_to_49">20-49</string>
+    <string name="size_50_to_99">50-99</string>
+    <string name="size_100_to_249">100-249</string>
+    <string name="size_250_to_499">250-499</string>
+    <string name="size_500_to_999">500-999</string>
+    <string name="size_1000">1000+</string>
     <string name="scan_failed">Failed to scan image</string>
+    <string name="trial_title">HANDWERKCLOUD TRIAL</string>
+    <string name="trial_purchase">Purchase</string>
+    <string name="trial_continue">Continue</string>
+    <string name="trial_active">Your trial is active.</string>
+    <string name="trial_expired">Thankyou for trying HandwerkCloud, your trial has now expired. </string>
+    <string name="trial_purchase_desc">To continue using HandwerkCloud tap the purchase button or visit the website.</string>
+    <plurals name="trial_days_remaining">
+        <item quantity="one">You have %1$d day remaining in your trial.</item>
+        <item quantity="other">You have %1$d days remaining in your trial.</item>
+    </plurals>
+    <string name="trial_end_date">Trial end date</string>
+    <string name="trial_end">Trial Ends %1$s</string>
+    <string name="trial_1_day_remaining">You have 1 day remaining in your trial.</string>
+    <string name="role_owner">Owner</string>
+    <string name="role_employee">Employee</string>
+    <string name="role_contractor">Contractor/self-employed</string>
 </resources>

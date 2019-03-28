@@ -23,6 +23,7 @@ package com.owncloud.android.operations;
 
 import android.content.Context;
 
+import com.handwerkcloud.client.GetHCRemoteStatusOperation;
 import com.owncloud.android.authentication.AuthenticatorUrlUtils;
 import com.owncloud.android.lib.common.OwnCloudClient;
 import com.owncloud.android.lib.common.operations.RemoteOperation;
@@ -75,7 +76,7 @@ public class GetServerInfoOperation extends RemoteOperation {
 	protected RemoteOperationResult run(OwnCloudClient client) {
 	    
 	    // first: check the status of the server (including its version)
-	    GetRemoteStatusOperation getStatus = new GetRemoteStatusOperation(mContext);
+	    GetHCRemoteStatusOperation getStatus = new GetHCRemoteStatusOperation(mContext);
 
 	    RemoteOperationResult result = getStatus.execute(client);
 	    
