@@ -58,6 +58,7 @@ import com.caverock.androidsvg.SVG;
 import com.caverock.androidsvg.SVGParseException;
 import com.github.chrisbanes.photoview.PhotoView;
 import com.google.android.material.snackbar.Snackbar;
+import com.handwerkcloud.client.Util;
 import com.owncloud.android.MainApp;
 import com.owncloud.android.R;
 import com.owncloud.android.authentication.AccountUtils;
@@ -463,12 +464,7 @@ public class PreviewImageFragment extends FileFragment {
                 }
                 else {
                     // not installed
-                    final String appPackageName = "de.dirkfarin.imagemeter"; // getPackageName() from Context or Activity object
-                    try {
-                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
-                    } catch (android.content.ActivityNotFoundException anfe) {
-                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
-                    }
+                    Util.promptPlaystore(getActivity());
                 }
                 return true;
 

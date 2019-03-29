@@ -117,7 +117,8 @@ public class UserInfoActivity extends FileActivity {
     private static final String TAG = UserInfoActivity.class.getSimpleName();
     private static final String KEY_USER_DATA = "USER_DATA";
     private static final String KEY_DIRECT_REMOVE = "DIRECT_REMOVE";
-
+    private static final String KEY_FEATURES_INFO = "KEY_FEATURES_INFO";
+    private static final String KEY_EXTRA_USER_INFO = "KEY_EXTRA_USER_INFO";
     private static final int KEY_DELETE_CODE = 101;
     private static final int EDIT_ACCOUNT_RESULT = 102;
 
@@ -154,6 +155,22 @@ public class UserInfoActivity extends FileActivity {
 
         if (savedInstanceState != null && savedInstanceState.containsKey(KEY_USER_DATA)) {
             userInfo = Parcels.unwrap(savedInstanceState.getParcelable(KEY_USER_DATA));
+        }
+
+        if (savedInstanceState != null && savedInstanceState.containsKey(KEY_FEATURES_INFO)) {
+            try {
+                featuresInfo = new JSONObject(savedInstanceState.getString(KEY_FEATURES_INFO));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (savedInstanceState != null && savedInstanceState.containsKey(KEY_EXTRA_USER_INFO)) {
+            try {
+                extraUserInfo = new JSONObject(savedInstanceState.getString(KEY_EXTRA_USER_INFO));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
 
         mCurrentAccountAvatarRadiusDimension = getResources().getDimension(R.dimen.nav_drawer_header_avatar_radius);
@@ -341,17 +358,22 @@ public class UserInfoActivity extends FileActivity {
         List<UserInfoDetailsItem> result = new LinkedList<>();
 
         try {
-            if (featuresInfo.getBoolean("is_trial") && featuresInfo.has("trial_end")) {
-                Date endDate = fromISO8601UTC(featuresInfo.getString("trial_end"));
-                DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getApplicationContext());
-                String endDateString = dateFormat.format(endDate);
-                result.add(new UserInfoDetailsItem(R.drawable.ic_information_outline, getResources().getString(R.string.trial_active), getResources().getString(R.string.trial_active)));
-                addToListIfNeeded(result, R.drawable.baseline_calendar_today_24, String.format(getResources().getString(R.string.trial_end), endDateString), R.string.trial_end_date);
+            if (featuresInfo != null && featuresInfo.getBoolean("is_trial")) {
+                if (featuresInfo.getBoolean("trial_expired")) {
+                    result.add(new UserInfoDetailsItem(R.drawable.baseline_info_24, getResources().getString(R.string.trial_ended), getResources().getString(R.string.trial_ended)));
+                }
+                else if (featuresInfo.has("trial_end")) {
+                    Date endDate = fromISO8601UTC(featuresInfo.getString("trial_end"));
+                    DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getApplicationContext());
+                    String endDateString = dateFormat.format(endDate);
+                    result.add(new UserInfoDetailsItem(R.drawable.baseline_info_24, getResources().getString(R.string.trial_active), getResources().getString(R.string.trial_active)));
+                    addToListIfNeeded(result, R.drawable.baseline_calendar_today_24, String.format(getResources().getString(R.string.trial_end), endDateString), R.string.trial_end_date);
+                }
             }
             addToListIfNeeded(result, R.drawable.baseline_business_24, extraUserInfo.getString("company"), R.string.company);
             addToListIfNeeded(result, R.drawable.baseline_build_24, getBusinessTypeString(extraUserInfo.getString("businesstype"), this), R.string.businesstype);
             addToListIfNeeded(result, R.drawable.ic_user, CompanyFragment.getRoleString(this, extraUserInfo.getString("role")), R.string.role);
-            addToListIfNeeded(result, R.drawable.ic_user, CompanyFragment.getBusinessSizeString(this, extraUserInfo.getString("businesssize")), R.string.businesssize);
+            addToListIfNeeded(result, R.drawable.baseline_people_24, CompanyFragment.getBusinessSizeString(this, extraUserInfo.getString("businesssize")), R.string.businesssize);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -549,6 +571,12 @@ public class UserInfoActivity extends FileActivity {
         super.onSaveInstanceState(outState);
         if (userInfo != null) {
             outState.putParcelable(KEY_USER_DATA, Parcels.wrap(userInfo));
+        }
+        if (featuresInfo != null) {
+            outState.putString(KEY_FEATURES_INFO, featuresInfo.toString());
+        }
+        if (extraUserInfo != null) {
+            outState.putString(KEY_EXTRA_USER_INFO, extraUserInfo.toString());
         }
     }
 

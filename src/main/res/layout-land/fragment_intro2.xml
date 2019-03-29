@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/cement_background"
+    tools:context=".RegisterFragment">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:layout_editor_absoluteX="40dp"
+        tools:layout_editor_absoluteY="59dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:background="@color/primary"
+            android:gravity="center">
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:src="@drawable/ic_launcher_foreground"
+                android:tint="@color/white"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/app_name"
+                android:textColor="@color/white"
+                android:layout_marginLeft="5dp"
+                />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/intro2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="20dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="@dimen/intro_margin_top"
+            android:layout_marginEnd="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginBottom="20dp"
+            android:text="@string/intro2"
+            android:textAlignment="center"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            android:textSize="20sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/intro2"
+        android:layout_toLeftOf="@+id/next"
+        android:weightSum="1">
+        <RelativeLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.5">
+            <ImageView
+                android:id="@+id/timemanagement"
+                android:layout_width="@dimen/icon_size_land"
+                android:layout_height="@dimen/icon_size_land"
+                android:layout_marginLeft="10dp"
+                android:src="@drawable/ic_timemanagement" />
+
+            <TextView
+                android:id="@+id/intro_timemanagement"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_alignTop="@+id/timemanagement"
+                android:layout_alignBottom="@+id/timemanagement"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_toRightOf="@+id/timemanagement"
+                android:gravity="center_vertical"
+                android:text="@string/intro_time_management"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+
+            <ImageView
+                android:id="@+id/photometric"
+                android:layout_width="@dimen/icon_size_land"
+                android:layout_height="@dimen/icon_size_land"
+                android:layout_marginTop="10dp"
+                android:layout_below="@+id/timemanagement"
+                android:layout_marginLeft="10dp"
+                android:src="@drawable/ic_imagemeterapp" />
+
+            <TextView
+                android:id="@+id/intro_photometric"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@+id/timemanagement"
+                android:layout_alignTop="@+id/photometric"
+                android:layout_alignBottom="@+id/photometric"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_toRightOf="@+id/photometric"
+                android:gravity="center_vertical"
+                android:text="@string/intro_photometric"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+
+            <ImageView
+                android:id="@+id/filestorage"
+                android:layout_width="@dimen/icon_size_land"
+                android:layout_height="@dimen/icon_size_land"
+                android:layout_below="@+id/photometric"
+                android:layout_marginLeft="10dp"
+                android:src="@drawable/ic_inventory" />
+
+            <TextView
+                android:id="@+id/intro_filestorage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@+id/intro_access"
+                android:layout_alignTop="@+id/filestorage"
+                android:layout_alignBottom="@+id/filestorage"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_toRightOf="@+id/filestorage"
+                android:gravity="center_vertical"
+                android:text="@string/intro_filestorage"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.5">
+            <ImageView
+                android:id="@+id/datamanagement"
+                android:layout_width="@dimen/icon_size_land"
+                android:layout_height="@dimen/icon_size_land"
+                android:layout_marginLeft="10dp"
+                android:src="@drawable/ic_documentmanagement" />
+
+            <TextView
+                android:id="@+id/intro_datamanagement"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_alignTop="@+id/datamanagement"
+                android:layout_alignBottom="@+id/datamanagement"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_toRightOf="@+id/datamanagement"
+                android:gravity="center_vertical"
+                android:text="@string/intro_datamanagement"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+
+            <ImageView
+                android:id="@+id/calendar"
+                android:layout_width="@dimen/icon_size_land"
+                android:layout_height="@dimen/icon_size_land"
+                android:layout_below="@+id/datamanagement"
+                android:layout_marginLeft="10dp"
+                android:src="@drawable/ic_calendar" />
+
+            <TextView
+                android:id="@+id/intro_calendar"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@+id/intro_datamanagement"
+                android:layout_alignTop="@+id/calendar"
+                android:layout_alignBottom="@+id/calendar"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_toRightOf="@+id/calendar"
+                android:gravity="center_vertical"
+                android:text="@string/intro_calendar"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+
+            <ImageView
+                android:id="@+id/andmore"
+                android:layout_width="@dimen/icon_size_land"
+                android:layout_height="@dimen/icon_size_land"
+                android:layout_below="@+id/calendar"
+                android:padding="10dp"
+                android:layout_marginLeft="10dp"
+                android:src="@drawable/ic_andmore" />
+
+            <TextView
+                android:id="@+id/intro_andmore"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@+id/intro_calendar"
+                android:layout_alignTop="@+id/andmore"
+                android:layout_alignBottom="@+id/andmore"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_toRightOf="@+id/andmore"
+                android:gravity="center_vertical"
+                android:text="@string/intro_andmore"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+        </RelativeLayout>
+    </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/next"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_navigate_next"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:background="@color/transparent"
+            android:tint="@color/primary"/>
+
+        <TextView
+            android:id="@+id/intro_skip"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="50dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:gravity="center_vertical"
+            android:textAlignment="center"
+            android:text="@string/skip_intro"
+            android:textColor="@color/black"
+            android:clickable="true"
+            android:textSize="16sp" />
+
+    </RelativeLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

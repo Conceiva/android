@@ -58,6 +58,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.google.android.material.navigation.NavigationView;
+import com.handwerkcloud.client.Util;
 import com.owncloud.android.MainApp;
 import com.owncloud.android.R;
 import com.owncloud.android.authentication.AccountUtils;
@@ -460,12 +461,7 @@ public abstract class DrawerActivity extends ToolbarActivity implements DisplayU
                 }
                 else {
                     // not installed
-                    final String appPackageName = "de.dirkfarin.imagemeter"; // getPackageName() from Context or Activity object
-                    try {
-                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
-                    } catch (android.content.ActivityNotFoundException anfe) {
-                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
-                    }
+                    Util.promptPlaystore(this);
                 }
                 break;
             case R.id.nav_all_files:

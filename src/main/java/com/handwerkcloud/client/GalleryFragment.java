@@ -52,6 +52,9 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
+import static android.media.ExifInterface.ORIENTATION_ROTATE_180;
+import static android.media.ExifInterface.ORIENTATION_ROTATE_270;
+import static android.media.ExifInterface.ORIENTATION_ROTATE_90;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -159,9 +162,18 @@ public class GalleryFragment extends Fragment implements OCRActivity.OnCaptureEv
                     return null;
                 }
 
+                rotation = 0;
                 ExifInterface exif = new ExifInterface(path);
-                rotation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-
+                int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+                if (orientation == ORIENTATION_ROTATE_90) {
+                    rotation =90;
+                }
+                else if (orientation == ORIENTATION_ROTATE_180) {
+                    rotation = 180;
+                }
+                else if (orientation == ORIENTATION_ROTATE_270) {
+                    rotation =270;
+                }
                 // rotate Image
                 if (rotation != 0) {
                     Matrix rotateMatrix = new Matrix();

@@ -54,6 +54,7 @@ import android.widget.RelativeLayout;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.snackbar.Snackbar;
 import com.handwerkcloud.client.OCRActivity;
+import com.handwerkcloud.client.Util;
 import com.owncloud.android.MainApp;
 import com.owncloud.android.R;
 import com.owncloud.android.authentication.AccountUtils;
@@ -489,12 +490,7 @@ public class OCFileListFragment extends ExtendedListFragment implements
         }
         else {
             // not installed
-            final String appPackageName = "de.dirkfarin.imagemeter"; // getPackageName() from Context or Activity object
-            try {
-                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
-            } catch (android.content.ActivityNotFoundException anfe) {
-                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
-            }
+            Util.promptPlaystore(getActivity());
         }
     }
 
@@ -1148,12 +1144,7 @@ public class OCFileListFragment extends ExtendedListFragment implements
                     }
                     else {
                         // not installed
-                        final String appPackageName = "de.dirkfarin.imagemeter"; // getPackageName() from Context or Activity object
-                        try {
-                            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
-                        } catch (android.content.ActivityNotFoundException anfe) {
-                            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
-                        }
+                        Util.promptPlaystore(getActivity());
                     }
                     return true;
                 }

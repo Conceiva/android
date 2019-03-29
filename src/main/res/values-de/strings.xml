@@ -879,7 +879,7 @@
     <string name="confirm_selection">Ist das korrekt? Klicken Sie auf weiter, um fortzufahren.</string>
     <string name="change">Ändern</string>
     <string name="proceed">Weiter</string>
-    <string name="start_trial">Start your trial of Handwerk Cloud</string>
+    <string name="start_trial">Start your trial of HandwerkCloud</string>
     <string name="company_hint">Company name</string>
     <string name="role_hint">E.g. Employee</string>
     <string name="phonenumber_hint">Enter phone number</string>

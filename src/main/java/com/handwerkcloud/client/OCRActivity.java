@@ -23,9 +23,11 @@ import android.os.StrictMode;
 import android.os.SystemClock;
 import android.print.PrintAttributes;
 import android.print.pdf.PrintedPdfDocument;
+import android.text.Editable;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.KeyEvent;
@@ -228,22 +230,40 @@ public class OCRActivity extends FragmentActivity {
         super.onSaveInstanceState(outState);
     }
 
-    void renamePdf() {
+    boolean renamePdf() {
         File current = new File(mFilename);
         String originalName = current.getName();
         String editName = filenameEdit.getText().toString();
         if (editName.compareTo(originalName) != 0) {
+            if (!isFilenameValid(editName)) {
+                return false;
+            }
+
             String newFilename = current.getParent();
             newFilename += "/" + filenameEdit.getText();
+            if (!newFilename.endsWith(".pdf")) {
+                newFilename += ".pdf";
+            }
             File dest = new File(newFilename);
             current.renameTo(dest);
             mFilename = newFilename;
         }
+        return true;
     }
 
     private String getFragmentTag(int viewPagerId, int fragmentPosition)
     {
         return "android:switcher:" + viewPagerId + ":" + fragmentPosition;
+    }
+
+    public static boolean isFilenameValid(String file) {
+        File f = new File(file);
+        try {
+            f.getCanonicalPath();
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
     }
 
     @Override
@@ -292,7 +312,35 @@ public class OCRActivity extends FragmentActivity {
                 return false;
             }
         });
+        filenameEdit.addTextChangedListener(new TextWatcher() {
 
+            @Override
+            public void afterTextChanged(Editable s) {}
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start,
+                                          int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start,
+                                      int before, int count) {
+                if(start < s.length() && s.charAt(start) == '/') {
+                    String edit = s.toString();
+                    edit = edit.replace("/", "");
+                    int pos = filenameEdit.getSelectionStart();
+                    filenameEdit.setText(edit);
+                    filenameEdit.setSelection(pos);
+                }
+
+                if (s.length() == 0) {
+                    acceptBtn.setEnabled(false);
+                }
+                else {
+                    acceptBtn.setEnabled(true);
+                }
+            }
+        });
         filenameEdit.setVisibility(View.GONE);
         cancelBtn.setVisibility(View.GONE);
         acceptBtn.setVisibility(View.GONE);
@@ -308,7 +356,11 @@ public class OCRActivity extends FragmentActivity {
         acceptBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                renamePdf();
+
+                if (!renamePdf()) {
+                    Toast.makeText(OCRActivity.this, R.string.invalid_filename, Toast.LENGTH_LONG).show();
+                    return;
+                }
                 Intent resultIntent = new Intent();
                 File previewFile = new File(mPreviewFilename);
                 previewFile.delete();
@@ -388,6 +440,7 @@ public class OCRActivity extends FragmentActivity {
             String previewFilename = i.getStringExtra(EXTRA_PREVIEW_FILENAME);
             mPreviewFilename = previewFilename;
             filenameEdit.setText(filename.substring(filename.lastIndexOf('/') + 1));
+            acceptBtn.setEnabled(true);
             displayPreview(previewFilename);
         }
         else if (i.getAction() == ACTION_SCAN_FAILED) {

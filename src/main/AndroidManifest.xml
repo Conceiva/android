@@ -69,7 +69,6 @@
         <activity android:name="com.handwerkcloud.client.TrialActivity"></activity>
         <activity
             android:name="com.handwerkcloud.client.IntroActivity"
-            android:configChanges="orientation|screenSize"
             android:label="@string/title_activity_intro"
             android:launchMode="singleInstance"
             android:theme="@style/Theme.ownCloud.noActionBar.Login" />
