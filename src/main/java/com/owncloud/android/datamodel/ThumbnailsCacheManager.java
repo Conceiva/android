@@ -304,9 +304,16 @@ public final class ThumbnailsCacheManager {
                     if (mClient != null) {
                         GetMethod getMethod = null;
                         try {
-                            String uri = mClient.getBaseUri() + "/index.php/core/preview.png?file="
+                            String uri = mClient.getBaseUri().toString();
+                            if (file.getMimeType().compareTo("application/vnd.imagemeter.image+zip") == 0) {
+                                uri += "/apps/imagemeter/download/annotated/"
+                                    + file.getLocalId();
+                            }
+                            else {
+                                uri += "/index.php/core/preview.png?file="
                                     + URLEncoder.encode(file.getRemotePath())
                                     + "&x=" + pxW + "&y=" + pxH + "&a=1&mode=cover&forceIcon=0";
+                            }
                             getMethod = new GetMethod(uri);
 
                             int status = mClient.executeMethod(getMethod);
