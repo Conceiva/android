@@ -33,18 +33,6 @@
         </LinearLayout>
 
         <TextView
-            android:id="@+id/next"
-            android:layout_width="wrap_content"
-            android:layout_height="40dp"
-            android:layout_alignParentRight="true"
-            android:text="@string/string_next"
-            android:textColor="@color/white"
-            android:textSize="18sp"
-            android:gravity="center_vertical"
-            android:layout_marginRight="10dp"
-            android:clickable="true"/>
-
-        <TextView
             android:id="@+id/choose_profession"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -59,7 +47,9 @@
             android:id="@+id/container_scroll_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@+id/choose_profession">
+            android:layout_below="@+id/choose_profession"
+            android:scrollbars="none"
+            android:layout_toLeftOf="@+id/next">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -408,5 +398,16 @@
                 </LinearLayout>
             </LinearLayout>
         </ScrollView>
+
+        <ImageButton
+            android:id="@+id/next"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_navigate_next"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:background="@color/transparent"
+            android:tint="@color/primary"/>
+
     </RelativeLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

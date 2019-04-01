@@ -106,6 +106,15 @@ public class IntroActivity extends FragmentActivity {
         }
     };
 
+    @Override
+    public void onBackPressed() {
+        int current = mPager.getCurrentItem();
+        if (current != 0) {
+            current--;
+            mPager.setCurrentItem(current);
+        }
+    }
+
     public static void runIfNeeded(Context context) {
         Account account = AccountUtils.getCurrentOwnCloudAccount(context);
         boolean firstRun = false;

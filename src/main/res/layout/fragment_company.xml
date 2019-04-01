@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -7,34 +7,35 @@
     android:background="@drawable/cement_background"
     tools:context=".CompanyFragment">
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:background="@color/primary"
+        android:gravity="center">
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/ic_launcher_foreground"
+            android:tint="@color/white"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/app_name"
+            android:textColor="@color/white"
+            android:layout_marginLeft="5dp"
+            />
+    </LinearLayout>
+
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_toLeftOf="@+id/next">
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             tools:layout_editor_absoluteX="40dp"
             tools:layout_editor_absoluteY="59dp">
 
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:background="@color/primary"
-                android:gravity="center">
-                <ImageView
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:src="@drawable/ic_launcher_foreground"
-                    android:tint="@color/white"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/app_name"
-                    android:textColor="@color/white"
-                    android:layout_marginLeft="5dp"
-                    />
-            </LinearLayout>
 
 
             <TextView
@@ -52,13 +53,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/companyLabel"
-                android:singleLine="true"
-                android:backgroundTint="@color/primary"
-                android:textColorHint="@android:color/darker_gray"
-                android:textCursorDrawable="@null"
-                android:hint="@string/company_hint"
                 android:layout_marginLeft="20dp"
-                android:layout_marginRight="20dp"/>
+                android:layout_marginRight="20dp"
+                android:backgroundTint="@color/primary"
+                android:hint="@string/company_hint"
+                android:singleLine="true"
+                android:textColorHint="@color/standard_grey"
+                android:textCursorDrawable="@null" />
 
             <TextView
                 android:id="@+id/roleLabel"
@@ -114,13 +115,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/phonenumberLabel"
-                android:singleLine="true"
-                android:backgroundTint="@color/primary"
-                android:textColorHint="@android:color/darker_gray"
-                android:textCursorDrawable="@null"
-                android:hint="@string/phonenumber_hint"
                 android:layout_marginLeft="20dp"
-                android:layout_marginRight="20dp"/>
+                android:layout_marginRight="20dp"
+                android:backgroundTint="@color/primary"
+                android:hint="@string/phonenumber_hint"
+                android:singleLine="true"
+                android:textColorHint="@color/standard_grey"
+                android:textCursorDrawable="@null" />
 
             <TextView
                 android:id="@+id/addressLabel"
@@ -138,34 +139,25 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/addressLabel"
-                android:singleLine="true"
-                android:backgroundTint="@color/primary"
-                android:textColorHint="@android:color/darker_gray"
-                android:textCursorDrawable="@null"
-                android:hint="@string/address_hint"
                 android:layout_marginLeft="20dp"
-                android:layout_marginRight="20dp"/>
+                android:layout_marginRight="20dp"
+                android:backgroundTint="@color/primary"
+                android:hint="@string/address_hint"
+                android:singleLine="true"
+                android:textColorHint="@color/standard_grey"
+                android:textCursorDrawable="@null" />
 
-            <ImageButton
-                android:id="@+id/startTrial"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:layout_below="@+id/address"
-                android:src="@drawable/ic_navigate_next"
-                android:tint="@color/primary"
-                android:background="@color/transparent"/>
 
-            <TextView
-                android:id="@+id/personalize_desc"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/startTrial"
-                android:layout_margin="20dp"
-                android:text="@string/start_trial"
-                android:textAlignment="center"
-                android:textColor="@color/black"
-                android:textSize="20sp" />
         </RelativeLayout>
     </ScrollView>
-</androidx.constraintlayout.widget.ConstraintLayout>
+
+    <ImageButton
+        android:id="@+id/next"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_navigate_next"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:background="@color/transparent"
+        android:tint="@color/primary"/>
+</RelativeLayout>

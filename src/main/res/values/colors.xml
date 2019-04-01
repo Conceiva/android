@@ -25,7 +25,7 @@
     <color name="black">#000000</color>
     <color name="white">#FFFFFF</color>
     <color name="textColor">@color/black</color>
-    <color name="disabled_text">#ff888888</color>
+    <color name="disabled_text">#888888</color>
     <color name="list_divider_background">#eee</color>
     <color name="filelist_icon_backgorund">#DDDDDD</color>
     <color name="dark_background_text_color">#EEEEEE</color>

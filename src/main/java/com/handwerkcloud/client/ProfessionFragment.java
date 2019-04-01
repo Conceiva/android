@@ -30,7 +30,7 @@ import java.util.Map;
 public class ProfessionFragment extends Fragment implements RegisterActivity.OnUserDataReceivedListener {
 
     Map<Integer, String> mSelectedProfessions = new HashMap<Integer, String>();
-    private TextView next;
+    private ImageButton next;
     LinearLayout carpenter;
     LinearLayout stovebuilder;
     LinearLayout windowbuilder;

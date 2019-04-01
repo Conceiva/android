@@ -107,7 +107,7 @@ public class CompanyFragment extends Fragment implements RegisterActivity.OnUser
         super.onCreateView(inflater, container, savedInstanceState);
         ((RegisterActivity)getActivity()).setAboutDataListener(this);
         View view = inflater.inflate(R.layout.fragment_company, container, false);
-        ImageButton startTrial = view.findViewById(R.id.startTrial);
+        ImageButton startTrial = view.findViewById(R.id.next);
         mCompany = view.findViewById(R.id.company);
         mRole = view.findViewById(R.id.role);
         mPhonenumber = view.findViewById(R.id.phonenumber);

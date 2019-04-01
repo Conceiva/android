@@ -234,6 +234,7 @@ public class OCRActivity extends FragmentActivity {
         File current = new File(mFilename);
         String originalName = current.getName();
         String editName = filenameEdit.getText().toString();
+        editName = editName.trim();
         if (editName.compareTo(originalName) != 0) {
             if (!isFilenameValid(editName)) {
                 return false;
@@ -257,6 +258,9 @@ public class OCRActivity extends FragmentActivity {
     }
 
     public static boolean isFilenameValid(String file) {
+        if (file.length() == 0) {
+            return false;
+        }
         File f = new File(file);
         try {
             f.getCanonicalPath();

@@ -249,6 +249,15 @@ public class RegisterActivity extends FragmentActivity {
     }
 
     @Override
+    public void onBackPressed() {
+        int current = mPager.getCurrentItem();
+        if (current != 0) {
+            current--;
+            mPager.setCurrentItem(current);
+        }
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
