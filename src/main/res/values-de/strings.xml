@@ -886,4 +886,5 @@
     <string name="address_hint">Enter address</string>
     <string name="add_to_imagemeter">Add to ImageMeter</string>
     <string name="string_next">Weiter</string>
+    <string name="string_prev">Vorige</string>
 </resources>

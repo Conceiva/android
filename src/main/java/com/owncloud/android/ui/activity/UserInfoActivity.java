@@ -232,6 +232,7 @@ public class UserInfoActivity extends FileActivity {
             case R.id.edit_account:
                 Intent i = new Intent(this, RegisterActivity.class);
                 i.putExtra(RegisterActivity.EXTRA_WAIT_FOR_UPDATE, true);
+                i.putExtra(RegisterActivity.EXTRA_EDIT, true);
                 startActivityForResult(i, EDIT_ACCOUNT_RESULT);
             default:
                 retval = super.onOptionsItemSelected(item);

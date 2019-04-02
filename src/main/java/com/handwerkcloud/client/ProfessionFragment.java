@@ -3,6 +3,7 @@ package com.handwerkcloud.client;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -10,7 +11,9 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -30,7 +33,7 @@ import java.util.Map;
 public class ProfessionFragment extends Fragment implements RegisterActivity.OnUserDataReceivedListener {
 
     Map<Integer, String> mSelectedProfessions = new HashMap<Integer, String>();
-    private ImageButton next;
+    private Button next;
     LinearLayout carpenter;
     LinearLayout stovebuilder;
     LinearLayout windowbuilder;
@@ -53,13 +56,23 @@ public class ProfessionFragment extends Fragment implements RegisterActivity.OnU
         int paddingRight = view.getPaddingRight();
         if (mSelectedProfessions.containsKey(value)) {
             mSelectedProfessions.remove(value);
-            view.setBackgroundResource(0);
-            view.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
+            //view.setBackgroundResource(R.drawable.profession_button);
+            //view.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
+            ((LinearLayout)view).removeView(view.findViewWithTag(type));
         }
         else {
             mSelectedProfessions.put(value, type);
-            view.setBackgroundResource(R.drawable.boxborder);
-            view.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
+            //view.setBackgroundResource(R.drawable.boxborder);
+            //view.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
+            LinearLayout.LayoutParams params = new LinearLayout
+                .LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            ImageView imageview = new ImageView(getActivity());
+
+            // Add image path from drawable folder.
+            imageview.setImageResource(R.drawable.baseline_check_circle_24);
+            imageview.setLayoutParams(params);
+            imageview.setTag(type);
+            ((LinearLayout)view).addView(imageview);
         }
 
         next.setVisibility(mSelectedProfessions.size() != 0 ? View.VISIBLE : View.GONE);
@@ -110,6 +123,21 @@ public class ProfessionFragment extends Fragment implements RegisterActivity.OnU
                 showConfirmDialog();
             }
         });
+
+        Button prev = view.findViewById(R.id.prev);
+        Bundle args = getArguments();
+        if (args.containsKey("EDIT")) {
+            prev.setVisibility(View.GONE);
+        }
+        else {
+            prev.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    getActivity().setResult(Activity.RESULT_CANCELED);
+                    getActivity().finish();
+                }
+            });
+        }
 
         carpenter = view.findViewById(R.id.carpenter);
         carpenter.setOnClickListener(new View.OnClickListener() {

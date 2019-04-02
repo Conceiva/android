@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -30,7 +31,7 @@ public class IntroFragment extends Fragment {
         int layoutId = args.getInt(LAYOUT_ID);
         View view = inflater.inflate(layoutId, container, false);
 
-        ImageButton next = view.findViewById(R.id.next);
+        Button next = view.findViewById(R.id.next);
         next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -40,15 +41,17 @@ public class IntroFragment extends Fragment {
             }
         });
 
-        TextView skip = view.findViewById(R.id.intro_skip);
-        skip.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent i = new Intent(getActivity(), IntroActivity.class);
-                i.setAction(IntroActivity.SKIP);
-                getActivity().startActivity(i);
-            }
-        });
+        Button prev = view.findViewById(R.id.prev);
+        if (prev != null) {
+            prev.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent i = new Intent(getActivity(), IntroActivity.class);
+                    i.setAction(IntroActivity.PREV);
+                    getActivity().startActivity(i);
+                }
+            });
+        }
         return view;
     }
 }

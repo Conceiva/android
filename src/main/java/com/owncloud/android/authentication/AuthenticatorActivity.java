@@ -280,7 +280,6 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity
         if (savedInstanceState == null && !directLogin) {
             FirstRunActivity.runIfNeeded(this);
 
-            IntroActivity.runIfNeeded(this);
         }
 
         if (getIntent().getBooleanExtra(FirstRunActivity.EXTRA_EXIT, false)) {

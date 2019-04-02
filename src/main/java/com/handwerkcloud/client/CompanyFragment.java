@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -107,7 +108,7 @@ public class CompanyFragment extends Fragment implements RegisterActivity.OnUser
         super.onCreateView(inflater, container, savedInstanceState);
         ((RegisterActivity)getActivity()).setAboutDataListener(this);
         View view = inflater.inflate(R.layout.fragment_company, container, false);
-        ImageButton startTrial = view.findViewById(R.id.next);
+        Button next = view.findViewById(R.id.next);
         mCompany = view.findViewById(R.id.company);
         mRole = view.findViewById(R.id.role);
         mPhonenumber = view.findViewById(R.id.phonenumber);
@@ -116,6 +117,17 @@ public class CompanyFragment extends Fragment implements RegisterActivity.OnUser
         mCompany.setFilters(new InputFilter[]{EMOJI_FILTER});
         mPhonenumber.setFilters(new InputFilter[]{EMOJI_FILTER});
         mAddress.setFilters(new InputFilter[]{EMOJI_FILTER});
+
+        Button prev = view.findViewById(R.id.prev);
+        prev.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent i = new Intent(getActivity(), RegisterActivity.class);
+                i.setAction(RegisterActivity.ACTION_PREV);
+                getActivity().startActivity(i);
+            }
+        });
+
 
         TextWatcher textWatcher = new TextWatcher() {
             @Override
@@ -157,7 +169,7 @@ public class CompanyFragment extends Fragment implements RegisterActivity.OnUser
         // Apply the adapter to the spinner
         mBusinesssize.setAdapter(businesssizeAdapter);
 
-        startTrial.setOnClickListener(new View.OnClickListener() {
+        next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (mCompany.getText().toString().length() == 0) {

@@ -61,12 +61,14 @@ public class RegisterActivity extends FragmentActivity {
     public static final String EXTRA_ADDRESS = "EXTRA_ADDRESS";
     public static final String EXTRA_WAIT_FOR_UPDATE = "EXTRA_WAIT_FOR_UPDATE";
     public static final String EXTRA_BUSINESSSIZE = "EXTRA_BUSINESSSIZE";
+    public static final String ACTION_PREV = "ACTION_PREV";
     static final String FIRSTRUN_SHARED_PREFERENCE = "FIRSTRUN_SHARED_PREF";
 
     /**
      * The number of pages (wizard steps) to show
      */
     private static final int NUM_PAGES = 2;
+    public static final String EXTRA_EDIT = "EXTRA_EDIT";
 
     /**
      * The pager widget, which handles animation and allows swiping horizontally to access previous
@@ -87,6 +89,7 @@ public class RegisterActivity extends FragmentActivity {
     public ArrayList<OnUserDataReceivedListener> mUserDataListener = new ArrayList<>();
     private boolean mUpdateBeforeFinish;
     private ProgressBar mLoading;
+    boolean mEditing = false;
 
     public interface OnUserDataReceivedListener {
         void onDataReceived(JSONObject data);
@@ -233,6 +236,11 @@ public class RegisterActivity extends FragmentActivity {
         public Fragment getItem(int position) {
             if (position == 0) {
                 Fragment fragment = new ProfessionFragment();
+                Bundle args = new Bundle();
+                if (mEditing) {
+                    args.putBoolean("EDIT", mEditing);
+                }
+                fragment.setArguments(args);
                 return fragment;
             }
             else if (position == 1) {
@@ -254,6 +262,9 @@ public class RegisterActivity extends FragmentActivity {
         if (current != 0) {
             current--;
             mPager.setCurrentItem(current);
+        }
+        else {
+            super.onBackPressed();
         }
     }
 
@@ -280,6 +291,18 @@ public class RegisterActivity extends FragmentActivity {
     }
 
     void handleIntent(Intent i) {
+        if (i.hasExtra(EXTRA_EDIT)) {
+            mEditing = true;
+        }
+
+        if (i.getAction() == ACTION_PREV) {
+            int current = mPager.getCurrentItem();
+            if (current != 0) {
+                current--;
+                mPager.setCurrentItem(current);
+            }
+        }
+
         if (i.hasExtra(EXTRA_WAIT_FOR_UPDATE)) {
             mUpdateBeforeFinish = true;
         }

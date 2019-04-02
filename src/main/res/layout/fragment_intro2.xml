@@ -67,7 +67,6 @@
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
             android:layout_toRightOf="@+id/timemanagement"
-            android:layout_toLeftOf="@+id/next"
             android:gravity="center_vertical"
             android:text="@string/intro_time_management"
             android:textColor="@color/black"
@@ -92,7 +91,6 @@
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
             android:layout_toRightOf="@+id/photometric"
-            android:layout_toLeftOf="@+id/next"
             android:gravity="center_vertical"
             android:text="@string/intro_photometric"
             android:textColor="@color/black"
@@ -116,7 +114,6 @@
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
             android:layout_toRightOf="@+id/filestorage"
-            android:layout_toLeftOf="@+id/next"
             android:gravity="center_vertical"
             android:text="@string/intro_filestorage"
             android:textColor="@color/black"
@@ -140,7 +137,6 @@
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
             android:layout_toRightOf="@+id/datamanagement"
-            android:layout_toLeftOf="@+id/next"
             android:gravity="center_vertical"
             android:text="@string/intro_datamanagement"
             android:textColor="@color/black"
@@ -164,7 +160,6 @@
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
             android:layout_toRightOf="@+id/calendar"
-            android:layout_toLeftOf="@+id/next"
             android:gravity="center_vertical"
             android:text="@string/intro_calendar"
             android:textColor="@color/black"
@@ -189,36 +184,36 @@
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
             android:layout_toRightOf="@+id/andmore"
-            android:layout_toLeftOf="@+id/next"
             android:gravity="center_vertical"
             android:text="@string/intro_andmore"
             android:textColor="@color/black"
             android:textSize="16sp" />
 
-        <ImageButton
-            android:id="@+id/next"
+
+        <LinearLayout
+            android:id="@+id/buttonLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_navigate_next"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:background="@color/transparent"
-            android:tint="@color/primary"/>
-
-        <TextView
-            android:id="@+id/intro_skip"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:orientation="horizontal"
             android:layout_alignParentBottom="true"
-            android:layout_marginBottom="50dp"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"
-            android:gravity="center_vertical"
-            android:textAlignment="center"
-            android:text="@string/skip_intro"
-            android:textColor="@color/black"
-            android:clickable="true"
-            android:textSize="16sp" />
+            android:layout_marginBottom="40dp"
+            android:layout_centerHorizontal="true">
+            <Button
+                android:id="@+id/prev"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_navigate_next"
+                android:background="@drawable/profession_button"
+                android:text="@string/string_prev"/>
+
+            <Button
+                android:id="@+id/next"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_navigate_next"
+                android:background="@drawable/profession_button"
+                android:text="@string/string_next"/>
+        </LinearLayout>
 
     </RelativeLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

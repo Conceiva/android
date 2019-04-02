@@ -51,7 +51,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_below="@+id/intro"
-            android:layout_toLeftOf="@+id/next"
             android:weightSum="1">
             <RelativeLayout
                 android:layout_width="0dp"
@@ -62,7 +61,6 @@
                     android:layout_width="@dimen/icon_size"
                     android:layout_height="@dimen/icon_size"
                     android:layout_marginTop="@dimen/timesaving_margin_top"
-                    android:layout_below="@+id/intro"
                     android:layout_marginLeft="10dp"
                     android:src="@drawable/ic_timesaving" />
 
@@ -136,30 +134,17 @@
             </RelativeLayout>
         </LinearLayout>
 
-        <ImageButton
+
+        <Button
             android:id="@+id/next"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/ic_navigate_next"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:background="@color/transparent"
-            android:tint="@color/primary"/>
-
-        <TextView
-            android:id="@+id/intro_skip"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:background="@drawable/profession_button"
+            android:layout_centerHorizontal="true"
             android:layout_alignParentBottom="true"
-            android:layout_marginBottom="50dp"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"
-            android:gravity="center_vertical"
-            android:textAlignment="center"
-            android:text="@string/skip_intro"
-            android:textColor="@color/black"
-            android:clickable="true"
-            android:textSize="16sp" />
+            android:layout_marginBottom="40dp"
+            android:text="@string/string_next"/>
 
     </RelativeLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

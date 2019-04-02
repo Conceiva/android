@@ -40,6 +40,8 @@ import android.view.WindowManager;
 
 import com.evernote.android.job.JobManager;
 import com.evernote.android.job.JobRequest;
+import com.handwerkcloud.client.IntroActivity;
+import com.handwerkcloud.client.LoggingExceptionHandler;
 import com.handwerkcloud.client.RegisterActivity;
 import com.handwerkcloud.client.TrialActivity;
 import com.owncloud.android.authentication.AccountUtils;
@@ -122,6 +124,7 @@ public class MainApp extends MultiDexApplication {
     @Override
     public void onCreate() {
         super.onCreate();
+        new LoggingExceptionHandler(this);
         JobManager.create(this).addJobCreator(new NCJobCreator());
         MainApp.mContext = getApplicationContext();
 
@@ -191,7 +194,11 @@ public class MainApp extends MultiDexApplication {
                 WhatsNewActivity.runIfNeeded(activity);
                 PassCodeManager.getPassCodeManager().onActivityCreated(activity);
                 RegisterActivity.runIfNeeded(activity);
-                TrialActivity.runIfNeeded(activity);
+                if (!(activity instanceof IntroActivity) &&
+                    !(activity instanceof RegisterActivity)) {
+                    TrialActivity.runIfNeeded(activity);
+                }
+                IntroActivity.runIfNeeded(activity);
             }
 
             @Override
