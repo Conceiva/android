@@ -40,6 +40,7 @@ public class TrialActivity extends AppCompatActivity {
     public static final String EXTRA_TRIAL_END_TIME = "EXTRA_TRIAL_END_TIME";
     public static final String EXTRA_TRIAL_END = "EXTRA_TRIAL_END";
     public static String EXTRA_TRIAL_EXPIRED = "EXTRA_TRIAL_EXPIRED";
+    public static final String EXTRA_ACCOUNT_REMOVE_REMAINING_SEC = "EXTRA_ACCOUNT_REMOVE_REMAINING_SEC";
     private static final long CHECK_INTERVAL = 60 * 60 * 1000;
 
     //AsyncTask<Params, Progress, Result>
@@ -126,6 +127,10 @@ public class TrialActivity extends AppCompatActivity {
                     boolean trialExpired = data.getBoolean("trial_expired");
                     trialIntent.putExtra(EXTRA_TRIAL_EXPIRED, trialExpired);
 
+                    if (data.has("account_remove_remaining_sec")) {
+                        int accountRemoveRemainingSec = data.getInt("account_remove_remaining_sec");
+                        trialIntent.putExtra(EXTRA_ACCOUNT_REMOVE_REMAINING_SEC, accountRemoveRemainingSec);
+                    }
                     if (data.has("trial_remaining_sec")) {
                         int trialRemainingSec = data.getInt("trial_remaining_sec");
                         trialIntent.putExtra(EXTRA_TRIAL_REMAINING_SEC, trialRemainingSec);
@@ -170,6 +175,7 @@ public class TrialActivity extends AppCompatActivity {
         TrialFragment fragment = new TrialFragment();
         Bundle args = new Bundle();
         args.putBoolean(EXTRA_TRIAL_EXPIRED, intent.getBooleanExtra(EXTRA_TRIAL_EXPIRED, false));
+        args.putInt(EXTRA_ACCOUNT_REMOVE_REMAINING_SEC, intent.getIntExtra(EXTRA_ACCOUNT_REMOVE_REMAINING_SEC, 0));
         args.putInt(EXTRA_TRIAL_REMAINING_SEC, intent.getIntExtra(EXTRA_TRIAL_REMAINING_SEC, 0));
         args.putInt(EXTRA_TRIAL_END_TIME, intent.getIntExtra(EXTRA_TRIAL_END_TIME, 0));
         args.putString(EXTRA_TRIAL_END, intent.getStringExtra(EXTRA_TRIAL_END));

@@ -129,8 +129,8 @@ public class IntroActivity extends FragmentActivity {
         protected void onPostExecute(JSONObject data) {
             super.onPostExecute(data);
             try {
-                if (data == null || data.getString("phone").length() == 0 || data.getString("address").length() == 0 ||
-                data.getString("company").length() == 0) {
+                if (data != null && (data.getString("phone").length() == 0 || data.getString("address").length() == 0 ||
+                data.getString("company").length() == 0)) {
                     Intent i = new Intent(mContext.get(), IntroActivity.class);
                     i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     mContext.get().startActivity(i);

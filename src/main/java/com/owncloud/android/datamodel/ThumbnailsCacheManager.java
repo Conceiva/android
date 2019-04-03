@@ -139,7 +139,9 @@ public final class ThumbnailsCacheManager {
                         mThumbnailCache = new DiskLruImageCache(diskCacheDir, DISK_CACHE_SIZE, mCompressFormat,
                                                                 mCompressQuality);
                     } catch (Exception e) {
-                        Log_OC.d(TAG, e.getMessage());
+                        if (e.getMessage() != null) {
+                            Log_OC.d(TAG, e.getMessage());
+                        }
                         mThumbnailCache = null;
                     }
                 }

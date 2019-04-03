@@ -15,6 +15,7 @@ import org.w3c.dom.Text;
 
 import androidx.fragment.app.Fragment;
 
+import static com.handwerkcloud.client.TrialActivity.EXTRA_ACCOUNT_REMOVE_REMAINING_SEC;
 import static com.handwerkcloud.client.TrialActivity.EXTRA_TRIAL_END;
 import static com.handwerkcloud.client.TrialActivity.EXTRA_TRIAL_END_TIME;
 import static com.handwerkcloud.client.TrialActivity.EXTRA_TRIAL_EXPIRED;
@@ -32,11 +33,13 @@ public class TrialFragment extends Fragment {
         Bundle args = getArguments();
 
         boolean trialExpired = args.getBoolean(EXTRA_TRIAL_EXPIRED, false);
+        int accountRemoveRemainingSec = args.getInt(EXTRA_ACCOUNT_REMOVE_REMAINING_SEC, 0);
         int trialRemainingSec = args.getInt(EXTRA_TRIAL_REMAINING_SEC, 0);
         int trialEndTime = args.getInt(EXTRA_TRIAL_END_TIME, 0);
         String trialEnd = args.getString(EXTRA_TRIAL_END, "");
 
         TextView trialText = view.findViewById(R.id.trial_text);
+        TextView accountRemoveText = view.findViewById(R.id.account_remove_text);
         TextView trialPurchaseDesc = view.findViewById(R.id.trial_purchase_desc);
         MaterialButton trialPurchase = view.findViewById(R.id.trial_purchase);
         MaterialButton trialContinue = view.findViewById(R.id.trial_continue);
@@ -60,9 +63,17 @@ public class TrialFragment extends Fragment {
             trialContinue.setVisibility(View.GONE);
             trialText.setText(R.string.trial_expired);
             trialPurchaseDesc.setVisibility(View.VISIBLE);
+            int days = accountRemoveRemainingSec / 60 / 60 / 24;
+            if (days > 0) {
+                accountRemoveText.setText(getResources().getQuantityString(R.plurals.account_remove_days_remaining, days, days));
+            }
+            else {
+                accountRemoveText.setText(R.string.account_remove_1_day_remaining);
+            }
         }
         else {
             trialPurchaseDesc.setVisibility(View.GONE);
+            accountRemoveText.setVisibility(View.GONE);
             int days = trialRemainingSec / 60 / 60 / 24;
             if (days > 0) {
                 trialText.setText(getResources().getQuantityString(R.plurals.trial_days_remaining, days, days));

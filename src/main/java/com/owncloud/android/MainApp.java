@@ -124,7 +124,7 @@ public class MainApp extends MultiDexApplication {
     @Override
     public void onCreate() {
         super.onCreate();
-        new LoggingExceptionHandler(this);
+        //new LoggingExceptionHandler(this);
         JobManager.create(this).addJobCreator(new NCJobCreator());
         MainApp.mContext = getApplicationContext();
 

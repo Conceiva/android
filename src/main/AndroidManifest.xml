@@ -69,15 +69,15 @@
         <activity android:name="com.handwerkcloud.client.TrialActivity"></activity>
         <activity
             android:name="com.handwerkcloud.client.IntroActivity"
-            android:launchMode="singleInstance"
+            android:launchMode="singleTop"
             android:theme="@style/Theme.ownCloud.noActionBar.Login" />
         <activity
             android:name="com.handwerkcloud.client.RegisterActivity"
-            android:launchMode="singleInstance"
+            android:launchMode="singleTop"
             android:theme="@style/Theme.ownCloud.noActionBar.Login" />
         <activity
             android:name="com.handwerkcloud.client.OCRActivity"
-            android:launchMode="singleInstance" />
+            android:launchMode="singleTop" />
 
         <uses-library
             android:name="org.apache.http.legacy"

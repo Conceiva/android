@@ -22,6 +22,8 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
+import static com.owncloud.android.authentication.AuthenticatorActivity.WEB_LOGIN;
+
 public class GetHCRemoteStatusOperation extends RemoteOperation {
 
     /**
@@ -48,6 +50,9 @@ public class GetHCRemoteStatusOperation extends RemoteOperation {
         boolean retval = false;
         GetMethod get = null;
         String baseUrlSt = client.getBaseUri().toString();
+        if (baseUrlSt.endsWith(WEB_LOGIN)) {
+            baseUrlSt = baseUrlSt.replace(WEB_LOGIN, "");
+        }
         try {
             get = new GetMethod(baseUrlSt + AccountUtils.STATUS_PATH);
             get.addRequestHeader("X-ClientType", "HandwerkCloud");

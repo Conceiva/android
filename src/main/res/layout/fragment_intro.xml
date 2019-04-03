@@ -15,19 +15,13 @@
             android:layout_width="match_parent"
             android:layout_height="40dp"
             android:background="@color/primary"
+            android:orientation="horizontal"
             android:gravity="center">
             <ImageView
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:src="@drawable/ic_launcher_foreground"
-                android:tint="@color/white"/>
-            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/app_name"
-                android:textColor="@color/white"
-                android:layout_marginLeft="5dp"
-                />
+                android:layout_margin="5dp"
+                android:src="@drawable/hc_logo"/>
         </LinearLayout>
 
         <TextView
@@ -35,10 +29,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
-            android:layout_marginStart="20dp"
             android:layout_marginLeft="20dp"
             android:layout_marginTop="@dimen/intro_margin_top"
-            android:layout_marginEnd="20dp"
             android:layout_marginRight="20dp"
             android:layout_marginBottom="20dp"
             android:text="@string/intro"
@@ -123,7 +115,6 @@
             android:id="@+id/next"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_navigate_next"
             android:background="@drawable/profession_button"
             android:layout_centerHorizontal="true"
             android:layout_alignParentBottom="true"

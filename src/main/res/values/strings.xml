@@ -932,9 +932,14 @@
         <item quantity="one">You have %1$d day remaining in your trial.</item>
         <item quantity="other">You have %1$d days remaining in your trial.</item>
     </plurals>
+    <plurals name="account_remove_days_remaining">
+        <item quantity="one">You have %1$d day remaining before your account and files are removed from HandwerkCloud.</item>
+        <item quantity="other">You have %1$d days remaining before your account and files are removed from HandwerkCloud.</item>
+    </plurals>
     <string name="trial_end_date">Trial end date</string>
     <string name="trial_end">Trial Ends %1$s</string>
     <string name="trial_1_day_remaining">You have 1 day remaining in your trial.</string>
+    <string name="account_remove_1_day_remaining">You have 1 day remaining before your account and files are removed from HandwerkCloud.</string>
     <string name="role_owner">Owner</string>
     <string name="role_employee">Employee</string>
     <string name="role_contractor">Contractor/self-employed</string>

@@ -188,7 +188,7 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity
     private static final String KEY_USERNAME = "USERNAME";
     private static final String KEY_PASSWORD = "PASSWORD";
     private static final String KEY_ASYNC_TASK_IN_PROGRESS = "AUTH_IN_PROGRESS";
-    private static final String WEB_LOGIN = "/index.php/login/flow";
+    public static final String WEB_LOGIN = "/index.php/login/flow";
     public static final String PROTOCOL_SUFFIX = "://";
     public static final String LOGIN_URL_DATA_KEY_VALUE_SEPARATOR = ":";
     public static final String HTTPS_PROTOCOL = "https://";
@@ -438,7 +438,11 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity
 
                     initServerPreFragment(null);
 
-                    mHostUrlInput.setText(baseURL);
+                    String baseURLValue = baseURL;
+                    if (baseURLValue.endsWith(WEB_LOGIN)) {
+                        baseURLValue = baseURLValue.replace(WEB_LOGIN, "");
+                    }
+                    mHostUrlInput.setText(baseURLValue);
 
                     checkOcServer();
                 }).show(), 60 * 1000);
@@ -1327,7 +1331,11 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity
 
     private void accessRootFolder(OwnCloudCredentials credentials) {
         mAsyncTask = new AuthenticatorAsyncTask(this);
-        Object[] params = {mServerInfo.mBaseUrl, credentials};
+        String baseUrl = mServerInfo.mBaseUrl;
+        if (baseUrl.endsWith(WEB_LOGIN)) {
+            baseUrl = baseUrl.replace(WEB_LOGIN, "");
+        }
+        Object[] params = {baseUrl, credentials};
         mAsyncTask.execute(params);
     }
 

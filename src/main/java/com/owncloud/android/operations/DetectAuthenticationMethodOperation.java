@@ -93,6 +93,9 @@ public class DetectAuthenticationMethodOperation extends RemoteOperation {
                 !result.isIdPRedirection()) {
             client.setBaseUri(Uri.parse(result.getRedirectedLocation()));
             result = operation.execute(client);
+            if (redirectedLocation.compareTo(result.getRedirectedLocation()) == 0) {
+                break; // don't loop infinitely
+            }
             redirectedLocation = result.getRedirectedLocation();
         } 
 
@@ -114,6 +117,9 @@ public class DetectAuthenticationMethodOperation extends RemoteOperation {
             
         } else if (result.isIdPRedirection()) {
             authMethod = AuthenticationMethod.SAML_WEB_SSO;
+        }
+        else if (result.getHttpCode() == HttpStatus.SC_MOVED_TEMPORARILY) {
+            authMethod = AuthenticationMethod.BASIC_HTTP_AUTH;
         }
         // else - fall back to UNKNOWN
         Log_OC.d(TAG, "Authentication method found: " + authenticationMethodToString(authMethod));

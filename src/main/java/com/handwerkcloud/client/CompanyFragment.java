@@ -4,11 +4,14 @@ import androidx.fragment.app.Fragment;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputFilter;
+import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextWatcher;
+import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -173,20 +176,44 @@ public class CompanyFragment extends Fragment implements RegisterActivity.OnUser
             @Override
             public void onClick(View view) {
                 if (mCompany.getText().toString().length() == 0) {
-                    snackbar = Snackbar.make(view, R.string.company_name_required,
-                        Snackbar.LENGTH_INDEFINITE);
+                    String snackText = getResources().getString(R.string.company_name_required);
+                    SpannableStringBuilder ssb = new SpannableStringBuilder()
+                        .append(snackText);
+                    ssb.setSpan(
+                        new ForegroundColorSpan(Color.WHITE),
+                        0,
+                        snackText.length(),
+                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    snackbar = Snackbar.make(view, ssb,
+                        Snackbar.LENGTH_LONG);
                     snackbar.show();
                     return;
                 }
                 else if (mPhonenumber.getText().toString().length() == 0) {
-                    snackbar = Snackbar.make(view, R.string.phonenr_required,
-                        Snackbar.LENGTH_INDEFINITE);
+                    String snackText = getResources().getString(R.string.phonenr_required);
+                    SpannableStringBuilder ssb = new SpannableStringBuilder()
+                        .append(snackText);
+                    ssb.setSpan(
+                        new ForegroundColorSpan(Color.WHITE),
+                        0,
+                        snackText.length(),
+                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    snackbar = Snackbar.make(view, ssb,
+                        Snackbar.LENGTH_LONG);
                     snackbar.show();
                     return;
                 }
                 else if (mAddress.getText().toString().length() == 0) {
-                    snackbar = Snackbar.make(view, R.string.address_required,
-                        Snackbar.LENGTH_INDEFINITE);
+                    String snackText = getResources().getString(R.string.address_required);
+                    SpannableStringBuilder ssb = new SpannableStringBuilder()
+                        .append(snackText);
+                    ssb.setSpan(
+                        new ForegroundColorSpan(Color.WHITE),
+                        0,
+                        snackText.length(),
+                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    snackbar = Snackbar.make(view, ssb,
+                        Snackbar.LENGTH_LONG);
                     snackbar.show();
                     return;
                 }
