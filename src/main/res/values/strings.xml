@@ -879,7 +879,7 @@
     <string name="intro_andmore">And much more</string>
     <string name="intro3">FOR ALL EXACTLY THE SUITABLE SOLUTION.</string>
     <string name="intro_select_profession">In the next step, select your profession so that we can provide you with personalized content tailored to your industry.</string>
-    <string name="choose_profession">Choose your profession:</string>
+    <string name="choose_profession">Choose your profession(s):</string>
     <string name="role">Role</string>
     <string name="company">Company</string>
     <string name="carpenter">Carpenter</string>
@@ -888,7 +888,7 @@
     <string name="installer">Installer</string>
     <string name="electrician">Electrician</string>
     <string name="painter">Painter</string>
-    <string name="flasher">Flasher</string>
+    <string name="plumber">Plumber</string>
     <string name="bricklayer">Bricklayer</string>
     <string name="roofer">Roofer</string>
     <string name="stuccoer">Stuccoer</string>
@@ -948,4 +948,5 @@
     <string name="company_name_required">Company name is required</string>
     <string name="phonenr_required">Phone number is required</string>
     <string name="address_required">Address is required</string>
+    <string name="server_access_error">Unable to connect to the HandwerkCloud server, please check your Internet connection.</string>
 </resources>

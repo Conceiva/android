@@ -43,7 +43,7 @@ public class RegisterActivity extends FragmentActivity {
     public static final String INSTALLER = "INSTALLER";
     public static final String ELECTRICIAN = "ELECTRICIAN";
     public static final String PAINTER = "PAINTER";
-    public static final String FLASHER = "FLASHER";
+    public static final String PLUMBER = "PLUMBER";
     public static final String BRICKLAYER = "BRICKLAYER";
     public static final String ROOFER = "ROOFER";
     public static final String STUCCOER = "STUCCOER";

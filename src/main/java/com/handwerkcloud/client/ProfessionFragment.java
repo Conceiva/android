@@ -40,7 +40,7 @@ public class ProfessionFragment extends Fragment implements RegisterActivity.OnU
     LinearLayout installer;
     LinearLayout electrician;
     LinearLayout painter;
-    LinearLayout flasher;
+    LinearLayout plumber;
     LinearLayout bricklayer;
     LinearLayout roofer;
     LinearLayout stuccoer;
@@ -187,11 +187,11 @@ public class ProfessionFragment extends Fragment implements RegisterActivity.OnU
             }
         });
 
-        flasher = view.findViewById(R.id.flasher);
-        flasher.setOnClickListener(new View.OnClickListener() {
+        plumber = view.findViewById(R.id.plumber);
+        plumber.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                selectProfession(R.string.flasher, RegisterActivity.FLASHER, view);
+                selectProfession(R.string.plumber, RegisterActivity.PLUMBER, view);
             }
         });
 
@@ -265,8 +265,8 @@ public class ProfessionFragment extends Fragment implements RegisterActivity.OnU
             else if (values[i].compareTo(RegisterActivity.PAINTER) == 0) {
                 retVal += context.getString(R.string.painter);
             }
-            else if (values[i].compareTo(RegisterActivity.FLASHER) == 0) {
-                retVal += context.getString(R.string.flasher);
+            else if (values[i].compareTo(RegisterActivity.PLUMBER) == 0) {
+                retVal += context.getString(R.string.plumber);
             }
             else if (values[i].compareTo(RegisterActivity.BRICKLAYER) == 0) {
                 retVal += context.getString(R.string.bricklayer);
@@ -316,8 +316,8 @@ public class ProfessionFragment extends Fragment implements RegisterActivity.OnU
                 else if (values[i].compareTo(RegisterActivity.PAINTER) == 0) {
                     selectProfession(R.string.painter, RegisterActivity.PAINTER, painter);
                 }
-                else if (values[i].compareTo(RegisterActivity.FLASHER) == 0) {
-                    selectProfession(R.string.flasher, RegisterActivity.FLASHER, flasher);
+                else if (values[i].compareTo(RegisterActivity.PLUMBER) == 0) {
+                    selectProfession(R.string.plumber, RegisterActivity.PLUMBER, plumber);
                 }
                 else if (values[i].compareTo(RegisterActivity.BRICKLAYER) == 0) {
                     selectProfession(R.string.bricklayer, RegisterActivity.BRICKLAYER, bricklayer);
