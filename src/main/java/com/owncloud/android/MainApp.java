@@ -198,7 +198,6 @@ public class MainApp extends MultiDexApplication {
                     !(activity instanceof RegisterActivity)) {
                     TrialActivity.runIfNeeded(activity);
                 }
-                IntroActivity.runIfNeeded(activity);
             }
 
             @Override

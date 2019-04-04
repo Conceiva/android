@@ -26,6 +26,11 @@
         android:id="@+id/drawer_menu_standard"
         android:checkableBehavior="single">
         <item
+            android:id="@+id/nav_welcome"
+            android:icon="@drawable/nav_welcome"
+            android:orderInCategory="0"
+            android:title="@string/welcome"/>
+        <item
             android:id="@+id/nav_image_meter"
             android:icon="@drawable/ic_action_imagemeter"
             android:orderInCategory="0"

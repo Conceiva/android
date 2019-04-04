@@ -44,24 +44,27 @@ public class CompanyFragment extends Fragment implements RegisterActivity.OnUser
     private Spinner mRole;
     private EditText mPhonenumber;
     private EditText mAddress;
-    private final String[] mRoles = {"owner", "employee", "contractor"};
+    private EditText mZip;
+    private EditText mCity;
+    private Spinner mCountry;
+    private final String[] mRoles = {"", "owner", "employee", "contractor"};
     private static final Map<String, Integer> mRoleMap = new HashMap<String, Integer>() {{
-        put("owner", 0);
-        put("employee", 1);
-        put("contractor", 2);
+        put("owner", 1);
+        put("employee", 2);
+        put("contractor", 3);
     }};
     private Spinner mBusinesssize;
-    private static final int[] mBusinesssizes = {1, 5, 10, 20, 50, 100, 250, 500, 1000};
+    private static final int[] mBusinesssizes = {0, 1, 5, 10, 20, 50, 100, 250, 500, 1000};
     private static final Map<Integer, Integer> mBusinesssizeMap = new HashMap<Integer, Integer>() {{
-        put(1, 0);
-        put(5, 1);
-        put(10, 2);
-        put(20, 3);
-        put(50, 4);
-        put(100, 5);
-        put(250, 6);
-        put(500, 7);
-        put(1000, 8);
+        put(1, 1);
+        put(5, 2);
+        put(10, 3);
+        put(20, 4);
+        put(50, 5);
+        put(100, 6);
+        put(250, 7);
+        put(500, 8);
+        put(1000, 9);
     }};
     private Snackbar snackbar;
 
@@ -120,6 +123,9 @@ public class CompanyFragment extends Fragment implements RegisterActivity.OnUser
         mCompany.setFilters(new InputFilter[]{EMOJI_FILTER});
         mPhonenumber.setFilters(new InputFilter[]{EMOJI_FILTER});
         mAddress.setFilters(new InputFilter[]{EMOJI_FILTER});
+        mZip = view.findViewById(R.id.zip);
+        mCity = view.findViewById(R.id.city);
+        mCountry = view.findViewById(R.id.country);
 
         Button prev = view.findViewById(R.id.prev);
         prev.setOnClickListener(new View.OnClickListener() {
@@ -155,6 +161,8 @@ public class CompanyFragment extends Fragment implements RegisterActivity.OnUser
         mCompany.addTextChangedListener(textWatcher);
         mPhonenumber.addTextChangedListener(textWatcher);
         mAddress.addTextChangedListener(textWatcher);
+        mZip.addTextChangedListener(textWatcher);
+        mCity.addTextChangedListener(textWatcher);
 
         // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getActivity(),
@@ -172,49 +180,47 @@ public class CompanyFragment extends Fragment implements RegisterActivity.OnUser
         // Apply the adapter to the spinner
         mBusinesssize.setAdapter(businesssizeAdapter);
 
+        // Create an ArrayAdapter using the string array and a default spinner layout
+        ArrayAdapter<CharSequence> countryAdapter = ArrayAdapter.createFromResource(getActivity(),
+            R.array.countries_array, android.R.layout.simple_spinner_item);
+        // Specify the layout to use when the list of choices appears
+        countryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        // Apply the adapter to the spinner
+        mCountry.setAdapter(countryAdapter);
+
         next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (mCompany.getText().toString().length() == 0) {
-                    String snackText = getResources().getString(R.string.company_name_required);
-                    SpannableStringBuilder ssb = new SpannableStringBuilder()
-                        .append(snackText);
-                    ssb.setSpan(
-                        new ForegroundColorSpan(Color.WHITE),
-                        0,
-                        snackText.length(),
-                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    snackbar = Snackbar.make(view, ssb,
-                        Snackbar.LENGTH_LONG);
-                    snackbar.show();
+                    showSnackbarMessage(view, R.string.company_name_required);
                     return;
                 }
                 else if (mPhonenumber.getText().toString().length() == 0) {
-                    String snackText = getResources().getString(R.string.phonenr_required);
-                    SpannableStringBuilder ssb = new SpannableStringBuilder()
-                        .append(snackText);
-                    ssb.setSpan(
-                        new ForegroundColorSpan(Color.WHITE),
-                        0,
-                        snackText.length(),
-                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    snackbar = Snackbar.make(view, ssb,
-                        Snackbar.LENGTH_LONG);
-                    snackbar.show();
+                    showSnackbarMessage(view, R.string.phonenr_required);
                     return;
                 }
                 else if (mAddress.getText().toString().length() == 0) {
-                    String snackText = getResources().getString(R.string.address_required);
-                    SpannableStringBuilder ssb = new SpannableStringBuilder()
-                        .append(snackText);
-                    ssb.setSpan(
-                        new ForegroundColorSpan(Color.WHITE),
-                        0,
-                        snackText.length(),
-                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    snackbar = Snackbar.make(view, ssb,
-                        Snackbar.LENGTH_LONG);
-                    snackbar.show();
+                    showSnackbarMessage(view, R.string.address_required);
+                    return;
+                }
+                else if (mZip.getText().toString().length() == 0) {
+                    showSnackbarMessage(view, R.string.zip_required);
+                    return;
+                }
+                else if (mCity.getText().toString().length() == 0) {
+                    showSnackbarMessage(view, R.string.city_required);
+                    return;
+                }
+                else if (mRole.getSelectedItemPosition() == 0) {
+                    showSnackbarMessage(view, R.string.role_required);
+                    return;
+                }
+                else if (mBusinesssize.getSelectedItemPosition() == 0) {
+                    showSnackbarMessage(view, R.string.businesssize_required);
+                    return;
+                }
+                else if (mCountry.getSelectedItemPosition() == 0) {
+                    showSnackbarMessage(view, R.string.country_required);
                     return;
                 }
                 Intent i = new Intent(getActivity(), RegisterActivity.class);
@@ -223,6 +229,10 @@ public class CompanyFragment extends Fragment implements RegisterActivity.OnUser
                 i.putExtra(RegisterActivity.EXTRA_ROLE, mRoles[mRole.getSelectedItemPosition()]);
                 i.putExtra(RegisterActivity.EXTRA_PHONENUMBER, mPhonenumber.getText().toString());
                 i.putExtra(RegisterActivity.EXTRA_ADDRESS, mAddress.getText().toString());
+                i.putExtra(RegisterActivity.EXTRA_ZIP, mZip.getText().toString());
+                i.putExtra(RegisterActivity.EXTRA_CITY, mCity.getText().toString());
+                String[] countries = getResources().getStringArray(R.array.countries_array);
+                i.putExtra(RegisterActivity.EXTRA_COUNTRY, countries[mCountry.getSelectedItemPosition()]);
                 i.putExtra(RegisterActivity.EXTRA_BUSINESSSIZE, mBusinesssizes[mBusinesssize.getSelectedItemPosition()]);
                 getActivity().startActivity(i);
             }
@@ -238,7 +248,7 @@ public class CompanyFragment extends Fragment implements RegisterActivity.OnUser
         }
 
         try {
-            String displayname = data.getString("displayname");
+            boolean missingData = false;
             String phone = data.getString("phone");
             mPhonenumber.setText(phone);
             String address = data.getString("address");
@@ -259,8 +269,75 @@ public class CompanyFragment extends Fragment implements RegisterActivity.OnUser
             int businesssize = data.getInt("businesssize");
             pos = mBusinesssizeMap.get(businesssize);
             mBusinesssize.setSelection(pos);
+
+            String zip = "";
+            if (data.has("zip")) {
+                zip = data.getString("zip");
+                mZip.setText(zip);
+            }
+
+            String city = "";
+            if (data.has("city")) {
+                city = data.getString("city");
+                mCity.setText(city);
+            }
+
+            String country = "";
+            if (data.has("country")) {
+                country = data.getString("country");
+                String[] countries = getResources().getStringArray(R.array.countries_array);
+                for (int i = 0; i < countries.length; i++) {
+                    if (country.compareTo(countries[i]) == 0) {
+                        pos = i;
+                        mCountry.setSelection(pos);
+                        break;
+                    }
+                }
+            }
+
+            missingData = (phone.length() == 0 || address.length() == 0 || zip.length() == 0 || city.length() == 0 ||
+                            country.length() == 0 || company.length() == 0 || role.length() == 0) &&
+                (phone.length() != 0 || address.length() != 0 || zip.length() != 0 || city.length() != 0 ||
+                country.length() != 0 || company.length() != 0 || role.length() != 0);
+            // highlight missing fields
+            if (missingData) {
+                if (phone.length() == 0) {
+                    mPhonenumber.setHintTextColor(getResources().getColor(android.R.color.holo_red_light));
+                    mPhonenumber.setHint(R.string.phonenr_required);
+                }
+                if (address.length() == 0) {
+                    mAddress.setHintTextColor(getResources().getColor(android.R.color.holo_red_light));
+                    mAddress.setHint(R.string.address_required);
+                }
+                if (zip.length() == 0) {
+                    mZip.setHintTextColor(getResources().getColor(android.R.color.holo_red_light));
+                    mZip.setHint(R.string.zip_required);
+                }
+                if (city.length() == 0) {
+                    mCity.setHintTextColor(getResources().getColor(android.R.color.holo_red_light));
+                    mCity.setHint(R.string.city_required);
+                }
+                if (company.length() == 0) {
+                    mCompany.setHintTextColor(getResources().getColor(android.R.color.holo_red_light));
+                    mCompany.setHint(R.string.company_name_required);
+                }
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+
+    void showSnackbarMessage(View view, int stringid) {
+        String snackText = getResources().getString(stringid);
+        SpannableStringBuilder ssb = new SpannableStringBuilder()
+            .append(snackText);
+        ssb.setSpan(
+            new ForegroundColorSpan(Color.WHITE),
+            0,
+            snackText.length(),
+            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        snackbar = Snackbar.make(view, ssb,
+            Snackbar.LENGTH_LONG);
+        snackbar.show();
     }
 }

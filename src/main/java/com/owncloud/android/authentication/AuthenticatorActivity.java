@@ -283,6 +283,7 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity
         if (savedInstanceState == null && !directLogin) {
             FirstRunActivity.runIfNeeded(this);
 
+            IntroActivity.runIfNeeded(this);
         }
 
         if (getIntent().getBooleanExtra(FirstRunActivity.EXTRA_EXIT, false)) {
@@ -511,6 +512,9 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity
                 InputStream resources = getResources().openRawResource(R.raw.custom_error);
                 String customError = DisplayUtils.getData(resources);
                 customError = customError.replace("ERROR_TXT", getString(R.string.server_access_error));
+
+                customError = customError.replace("RETRY_TXT", getString(R.string.retry));
+                customError = customError.replace("RETRY_URL", failingUrl);
 
                 if (!customError.isEmpty()) {
                     mLoginWebView.loadData(customError, "text/html; charset=UTF-8", null);

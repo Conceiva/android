@@ -142,6 +142,73 @@
                 android:textColorHint="@color/standard_grey"
                 android:textCursorDrawable="@null" />
 
+            <TextView
+                android:id="@+id/cityLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/address"
+                android:layout_marginTop="20dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:textColor="@color/black"
+                android:text="@string/user_info_city"/>
+
+            <EditText
+                android:id="@+id/city"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/cityLabel"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:backgroundTint="@color/primary"
+                android:hint="@string/city_hint"
+                android:singleLine="true"
+                android:textColorHint="@color/standard_grey"
+                android:textCursorDrawable="@null" />
+
+            <TextView
+                android:id="@+id/zipLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/city"
+                android:layout_marginTop="20dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:textColor="@color/black"
+                android:text="@string/user_info_zip"/>
+
+            <EditText
+                android:id="@+id/zip"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/zipLabel"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:backgroundTint="@color/primary"
+                android:hint="@string/zip_hint"
+                android:singleLine="true"
+                android:textColorHint="@color/standard_grey"
+                android:textCursorDrawable="@null" />
+
+            <TextView
+                android:id="@+id/countryLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/zip"
+                android:layout_marginTop="20dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:textColor="@color/black"
+                android:text="@string/user_info_country"/>
+
+            <Spinner
+                android:id="@+id/country"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/countryLabel"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp" />
+
 
         </RelativeLayout>
     </ScrollView>
@@ -167,6 +234,6 @@
             android:layout_height="wrap_content"
             android:src="@drawable/ic_navigate_next"
             android:background="@drawable/profession_button"
-            android:text="@string/string_next"/>
+            android:text="@string/string_finish"/>
     </LinearLayout>
 </RelativeLayout>

@@ -47,7 +47,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/intro3"
-            android:layout_marginLeft="20dp"
+            android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
             android:src="@drawable/profession" />
 
@@ -86,7 +86,7 @@
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_navigate_next"
                 android:background="@drawable/profession_button"
-                android:text="@string/string_next"/>
+                android:text="@string/string_finish"/>
         </LinearLayout>
 
     </RelativeLayout>

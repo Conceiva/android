@@ -23,6 +23,7 @@
 
     <!-- URLs and flags related -->
     <string name="server_url">https://data.handwerkcloud.de</string>
+    <string name="about_app_url">https://www.handwerkcloud.de/android</string>
     <bool name="show_server_url_input">false</bool>
     <!-- Can be regular (full input), prefix (subdomain input) and suffix (directory input) -->
     <!-- Requires server url to be set -->
@@ -104,7 +105,7 @@
     <bool name="logger_enabled">false</bool>
     <bool name="sourcecode_enabled">false</bool>
     <string name="sourcecode_url" translatable="false">https://github.com/nextcloud/android</string>
-    <bool name="license_enabled">true</bool>
+    <bool name="license_enabled">false</bool>
     <string name="license_url" translatable="false">https://www.gnu.org/licenses/gpl-2.0.html</string>
     <string name="url_imprint"></string>
     <string name="mail_feedback">android@handwerkcloud.de</string>

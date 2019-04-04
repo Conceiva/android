@@ -381,6 +381,12 @@ public class UserInfoActivity extends FileActivity {
         addToListIfNeeded(result, R.drawable.ic_phone, userInfo.getPhone(), R.string.user_info_phone);
         addToListIfNeeded(result, R.drawable.ic_email, userInfo.getEmail(), R.string.user_info_email);
         addToListIfNeeded(result, R.drawable.ic_map_marker, userInfo.getAddress(), R.string.user_info_address);
+        try {
+            addToListIfNeeded(result, R.drawable.baseline_location_city_24, extraUserInfo.getString("city") + " " + extraUserInfo.getString("zip"), R.string.user_info_city);
+            addToListIfNeeded(result, R.drawable.baseline_language_24, extraUserInfo.getString("country"), R.string.user_info_country);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         addToListIfNeeded(result, R.drawable.ic_web, DisplayUtils.beautifyURL(userInfo.getWebsite()),
                     R.string.user_info_website);
         addToListIfNeeded(result, R.drawable.ic_twitter, DisplayUtils.beautifyTwitterHandle(userInfo.getTwitter()),
@@ -638,7 +644,9 @@ public class UserInfoActivity extends FileActivity {
             holder.icon.setImageResource(item.icon);
             holder.text.setText(item.text);
             holder.icon.setContentDescription(item.iconContentDescription);
-            DrawableCompat.setTint(holder.icon.getDrawable(), mTintColor);
+            if (holder.icon.getDrawable() != null) {
+                DrawableCompat.setTint(holder.icon.getDrawable(), mTintColor);
+            }
         }
 
         @Override

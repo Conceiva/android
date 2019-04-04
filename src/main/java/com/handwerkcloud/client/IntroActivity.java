@@ -67,81 +67,6 @@ public class IntroActivity extends FragmentActivity {
     private TextView[] dots;
 
 
-    //AsyncTask<Params, Progress, Result>
-    //Params: type passed in the execute() call, and received in the doInBackground method
-    //Progress: type of object passed in publishProgress calls
-    //Result: object type returned by the doInBackground method, and received by onPostExecute()
-    static class IntroTask extends AsyncTask<String, Integer, JSONObject> {
-        WeakReference<Context> mContext = null;
-        IntroTask(Context context) {
-            mContext = new WeakReference<>(context);
-        }
-
-        @Override
-        protected void onPreExecute() {
-        }
-
-        @Override
-        protected JSONObject doInBackground(String... params) {
-            Account account = AccountUtils.getCurrentOwnCloudAccount(mContext.get());
-            OwnCloudAccount ocAccount = null;
-
-            if (account != null) {
-                try {
-                    ocAccount = new OwnCloudAccount(account, mContext.get());
-                } catch (com.owncloud.android.lib.common.accounts.AccountUtils.AccountNotFoundException e) {
-                    e.printStackTrace();
-                }
-
-                OwnCloudClient client = null;
-                try {
-                    client = OwnCloudClientManagerFactory.getDefaultSingleton().
-                        getClientFor(ocAccount, mContext.get());
-                } catch (com.owncloud.android.lib.common.accounts.AccountUtils.AccountNotFoundException e) {
-                    e.printStackTrace();
-                } catch (OperationCanceledException e) {
-                    e.printStackTrace();
-                } catch (AuthenticatorException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                AccountManager mAccountMgr = AccountManager.get(mContext.get());
-                String userId = mAccountMgr.getUserData(account,
-                    com.owncloud.android.lib.common.accounts.AccountUtils.Constants.KEY_USER_ID);
-
-                UserProfileDataOperation gfo = new UserProfileDataOperation(userId, null);
-                RemoteOperationResult getresult = gfo.execute(client);
-
-                if (getresult.isSuccess()) {
-                    JSONObject data = (JSONObject) getresult.getData().get(0);
-
-                    return data;
-
-                }
-
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(JSONObject data) {
-            super.onPostExecute(data);
-            try {
-                if (data != null && (data.getString("phone").length() == 0 || data.getString("address").length() == 0 ||
-                data.getString("company").length() == 0)) {
-                    Intent i = new Intent(mContext.get(), IntroActivity.class);
-                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    mContext.get().startActivity(i);
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-        }
-    }
-
     /**
      * A simple pager adapter that represents 5 ScreenSlidePageFragment objects, in
      * sequence.
@@ -213,9 +138,15 @@ public class IntroActivity extends FragmentActivity {
     }
 
     public static void runIfNeeded(Context context) {
-        Account account = AccountUtils.getCurrentOwnCloudAccount(context);
-        if (context instanceof FileDisplayActivity) {
-            new IntroTask(context.getApplicationContext()).execute();
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        boolean introShown = preferences.getBoolean("intro_shown", false);
+        if (!introShown) {
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putBoolean("intro_shown", true);
+            editor.commit();
+            Intent i = new Intent(context, IntroActivity.class);
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(i);
         }
     }
 
@@ -270,11 +201,6 @@ public class IntroActivity extends FragmentActivity {
         handleIntent(i);
     }
 
-    void startRegisterActivity() {
-        Intent i = new Intent(this, RegisterActivity.class);
-        startActivityForResult(i, REGISTER_RESULT);
-    }
-
     void handleIntent(Intent i) {
 
         if (i.getAction() == NEXT) {
@@ -282,7 +208,7 @@ public class IntroActivity extends FragmentActivity {
                 mPager.setCurrentItem(mPager.getCurrentItem() + 1);
             }
             else {
-                startRegisterActivity();
+                finish();
             }
         }
         else if (i.getAction() == PREV) {

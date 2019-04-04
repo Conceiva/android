@@ -58,6 +58,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.google.android.material.navigation.NavigationView;
+import com.handwerkcloud.client.IntroActivity;
 import com.handwerkcloud.client.Util;
 import com.owncloud.android.MainApp;
 import com.owncloud.android.R;
@@ -414,6 +415,10 @@ public abstract class DrawerActivity extends ToolbarActivity implements DisplayU
         setDrawerMenuItemChecked(menuItem.getItemId());
 
         switch (menuItem.getItemId()) {
+            case R.id.nav_welcome:
+                Intent i = new Intent(this, IntroActivity.class);
+                startActivity(i);
+                break;
             case R.id.nav_image_meter:
                 Intent launchIntent = getPackageManager().getLaunchIntentForPackage("de.dirkfarin.imagemeter");
                 if (launchIntent != null) {

@@ -219,6 +219,10 @@ public class Preferences extends PreferenceActivity
         if (pAboutApp != null) {
             pAboutApp.setTitle(String.format(getString(R.string.about_android), getString(R.string.app_name)));
             pAboutApp.setSummary(String.format(getString(R.string.about_version), appVersion));
+            pAboutApp.setOnPreferenceClickListener(preference -> {
+                DisplayUtils.startLinkIntent(this, R.string.about_app_url);
+                return true;
+            });
         }
 
         // license

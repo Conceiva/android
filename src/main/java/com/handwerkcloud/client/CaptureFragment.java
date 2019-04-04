@@ -9,11 +9,15 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.hardware.Camera;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
@@ -27,6 +31,7 @@ import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
+import com.google.android.material.snackbar.Snackbar;
 import com.owncloud.android.R;
 
 import java.io.File;
@@ -118,12 +123,20 @@ public class CaptureFragment extends Fragment implements OCRActivity.OnCaptureEv
         @Override
         protected void onPostExecute(String filename) {
             super.onPostExecute(filename);
-            String previewFilename = filename.substring(0, filename.lastIndexOf('/') + 1) + "/Highlightscan.pdf";
-            Intent i = new Intent(getActivity(), OCRActivity.class);
-            i.setAction(OCRActivity.ACTION_DISPLAY_PREVIEW);
-            i.putExtra(OCRActivity.EXTRA_FILENAME, filename);
-            i.putExtra(OCRActivity.EXTRA_PREVIEW_FILENAME, previewFilename);
-            startActivity(i);
+            if (filename != null) {
+                String previewFilename = filename.substring(0, filename.lastIndexOf('/') + 1) + "/Highlightscan.pdf";
+                Intent i = new Intent(getActivity(), OCRActivity.class);
+                i.setAction(OCRActivity.ACTION_DISPLAY_PREVIEW);
+                i.putExtra(OCRActivity.EXTRA_FILENAME, filename);
+                i.putExtra(OCRActivity.EXTRA_PREVIEW_FILENAME, previewFilename);
+                startActivity(i);
+            }
+
+            else {
+                Intent i = new Intent(getActivity(), OCRActivity.class);
+                i.setAction(OCRActivity.ACTION_SCAN_FAILED);
+                startActivity(i);
+            }
         }
     }
 

@@ -124,21 +124,6 @@ public class ProfessionFragment extends Fragment implements RegisterActivity.OnU
             }
         });
 
-        Button prev = view.findViewById(R.id.prev);
-        Bundle args = getArguments();
-        if (args.containsKey("EDIT")) {
-            prev.setVisibility(View.GONE);
-        }
-        else {
-            prev.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    getActivity().setResult(Activity.RESULT_CANCELED);
-                    getActivity().finish();
-                }
-            });
-        }
-
         carpenter = view.findViewById(R.id.carpenter);
         carpenter.setOnClickListener(new View.OnClickListener() {
             @Override

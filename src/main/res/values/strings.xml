@@ -877,8 +877,8 @@
     <string name="intro_datamanagement">Data management, document entry &amp; recognition</string>
     <string name="intro_calendar">Calendar, mission planning</string>
     <string name="intro_andmore">And much more</string>
-    <string name="intro3">FOR ALL EXACTLY THE SUITABLE SOLUTION.</string>
-    <string name="intro_select_profession">In the next step, select your profession so that we can provide you with personalized content tailored to your industry.</string>
+    <string name="intro3">FOR EXACTLY THE SUITABLE SOLUTION.</string>
+    <string name="intro_select_profession">We can provide you with personalized content tailored to your industry.</string>
     <string name="choose_profession">Choose your profession(s):</string>
     <string name="role">Role</string>
     <string name="company">Company</string>
@@ -902,6 +902,7 @@
     <string name="add_to_imagemeter">Add to ImageMeter</string>
     <string name="string_next">Next</string>
     <string name="string_prev">Prev</string>
+    <string name="string_finish">Finish</string>
     <string name="your_selection">Your selection: %1$s</string>
     <string name="confirm_selection">Is that correct? Click Next to continue.</string>
     <string name="change">Change</string>
@@ -946,7 +947,20 @@
     <string name="imagemeter_not_installed">ImageMeter is not currently installed.  To install the app go to Google Play.</string>
     <string name="invalid_filename">The filename contains illegal characters</string>
     <string name="company_name_required">Company name is required</string>
+    <string name="role_required">Role is required</string>
+    <string name="businesssize_required">Employees is required</string>
     <string name="phonenr_required">Phone number is required</string>
     <string name="address_required">Address is required</string>
-    <string name="server_access_error">Unable to connect to the HandwerkCloud server, please check your Internet connection.</string>
+    <string name="zip_required">Zip is required</string>
+    <string name="city_required">City is required</string>
+    <string name="country_required">Country is required</string>
+    <string name="server_access_error">Unable to connect to the HandwerkCloud server.  Please check your Internet connection.</string>
+    <string name="retry">Retry</string>
+    <string name="failed_to_create_document">Failed to create document.</string>
+    <string name="welcome">Welcome</string>
+    <string name="user_info_zip">Zip</string>
+    <string name="user_info_city">City</string>
+    <string name="user_info_country">Country</string>
+    <string name="zip_hint">Zip code</string>
+    <string name="city_hint">City</string>
 </resources>

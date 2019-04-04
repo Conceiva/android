@@ -87,7 +87,7 @@
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_navigate_next"
                 android:background="@drawable/profession_button"
-                android:text="@string/string_next"/>
+                android:text="@string/string_finish"/>
         </LinearLayout>
 
     </RelativeLayout>
