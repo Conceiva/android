@@ -963,4 +963,7 @@
     <string name="user_info_country">Country</string>
     <string name="zip_hint">Zip code</string>
     <string name="city_hint">City</string>
+    <string name="failed_to_update_data">Failed to update information.</string>
+    <string name="exit">Exit</string>
+    <string name="exit_message">Exit HandwerkCloud?</string>
 </resources>

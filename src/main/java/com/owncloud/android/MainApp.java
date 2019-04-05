@@ -63,6 +63,7 @@ import com.owncloud.android.lib.common.OwnCloudClientManagerFactory.Policy;
 import com.owncloud.android.lib.common.utils.Log_OC;
 import com.owncloud.android.lib.resources.status.OwnCloudVersion;
 import com.owncloud.android.ui.activity.ContactsPreferenceActivity;
+import com.owncloud.android.ui.activity.FileDisplayActivity;
 import com.owncloud.android.ui.activity.Preferences;
 import com.owncloud.android.ui.activity.SyncedFoldersActivity;
 import com.owncloud.android.ui.activity.WhatsNewActivity;
@@ -193,7 +194,13 @@ public class MainApp extends MultiDexApplication {
                 Log_OC.d(activity.getClass().getSimpleName(), "onCreate(Bundle) starting");
                 WhatsNewActivity.runIfNeeded(activity);
                 PassCodeManager.getPassCodeManager().onActivityCreated(activity);
-                RegisterActivity.runIfNeeded(activity);
+
+                if (activity instanceof FileDisplayActivity) {
+                    if (!activity.getIntent().hasExtra("EXIT")) {
+                        RegisterActivity.runIfNeeded(activity);
+                    }
+                }
+
                 if (!(activity instanceof IntroActivity) &&
                     !(activity instanceof RegisterActivity)) {
                     TrialActivity.runIfNeeded(activity);

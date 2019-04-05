@@ -20,6 +20,7 @@
 
 package com.owncloud.android.ui.fragment;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,6 +38,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
+
+import static android.view.View.GONE;
 
 /**
  * FAB menu {@link android.app.Dialog} styled as a bottom sheet for main actions.
@@ -76,6 +79,10 @@ public class OCFileListBottomSheetDialog extends BottomSheetDialog {
 
         if (getWindow() != null) {
             getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        }
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+            view.findViewById(R.id.menu_ocr).setVisibility(GONE);
         }
 
         unbinder = ButterKnife.bind(this, view);

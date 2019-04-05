@@ -151,6 +151,7 @@ public class FileDisplayActivity extends HookActivity
         OnEnforceableRefreshListener, SortingOrderDialogFragment.OnSortingOrderListener,
         SendShareDialog.SendShareDialogDownloader {
 
+    public static final String EXIT = "EXIT";
     public static final String RESTART = "RESTART";
 
     private SyncBroadcastReceiver mSyncBroadcastReceiver;
@@ -552,6 +553,8 @@ public class FileDisplayActivity extends HookActivity
         if (ACTION_DETAILS.equalsIgnoreCase(intent.getAction())) {
             setIntent(intent);
             setFile(intent.getParcelableExtra(EXTRA_FILE));
+        } else if (EXIT.equals(intent.getAction())) {
+            finish();
         } else if (RESTART.equals(intent.getAction())) {
             finish();
             startActivity(intent);

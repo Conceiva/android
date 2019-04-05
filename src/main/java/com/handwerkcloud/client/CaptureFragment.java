@@ -123,7 +123,7 @@ public class CaptureFragment extends Fragment implements OCRActivity.OnCaptureEv
         @Override
         protected void onPostExecute(String filename) {
             super.onPostExecute(filename);
-            if (filename != null) {
+            if (filename != null && getActivity() != null) {
                 String previewFilename = filename.substring(0, filename.lastIndexOf('/') + 1) + "/Highlightscan.pdf";
                 Intent i = new Intent(getActivity(), OCRActivity.class);
                 i.setAction(OCRActivity.ACTION_DISPLAY_PREVIEW);

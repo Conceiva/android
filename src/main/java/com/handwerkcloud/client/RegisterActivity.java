@@ -6,20 +6,27 @@ import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.widget.ProgressBar;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.owncloud.android.R;
 import com.owncloud.android.authentication.AccountUtils;
 import com.owncloud.android.lib.common.OwnCloudAccount;
 import com.owncloud.android.lib.common.OwnCloudClient;
 import com.owncloud.android.lib.common.OwnCloudClientManagerFactory;
 import com.owncloud.android.lib.common.operations.RemoteOperationResult;
+import com.owncloud.android.ui.activity.FileDisplayActivity;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -29,6 +36,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
@@ -106,6 +114,7 @@ public class RegisterActivity extends FragmentActivity {
     static class RegisterTask extends AsyncTask<String, Integer, JSONObject> {
         WeakReference<Context> mContext = null;
         WeakReference<RegisterActivity> mRegisterActivity = null;
+        boolean mFailed = false;
         RegisterTask(Context context, RegisterActivity activity) {
             mContext = new WeakReference<>(context);
             mRegisterActivity = new WeakReference<>(activity);
@@ -202,6 +211,9 @@ public class RegisterActivity extends FragmentActivity {
                             editor.putString(EXTRA_COUNTRY, "");
                             editor.commit();
                         }
+                        else {
+                            mFailed = true;
+                        }
                     }
                 }
             }
@@ -213,7 +225,31 @@ public class RegisterActivity extends FragmentActivity {
             super.onPostExecute(data);
             if (mRegisterActivity.get() != null) {
                 if (mRegisterActivity.get().mUpdateBeforeFinish && data == null) {
-                    mRegisterActivity.get().finish();
+                    mRegisterActivity.get().mLoading.setVisibility(View.GONE);
+                    if (mFailed) {
+                        String snackText = mRegisterActivity.get().getResources().getString(R.string.failed_to_update_data);
+                        SpannableStringBuilder ssb = new SpannableStringBuilder()
+                            .append(snackText);
+                        ssb.setSpan(
+                            new ForegroundColorSpan(Color.WHITE),
+                            0,
+                            snackText.length(),
+                            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        Snackbar snackbar = Snackbar.make(mRegisterActivity.get().mPager, ssb,
+                            Snackbar.LENGTH_LONG);
+                        snackbar.setAction(R.string.retry, new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                new RegisterTask(mRegisterActivity.get(), mRegisterActivity.get()).execute("POST");
+                                mRegisterActivity.get().mLoading.setVisibility(View.VISIBLE);
+                                snackbar.dismiss();
+                            }
+                        });
+                        snackbar.show();
+                    }
+                    else {
+                        mRegisterActivity.get().finish();
+                    }
                 }
                 else {
                     Iterator it = mRegisterActivity.get().mUserDataListener.iterator();
@@ -291,7 +327,23 @@ public class RegisterActivity extends FragmentActivity {
             mPager.setCurrentItem(current);
         }
         else {
-            super.onBackPressed();
+            if (!mEditing) {
+                new AlertDialog.Builder(this)
+                    .setMessage(R.string.exit_message)
+                    .setPositiveButton(R.string.exit, new DialogInterface.OnClickListener() {
+
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            Intent i = new Intent(RegisterActivity.this, FileDisplayActivity.class);
+                            i.setAction(FileDisplayActivity.EXIT);
+                            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            startActivity(i);
+                            finish();
+                        }})
+                    .setNegativeButton(R.string.common_cancel, null).show();
+            }
+            else {
+                super.onBackPressed();
+            }
         }
     }
 

@@ -506,7 +506,7 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity
             }
 
             public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-                progressBar.setVisibility(View.GONE);
+                /*progressBar.setVisibility(View.GONE);
                 mLoginWebView.setVisibility(View.VISIBLE);
 
                 InputStream resources = getResources().openRawResource(R.raw.custom_error);
@@ -518,7 +518,34 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity
 
                 if (!customError.isEmpty()) {
                     mLoginWebView.loadData(customError, "text/html; charset=UTF-8", null);
+                }*/
+                mLoginWebView.setVisibility(View.INVISIBLE);
+                webViewLoginMethod = false;
+
+                setContentView(R.layout.account_setup);
+
+                // initialize general UI elements
+                initOverallUi();
+
+                mPasswordInputLayout.setVisibility(View.VISIBLE);
+                mUsernameInputLayout.setVisibility(View.VISIBLE);
+                mUsernameInput.requestFocus();
+                mOAuth2Check.setVisibility(View.INVISIBLE);
+                mAuthStatusView.setVisibility(View.INVISIBLE);
+                mServerStatusView.setVisibility(View.INVISIBLE);
+                mTestServerButton.setVisibility(View.INVISIBLE);
+                forceOldLoginMethod = true;
+                mOkButton.setVisibility(View.VISIBLE);
+
+                initServerPreFragment(null);
+
+                String baseURLValue = mServerInfo.mBaseUrl;
+                if (baseURLValue.endsWith(WEB_LOGIN)) {
+                    baseURLValue = baseURLValue.replace(WEB_LOGIN, "");
                 }
+                mHostUrlInput.setText(baseURLValue);
+
+                checkOcServer();
             }
         });
     }
