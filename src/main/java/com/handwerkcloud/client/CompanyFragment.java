@@ -32,6 +32,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.slf4j.MDC.put;
 
@@ -106,6 +108,16 @@ public class CompanyFragment extends Fragment implements RegisterActivity.OnUser
         int pos = mRoleMap.get(role);
         String[] values = context.getResources().getStringArray(R.array.roles_array);
         return values[pos];
+    }
+
+    public static String getCountryName(Context context, String country) {
+        String[] countries = context.getResources().getStringArray(R.array.country_codes_array);
+        String[] countryNames = context.getResources().getStringArray(R.array.countries_array);
+        Map<String, String> countryMap = new HashMap<>();
+        for (int i = 0; i < countries.length; i++) {
+            countryMap.put(countries[i], countryNames[i]);
+        }
+        return countryMap.get(country);
     }
 
     @Override
@@ -231,7 +243,7 @@ public class CompanyFragment extends Fragment implements RegisterActivity.OnUser
                 i.putExtra(RegisterActivity.EXTRA_ADDRESS, mAddress.getText().toString());
                 i.putExtra(RegisterActivity.EXTRA_ZIP, mZip.getText().toString());
                 i.putExtra(RegisterActivity.EXTRA_CITY, mCity.getText().toString());
-                String[] countries = getResources().getStringArray(R.array.countries_array);
+                String[] countries = getResources().getStringArray(R.array.country_codes_array);
                 i.putExtra(RegisterActivity.EXTRA_COUNTRY, countries[mCountry.getSelectedItemPosition()]);
                 i.putExtra(RegisterActivity.EXTRA_BUSINESSSIZE, mBusinesssizes[mBusinesssize.getSelectedItemPosition()]);
                 getActivity().startActivity(i);
@@ -285,7 +297,7 @@ public class CompanyFragment extends Fragment implements RegisterActivity.OnUser
             String country = "";
             if (data.has("country")) {
                 country = data.getString("country");
-                String[] countries = getResources().getStringArray(R.array.countries_array);
+                String[] countries = getResources().getStringArray(R.array.country_codes_array);
                 for (int i = 0; i < countries.length; i++) {
                     if (country.compareTo(countries[i]) == 0) {
                         pos = i;

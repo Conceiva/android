@@ -383,7 +383,7 @@ public class UserInfoActivity extends FileActivity {
         addToListIfNeeded(result, R.drawable.ic_map_marker, userInfo.getAddress(), R.string.user_info_address);
         try {
             addToListIfNeeded(result, R.drawable.baseline_location_city_24, extraUserInfo.getString("city") + " " + extraUserInfo.getString("zip"), R.string.user_info_city);
-            addToListIfNeeded(result, R.drawable.baseline_language_24, extraUserInfo.getString("country"), R.string.user_info_country);
+            addToListIfNeeded(result, R.drawable.baseline_language_24, CompanyFragment.getCountryName(this, extraUserInfo.getString("country")), R.string.user_info_country);
         } catch (JSONException e) {
             e.printStackTrace();
         }
