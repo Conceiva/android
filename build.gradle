@@ -58,10 +58,10 @@ repositories {
 }
 
 // semantic versioning for version code
-def versionMajor = 1
+def versionMajor = 0
 def versionMinor = 0
-def versionPatch = 0
-def versionBuild = 7 // 0-50=Alpha / 51-98=RC / 90-99=stable
+def versionPatch = 1
+def versionBuild = 0
 
 def taskRequest = getGradle().getStartParameter().getTaskRequests().toString()
 if (taskRequest.contains("Gplay") || taskRequest.contains("findbugs") || taskRequest.contains("lint")) {
@@ -95,15 +95,8 @@ android {
 
         multiDexEnabled true
 
-        versionCode versionMajor * 10000000 + versionMinor * 10000 + versionPatch * 100 + versionBuild
-
-        if (versionBuild > 89) {
-            versionName "${versionMajor}.${versionMinor}.${versionPatch}"
-        } else if (versionBuild > 50) {
-            versionName "${versionMajor}.${versionMinor}.${versionPatch} RC" + (versionBuild - 50)
-        } else {
-            versionName "${versionMajor}.${versionMinor}.${versionPatch} Alpha" + (versionBuild + 1)
-        }
+        versionCode = ((versionMajor * 1000 + versionMinor) * 100 + versionPatch) * 10 + versionBuild
+        versionName = "${versionMajor}.${versionMinor}.${versionPatch}"
 
         // adapt structure from Eclipse to Gradle/Android Studio expectations;
         // see http://tools.android.com/tech-docs/new-build-system/user-guide#TOC-Configuring-the-Structure
@@ -137,8 +130,7 @@ android {
         }
 
         ndk {
-            abiFilters "armeabi"
-// , "armeabi-v7a", "x86", "mips"
+            abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
         }
     }
 
