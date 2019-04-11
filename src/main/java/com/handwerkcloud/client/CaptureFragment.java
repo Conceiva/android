@@ -5,6 +5,8 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import android.Manifest;
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -62,16 +64,27 @@ public class CaptureFragment extends Fragment implements OCRActivity.OnCaptureEv
     //Params: type passed in the execute() call, and received in the doInBackground method
     //Progress: type of object passed in publishProgress calls
     //Result: object type returned by the doInBackground method, and received by onPostExecute()
-    public class CaptureTask extends AsyncTask<byte[], Integer, String> {
+    public static class CaptureTask extends AsyncTask<byte[], Integer, String> {
 
         private int rotation;
+        static private WeakReference<Activity> mActivity = null;
+        WeakReference<TextRecognizer> mTextRecognizer;
+
+        CaptureTask(Activity activity, TextRecognizer textRecognizer) {
+            mActivity = new WeakReference<>(activity);
+            mTextRecognizer = new WeakReference<>(textRecognizer);
+        }
+
+        public static void setActivity(Activity activity) {
+            mActivity = new WeakReference<>(activity);
+        }
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            Intent i = new Intent(getActivity(), OCRActivity.class);
+            Intent i = new Intent(mActivity.get(), OCRActivity.class);
             i.setAction(OCRActivity.ACTION_CAPTURE_STARTED);
-            startActivity(i);
+            mActivity.get().startActivity(i);
         }
 
         @Override
@@ -95,18 +108,18 @@ public class CaptureFragment extends Fragment implements OCRActivity.OnCaptureEv
                     bitmap = rotatedBitmap;
                 }
 
-                SparseArray<TextBlock> items = textRecognizer.get().detect(new Frame.Builder().setBitmap(bitmap).build());
-                filename = OCRActivity.savePDF(items, bitmap, getContext());
+                SparseArray<TextBlock> items = mTextRecognizer.get().detect(new Frame.Builder().setBitmap(bitmap).build());
+                filename = OCRActivity.savePDF(items, bitmap, mActivity.get());
                 if (filename == null) {
                     return filename;
                 }
 
-                int permissionCheck = ContextCompat.checkSelfPermission(getActivity(),
+                int permissionCheck = ContextCompat.checkSelfPermission(mActivity.get(),
                     READ_EXTERNAL_STORAGE);
 
                 if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(
-                        getActivity(),
+                        mActivity.get(),
                         new String[]{READ_EXTERNAL_STORAGE},
                         OCRActivity.PERMISSION_CODE
                     );
@@ -123,24 +136,37 @@ public class CaptureFragment extends Fragment implements OCRActivity.OnCaptureEv
         @Override
         protected void onPostExecute(String filename) {
             super.onPostExecute(filename);
-            if (filename != null && getActivity() != null) {
+            if (filename != null && mActivity.get() != null) {
                 String previewFilename = filename.substring(0, filename.lastIndexOf('/') + 1) + "/Highlightscan.pdf";
-                Intent i = new Intent(getActivity(), OCRActivity.class);
+                Intent i = new Intent(mActivity.get(), OCRActivity.class);
                 i.setAction(OCRActivity.ACTION_DISPLAY_PREVIEW);
                 i.putExtra(OCRActivity.EXTRA_FILENAME, filename);
                 i.putExtra(OCRActivity.EXTRA_PREVIEW_FILENAME, previewFilename);
-                startActivity(i);
+                mActivity.get().startActivity(i);
             }
-
             else {
-                Intent i = new Intent(getActivity(), OCRActivity.class);
-                i.setAction(OCRActivity.ACTION_SCAN_FAILED);
-                startActivity(i);
+                if (mActivity.get() != null) {
+                    Intent i = new Intent(mActivity.get(), OCRActivity.class);
+                    i.setAction(OCRActivity.ACTION_SCAN_FAILED);
+                    mActivity.get().startActivity(i);
+                }
             }
         }
     }
 
     public CaptureFragment() {
+
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        Activity a;
+
+        if (context instanceof Activity){
+            CaptureTask.setActivity((Activity) context);
+        }
 
     }
 
@@ -236,7 +262,7 @@ public class CaptureFragment extends Fragment implements OCRActivity.OnCaptureEv
             private File imageFile;
             @Override
             public void onPictureTaken(byte[] bytes) {
-                new CaptureTask().execute(bytes);
+                new CaptureTask(getActivity(), textRecognizer.get()).execute(bytes);
             }
         });
 
