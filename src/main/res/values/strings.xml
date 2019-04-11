@@ -981,4 +981,6 @@
     <string name="failed_to_update_data">Failed to update information.</string>
     <string name="exit">Exit</string>
     <string name="exit_message">Exit HandwerkCloud?</string>
+    <string name="upload_started">Your file is being uploaded to the server.</string>
+    <string name="do_not_show_again">Do not show again.</string>
 </resources>

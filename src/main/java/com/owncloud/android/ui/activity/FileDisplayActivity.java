@@ -56,6 +56,7 @@ import android.widget.ImageView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.snackbar.Snackbar;
+import com.handwerkcloud.client.Util;
 import com.nextcloud.client.di.Injectable;
 import com.owncloud.android.MainApp;
 import com.owncloud.android.R;
@@ -975,6 +976,7 @@ public class FileDisplayActivity extends HookActivity
 
             requestUploadOfFilesFromFileSystem(data, resultCode);
 
+            Util.promptUploadStarted(this);
         } else if (requestCode == REQUEST_CODE__UPLOAD_FROM_CAMERA &&
                 (resultCode == RESULT_OK || resultCode == UploadFilesActivity.RESULT_OK_AND_MOVE)) {
 
@@ -1595,15 +1597,7 @@ public class FileDisplayActivity extends HookActivity
          */
         @Override
         public void onReceive(Context context, Intent intent) {
-            Snackbar.make(findViewById(android.R.id.content), intent.getStringExtra(EXTRA_ERROR_TEXT), Snackbar.LENGTH_INDEFINITE)
-                .setAction(R.string.retry, new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        FileUploader.UploadRequester requester = new FileUploader.UploadRequester();
-                        new Thread(() -> requester.retryFailedUploads(view.getContext(), null, null)).start();
-                    }
-                }).show();
-
+            Util.promptUploadFailed(FileDisplayActivity.this, intent.getStringExtra(EXTRA_ERROR_TEXT));
         }
     }
 
