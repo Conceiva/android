@@ -60,6 +60,8 @@ import com.bumptech.glide.request.target.SimpleTarget;
 import com.google.android.material.navigation.NavigationView;
 import com.handwerkcloud.client.IntroActivity;
 import com.handwerkcloud.client.Util;
+import com.nextcloud.client.di.Injectable;
+import com.nextcloud.client.preferences.AppPreferences;
 import com.owncloud.android.MainApp;
 import com.owncloud.android.R;
 import com.owncloud.android.authentication.AccountUtils;
@@ -68,7 +70,6 @@ import com.owncloud.android.datamodel.ArbitraryDataProvider;
 import com.owncloud.android.datamodel.ExternalLinksProvider;
 import com.owncloud.android.datamodel.FileDataStorageManager;
 import com.owncloud.android.datamodel.OCFile;
-import com.owncloud.android.db.PreferenceManager;
 import com.owncloud.android.lib.common.ExternalLink;
 import com.owncloud.android.lib.common.ExternalLinkType;
 import com.owncloud.android.lib.common.OwnCloudAccount;
@@ -111,6 +112,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable;
@@ -121,7 +124,9 @@ import androidx.drawerlayout.widget.DrawerLayout;
  * Base class to handle setup of the drawer implementation including user switching and avatar fetching and fallback
  * generation.
  */
-public abstract class DrawerActivity extends ToolbarActivity implements DisplayUtils.AvatarGenerationListener {
+public abstract class DrawerActivity extends ToolbarActivity
+    implements DisplayUtils.AvatarGenerationListener, Injectable {
+
     private static final String TAG = DrawerActivity.class.getSimpleName();
     private static final String KEY_IS_ACCOUNT_CHOOSER_ACTIVE = "IS_ACCOUNT_CHOOSER_ACTIVE";
     private static final String KEY_CHECKED_MENU_ITEM = "CHECKED_MENU_ITEM";
@@ -213,6 +218,9 @@ public abstract class DrawerActivity extends ToolbarActivity implements DisplayU
 
     private ExternalLinksProvider externalLinksProvider;
     private ArbitraryDataProvider arbitraryDataProvider;
+
+    @Inject
+    AppPreferences preferences;
 
     /**
      * Initializes the drawer, its content and highlights the menu item with the given id.
@@ -393,7 +401,7 @@ public abstract class DrawerActivity extends ToolbarActivity implements DisplayU
                 showFiles(false);
                 break;
             case R.id.nav_bar_settings:
-                Intent settingsIntent = new Intent(getApplicationContext(), Preferences.class);
+                Intent settingsIntent = new Intent(getApplicationContext(), SettingsActivity.class);
                 startActivity(settingsIntent);
                 break;
             default:
@@ -513,7 +521,7 @@ public abstract class DrawerActivity extends ToolbarActivity implements DisplayU
                 startActivity(contactsIntent);
                 break;
             case R.id.nav_settings:
-                Intent settingsIntent = new Intent(getApplicationContext(), Preferences.class);
+                Intent settingsIntent = new Intent(getApplicationContext(), SettingsActivity.class);
                 startActivity(settingsIntent);
                 break;
             case R.id.nav_participate:
@@ -774,7 +782,7 @@ public abstract class DrawerActivity extends ToolbarActivity implements DisplayU
                         Menu.NONE,
                         MENU_ORDER_ACCOUNT,
                         account.name)
-                        .setIcon(R.drawable.ic_user);
+                    .setIcon(R.drawable.ic_user);
             }
         }
 
@@ -784,7 +792,7 @@ public abstract class DrawerActivity extends ToolbarActivity implements DisplayU
                 getResources().getString(R.string.prefs_add_account)).setIcon(R.drawable.ic_account_plus);
         mNavigationView.getMenu().add(R.id.drawer_menu_accounts, R.id.drawer_menu_account_manage,
                 MENU_ORDER_ACCOUNT_FUNCTION,
-                getResources().getString(R.string.drawer_manage_accounts)).setIcon(R.drawable.ic_settings);
+                getResources().getString(R.string.drawer_manage_accounts)).setIcon(R.drawable.nav_settings);
 
         // adding sets menu group back to visible, so safety check and setting invisible
         showMenu();
@@ -979,7 +987,7 @@ public abstract class DrawerActivity extends ToolbarActivity implements DisplayU
                         }
                     };
 
-                    DisplayUtils.downloadIcon(this, firstQuota.iconUrl, target, R.drawable.ic_link_grey, size, size);
+                    DisplayUtils.downloadIcon(this, firstQuota.iconUrl, target, R.drawable.ic_link, size, size);
 
                 } else {
                     mQuotaTextLink.setVisibility(View.GONE);
@@ -1124,7 +1132,7 @@ public abstract class DrawerActivity extends ToolbarActivity implements DisplayU
                     }
                 };
 
-                DisplayUtils.downloadIcon(this, link.iconUrl, target, R.drawable.ic_link_grey, size, size);
+                DisplayUtils.downloadIcon(this, link.iconUrl, target, R.drawable.ic_link, size, size);
             }
 
             setDrawerMenuItemChecked(mCheckedMenuItem);
@@ -1138,7 +1146,7 @@ public abstract class DrawerActivity extends ToolbarActivity implements DisplayU
             if (drawable != null) {
                 menuItem.setIcon(ThemeUtils.tintDrawable(drawable, greyColor));
             } else {
-                menuItem.setIcon(R.drawable.ic_link_grey);
+                menuItem.setIcon(R.drawable.ic_link);
             }
         }
     }
@@ -1321,7 +1329,7 @@ public abstract class DrawerActivity extends ToolbarActivity implements DisplayU
 
             if (result == RequestCredentialsActivity.KEY_CHECK_RESULT_CANCEL) {
                 Log_OC.d(TAG, "PassCodeManager cancelled");
-                PreferenceManager.setLockTimestamp(this, 0);
+                preferences.setLockTimestamp(0);
                 finish();
             }
         }

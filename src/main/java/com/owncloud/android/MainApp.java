@@ -25,10 +25,10 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.Service;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -41,9 +41,12 @@ import android.view.WindowManager;
 import com.evernote.android.job.JobManager;
 import com.evernote.android.job.JobRequest;
 import com.handwerkcloud.client.IntroActivity;
-import com.handwerkcloud.client.LoggingExceptionHandler;
 import com.handwerkcloud.client.RegisterActivity;
 import com.handwerkcloud.client.TrialActivity;
+import com.nextcloud.client.di.ActivityInjector;
+import com.nextcloud.client.di.DaggerAppComponent;
+import com.nextcloud.client.preferences.AppPreferences;
+import com.nextcloud.client.preferences.PreferenceManager;
 import com.owncloud.android.authentication.AccountUtils;
 import com.owncloud.android.authentication.PassCodeManager;
 import com.owncloud.android.datamodel.ArbitraryDataProvider;
@@ -55,7 +58,6 @@ import com.owncloud.android.datamodel.SyncedFolderProvider;
 import com.owncloud.android.datamodel.ThumbnailsCacheManager;
 import com.owncloud.android.datastorage.DataStorageProvider;
 import com.owncloud.android.datastorage.StoragePoint;
-import com.owncloud.android.db.PreferenceManager;
 import com.owncloud.android.jobs.MediaFoldersDetectionJob;
 import com.owncloud.android.jobs.NCJobCreator;
 import com.owncloud.android.lib.common.OwnCloudClientManagerFactory;
@@ -64,7 +66,6 @@ import com.owncloud.android.lib.common.utils.Log_OC;
 import com.owncloud.android.lib.resources.status.OwnCloudVersion;
 import com.owncloud.android.ui.activity.ContactsPreferenceActivity;
 import com.owncloud.android.ui.activity.FileDisplayActivity;
-import com.owncloud.android.ui.activity.Preferences;
 import com.owncloud.android.ui.activity.SyncedFoldersActivity;
 import com.owncloud.android.ui.activity.WhatsNewActivity;
 import com.owncloud.android.ui.notifications.NotificationUtils;
@@ -81,11 +82,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
 import androidx.annotation.RequiresApi;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.util.Pair;
+import androidx.fragment.app.Fragment;
 import androidx.multidex.MultiDexApplication;
+import dagger.android.AndroidInjector;
+import dagger.android.DispatchingAndroidInjector;
+import dagger.android.HasActivityInjector;
+import dagger.android.HasServiceInjector;
+import dagger.android.support.HasSupportFragmentInjector;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import static com.owncloud.android.ui.activity.ContactsPreferenceActivity.PREFERENCE_CONTACTS_AUTOMATIC_BACKUP;
@@ -97,7 +106,10 @@ import static com.owncloud.android.ui.activity.ContactsPreferenceActivity.PREFER
  * Contains methods to build the "static" strings. These strings were before constants in different
  * classes
  */
-public class MainApp extends MultiDexApplication {
+public class MainApp extends MultiDexApplication implements
+    HasActivityInjector,
+    HasSupportFragmentInjector,
+    HasServiceInjector {
 
     public static final OwnCloudVersion OUTDATED_SERVER_VERSION = OwnCloudVersion.nextcloud_12;
     public static final OwnCloudVersion MINIMUM_SUPPORTED_SERVER_VERSION = OwnCloudVersion.nextcloud_12;
@@ -117,7 +129,20 @@ public class MainApp extends MultiDexApplication {
 
     private static boolean mOnlyOnDevice;
 
-    private SharedPreferences appPrefs;
+    @Inject
+    AppPreferences preferences;
+
+    @Inject
+    DispatchingAndroidInjector<Activity> dispatchingActivityInjector;
+
+    @Inject
+    DispatchingAndroidInjector<Fragment> dispatchingFragmentInjector;
+
+    @Inject
+    DispatchingAndroidInjector<Service> dispatchingServiceInjector;
+
+    private PassCodeManager passCodeManager;
+
     @SuppressWarnings("unused")
     private boolean mBound;
 
@@ -125,19 +150,24 @@ public class MainApp extends MultiDexApplication {
     @Override
     public void onCreate() {
         super.onCreate();
-        //new LoggingExceptionHandler(this);
+
+        DaggerAppComponent.builder()
+            .application(this)
+            .build()
+            .inject(this);
+
+        registerActivityLifecycleCallbacks(new ActivityInjector());
+
         JobManager.create(this).addJobCreator(new NCJobCreator());
         MainApp.mContext = getApplicationContext();
 
         new SecurityUtils();
         DisplayUtils.useCompatVectorIfNeeded();
 
-        appPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-
         fixStoragePath();
+        passCodeManager = new PassCodeManager(preferences);
 
-        MainApp.storagePath = appPrefs.getString(Preferences.PreferenceKeys.STORAGE_PATH,
-                getApplicationContext().getFilesDir().getAbsolutePath());
+        MainApp.storagePath = preferences.getStoragePath(getApplicationContext().getFilesDir().getAbsolutePath());
 
         boolean isSamlAuth = AUTH_ON.equals(getString(R.string.auth_method_saml_web_sso));
 
@@ -192,8 +222,6 @@ public class MainApp extends MultiDexApplication {
             @Override
             public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
                 Log_OC.d(activity.getClass().getSimpleName(), "onCreate(Bundle) starting");
-                WhatsNewActivity.runIfNeeded(activity);
-                PassCodeManager.getPassCodeManager().onActivityCreated(activity);
 
                 if (activity instanceof FileDisplayActivity) {
                     if (!activity.getIntent().hasExtra("EXIT")) {
@@ -205,12 +233,14 @@ public class MainApp extends MultiDexApplication {
                     !(activity instanceof RegisterActivity)) {
                     TrialActivity.runIfNeeded(activity);
                 }
+                WhatsNewActivity.runIfNeeded(activity, preferences);
+                passCodeManager.onActivityCreated(activity);
             }
 
             @Override
             public void onActivityStarted(Activity activity) {
                 Log_OC.d(activity.getClass().getSimpleName(), "onStart() starting");
-                PassCodeManager.getPassCodeManager().onActivityStarted(activity);
+                passCodeManager.onActivityStarted(activity);
             }
 
             @Override
@@ -226,7 +256,7 @@ public class MainApp extends MultiDexApplication {
             @Override
             public void onActivityStopped(Activity activity) {
                 Log_OC.d(activity.getClass().getSimpleName(), "onStop() ending");
-                PassCodeManager.getPassCodeManager().onActivityStopped(activity);
+                passCodeManager.onActivityStopped(activity);
             }
 
             @Override
@@ -257,25 +287,24 @@ public class MainApp extends MultiDexApplication {
 
     @SuppressLint("ApplySharedPref") // commit is done on purpose to write immediately
     private void fixStoragePath() {
-        if (!PreferenceManager.getStoragePathFix(this)) {
+        if (!preferences.isStoragePathFixEnabled()) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 StoragePoint[] storagePoints = DataStorageProvider.getInstance().getAvailableStoragePoints();
-                String storagePath = appPrefs.getString(Preferences.PreferenceKeys.STORAGE_PATH, "");
+                String storagePath = preferences.getStoragePath("");
+
                 if (TextUtils.isEmpty(storagePath)) {
-                    if (PreferenceManager.getLastSeenVersionCode(this) != 0) {
+                    if (preferences.getLastSeenVersionCode() != 0) {
                         // We already used the app, but no storage is set - fix that!
-                        appPrefs.edit().putString(Preferences.PreferenceKeys.STORAGE_PATH,
-                                Environment.getExternalStorageDirectory().getAbsolutePath()).commit();
-                        appPrefs.edit().remove(PreferenceManager.PREF__KEYS_MIGRATION).commit();
+                        preferences.setStoragePath(Environment.getExternalStorageDirectory().getAbsolutePath());
+                        preferences.removeKeysMigrationPreference();
                     } else {
                         // find internal storage path that's indexable
                         boolean set = false;
                         for (StoragePoint storagePoint : storagePoints) {
                             if (storagePoint.getStorageType().equals(StoragePoint.StorageType.INTERNAL) &&
                                     storagePoint.getPrivacyType().equals(StoragePoint.PrivacyType.PUBLIC)) {
-                                appPrefs.edit().putString(Preferences.PreferenceKeys.STORAGE_PATH,
-                                        storagePoint.getPath()).commit();
-                                appPrefs.edit().remove(PreferenceManager.PREF__KEYS_MIGRATION).commit();
+                                preferences.setStoragePath(storagePoint.getPath());
+                                preferences.removeKeysMigrationPreference();
                                 set = true;
                                 break;
                             }
@@ -284,9 +313,8 @@ public class MainApp extends MultiDexApplication {
                         if (!set) {
                             for (StoragePoint storagePoint : storagePoints) {
                                 if (storagePoint.getPrivacyType().equals(StoragePoint.PrivacyType.PUBLIC)) {
-                                    appPrefs.edit().putString(Preferences.PreferenceKeys.STORAGE_PATH,
-                                            storagePoint.getPath()).commit();
-                                    appPrefs.edit().remove(PreferenceManager.PREF__KEYS_MIGRATION).commit();
+                                    preferences.setStoragePath(storagePoint.getPath());
+                                    preferences.removeKeysMigrationPreference();
                                     set = true;
                                     break;
                                 }
@@ -294,18 +322,17 @@ public class MainApp extends MultiDexApplication {
 
                         }
                     }
-                    PreferenceManager.setStoragePathFix(this, true);
+                    preferences.setStoragePathFixEnabled(true);
                 } else {
-                    appPrefs.edit().remove(PreferenceManager.PREF__KEYS_MIGRATION).commit();
-                    PreferenceManager.setStoragePathFix(this, true);
+                    preferences.removeKeysMigrationPreference();
+                    preferences.setStoragePathFixEnabled(true);
                 }
             } else {
                 if (TextUtils.isEmpty(storagePath)) {
-                    appPrefs.edit().putString(Preferences.PreferenceKeys.STORAGE_PATH,
-                            Environment.getExternalStorageDirectory().getAbsolutePath()).commit();
+                    preferences.setStoragePath(Environment.getExternalStorageDirectory().getAbsolutePath());
                 }
-                appPrefs.edit().remove(PreferenceManager.PREF__KEYS_MIGRATION).commit();
-                PreferenceManager.setStoragePathFix(this, true);
+                preferences.removeKeysMigrationPreference();
+                preferences.setStoragePathFixEnabled(true);
             }
         }
     }
@@ -320,7 +347,8 @@ public class MainApp extends MultiDexApplication {
                     Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                 splitOutAutoUploadEntries();
             } else {
-                PreferenceManager.setAutoUploadSplitEntries(getAppContext(), true);
+                AppPreferences preferences = PreferenceManager.fromContext(getAppContext());
+                preferences.setAutoUploadSplitEntriesEnabled(true);
             }
         }
 
@@ -526,23 +554,9 @@ public class MainApp extends MultiDexApplication {
 
     private static void updateToAutoUpload() {
             Context context = getAppContext();
-            if (PreferenceManager.instantPictureUploadEnabled(context) ||
-                    PreferenceManager.instantVideoUploadEnabled(context)){
-
-                // remove legacy shared preferences
-                SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
-                editor.remove("instant_uploading")
-                        .remove("instant_video_uploading")
-                        .remove("instant_upload_path")
-                        .remove("instant_upload_path_use_subfolders")
-                        .remove("instant_upload_on_wifi")
-                        .remove("instant_upload_on_charging")
-                        .remove("instant_video_upload_path")
-                        .remove("instant_video_upload_path_use_subfolders")
-                        .remove("instant_video_upload_on_wifi")
-                        .remove("instant_video_uploading")
-                        .remove("instant_video_upload_on_charging")
-                        .remove("prefs_instant_behaviour").apply();
+            AppPreferences preferences = PreferenceManager.fromContext(context);
+            if (preferences.instantPictureUploadEnabled() || preferences.instantVideoUploadEnabled()){
+                preferences.removeLegacyPreferences();
 
                 // show info pop-up
                 try {
@@ -567,22 +581,24 @@ public class MainApp extends MultiDexApplication {
     private static void updateAutoUploadEntries() {
         // updates entries to reflect their true paths
         Context context = getAppContext();
-        if (!PreferenceManager.getAutoUploadPathsUpdate(context)) {
+        AppPreferences preferences = PreferenceManager.fromContext(context);
+        if (!preferences.isAutoUploadPathsUpdateEnabled()) {
             SyncedFolderProvider syncedFolderProvider =
-                    new SyncedFolderProvider(MainApp.getAppContext().getContentResolver());
+                    new SyncedFolderProvider(MainApp.getAppContext().getContentResolver(), preferences);
             syncedFolderProvider.updateAutoUploadPaths(mContext);
         }
     }
 
     private static void splitOutAutoUploadEntries() {
         Context context = getAppContext();
-        if (!PreferenceManager.getAutoUploadSplitEntries(context)) {
+        AppPreferences preferences = PreferenceManager.fromContext(context);
+        if (!preferences.isAutoUploadSplitEntriesEnabled()) {
             // magic to split out existing synced folders in two when needed
             // otherwise, we migrate them to their proper type (image or video)
             Log_OC.i(TAG, "Migrate synced_folders records for image/video split");
             ContentResolver contentResolver = context.getContentResolver();
 
-            SyncedFolderProvider syncedFolderProvider = new SyncedFolderProvider(contentResolver);
+            SyncedFolderProvider syncedFolderProvider = new SyncedFolderProvider(contentResolver, preferences);
 
             final List<MediaFolder> imageMediaFolders = MediaProvider.getImageFolders(contentResolver, 1, null, true);
             final List<MediaFolder> videoMediaFolders = MediaProvider.getVideoFolders(contentResolver, 1, null, true);
@@ -624,15 +640,16 @@ public class MainApp extends MultiDexApplication {
                 syncedFolderProvider.deleteSyncedFolder(id);
             }
 
-            PreferenceManager.setAutoUploadSplitEntries(context, true);
+            preferences.setAutoUploadSplitEntriesEnabled(true);
         }
     }
 
     private static void initiateExistingAutoUploadEntries() {
         new Thread(() -> {
-            if (!PreferenceManager.getAutoUploadInit(getAppContext())) {
+            AppPreferences preferences = PreferenceManager.fromContext(getAppContext());
+            if (!preferences.isAutoUploadInitialized()) {
                 SyncedFolderProvider syncedFolderProvider =
-                        new SyncedFolderProvider(MainApp.getAppContext().getContentResolver());
+                        new SyncedFolderProvider(MainApp.getAppContext().getContentResolver(), preferences);
 
                 for (SyncedFolder syncedFolder : syncedFolderProvider.getSyncedFolders()) {
                     if (syncedFolder.isEnabled()) {
@@ -640,7 +657,7 @@ public class MainApp extends MultiDexApplication {
                     }
                 }
 
-                PreferenceManager.setAutoUploadInit(getAppContext(), true);
+                preferences.setAutoUploadInit(true);
             }
 
         }).start();
@@ -651,10 +668,11 @@ public class MainApp extends MultiDexApplication {
         // database, and this cleans all that and leaves 1 (newest) entry per synced folder
 
         Context context = getAppContext();
+        AppPreferences preferences = PreferenceManager.fromContext(context);
 
-        if (!PreferenceManager.getLegacyClean(context)) {
+        if (!preferences.isLegacyClean()) {
             SyncedFolderProvider syncedFolderProvider =
-                    new SyncedFolderProvider(context.getContentResolver());
+                    new SyncedFolderProvider(context.getContentResolver(), preferences);
 
             List<SyncedFolder> syncedFolderList = syncedFolderProvider.getSyncedFolders();
             Map<Pair<String, String>, Long> syncedFolders = new HashMap<>();
@@ -673,10 +691,28 @@ public class MainApp extends MultiDexApplication {
             ids.addAll(syncedFolders.values());
 
             if (ids.size() > 0) {
-                syncedFolderProvider.deleteSyncedFoldersNotInList(mContext, ids);
+                int deletedCount = syncedFolderProvider.deleteSyncedFoldersNotInList(ids);
+                if(deletedCount > 0) {
+                    preferences.setLegacyClean(true);
+                }
             } else {
-                PreferenceManager.setLegacyClean(context, true);
+                preferences.setLegacyClean(true);
             }
         }
+    }
+
+    @Override
+    public AndroidInjector<Activity> activityInjector() {
+        return dispatchingActivityInjector;
+    }
+
+    @Override
+    public AndroidInjector<Fragment> supportFragmentInjector() {
+        return dispatchingFragmentInjector;
+    }
+
+    @Override
+    public AndroidInjector<Service> serviceInjector() {
+        return dispatchingServiceInjector;
     }
 }

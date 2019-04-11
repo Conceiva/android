@@ -37,7 +37,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.content.SyncRequest;
 import android.content.pm.PackageManager;
 import android.content.res.Resources.NotFoundException;
@@ -57,13 +56,15 @@ import android.widget.ImageView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.snackbar.Snackbar;
+import com.nextcloud.client.di.Injectable;
 import com.owncloud.android.MainApp;
 import com.owncloud.android.R;
 import com.owncloud.android.datamodel.ArbitraryDataProvider;
 import com.owncloud.android.datamodel.FileDataStorageManager;
 import com.owncloud.android.datamodel.OCFile;
 import com.owncloud.android.datamodel.VirtualFolderType;
-import com.owncloud.android.db.PreferenceManager;
+import com.nextcloud.client.preferences.AppPreferences;
+import com.nextcloud.client.preferences.PreferenceManager;
 import com.owncloud.android.files.services.FileDownloader;
 import com.owncloud.android.files.services.FileDownloader.FileDownloaderBinder;
 import com.owncloud.android.files.services.FileUploader;
@@ -131,6 +132,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
+
+import javax.inject.Inject;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
@@ -149,7 +153,7 @@ import androidx.fragment.app.FragmentTransaction;
 public class FileDisplayActivity extends HookActivity
         implements FileFragment.ContainerActivity,
         OnEnforceableRefreshListener, SortingOrderDialogFragment.OnSortingOrderListener,
-        SendShareDialog.SendShareDialogDownloader {
+        SendShareDialog.SendShareDialogDownloader, Injectable {
 
     public static final String EXIT = "EXIT";
     public static final String RESTART = "RESTART";
@@ -209,6 +213,8 @@ public class FileDisplayActivity extends HookActivity
     private boolean searchOpen;
 
     private SearchView searchView;
+    @Inject
+    AppPreferences preferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -319,24 +325,8 @@ public class FileDisplayActivity extends HookActivity
      */
     private void upgradeNotificationForInstantUpload() {
         // check for Android 6+ if legacy instant upload is activated --> disable + show info
-        if (PreferenceManager.instantPictureUploadEnabled(this) ||
-                PreferenceManager.instantVideoUploadEnabled(this)) {
-
-            // remove legacy shared preferences
-            SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
-            editor.remove("instant_uploading")
-                    .remove("instant_video_uploading")
-                    .remove("instant_upload_path")
-                    .remove("instant_upload_path_use_subfolders")
-                    .remove("instant_upload_on_wifi")
-                    .remove("instant_upload_on_charging")
-                    .remove("instant_video_upload_path")
-                    .remove("instant_video_upload_path_use_subfolders")
-                    .remove("instant_video_upload_on_wifi")
-                    .remove("instant_video_uploading")
-                    .remove("instant_video_upload_on_charging")
-                    .remove("prefs_instant_behaviour").apply();
-
+        if (preferences.instantPictureUploadEnabled() || preferences.instantVideoUploadEnabled()) {
+            preferences.removeLegacyPreferences();
             // show info pop-up
             new AlertDialog.Builder(this, R.style.Theme_ownCloud_Dialog)
                     .setTitle(R.string.drawer_synced_folders)
@@ -582,7 +572,7 @@ public class FileDisplayActivity extends HookActivity
                 }
 
             } else {
-                Log_OC.e(TAG, "Unexpected intent " + intent.toString());
+                Log_OC.e(TAG, String.format(Locale.US, "Unexpected intent %s", intent));
             }
     }
 
@@ -901,7 +891,7 @@ public class FileDisplayActivity extends HookActivity
                 ft.addToBackStack(null);
 
                 SortingOrderDialogFragment mSortingOrderDialogFragment = SortingOrderDialogFragment.newInstance(
-                    PreferenceManager.getSortOrderByFolder(this, getListOfFilesFragment().getCurrentFile()));
+                    preferences.getSortOrderByFolder(getListOfFilesFragment().getCurrentFile()));
                 mSortingOrderDialogFragment.show(ft, SortingOrderDialogFragment.SORTING_ORDER_FRAGMENT);
 
                 break;
@@ -2584,10 +2574,10 @@ public class FileDisplayActivity extends HookActivity
 
     @Subscribe(threadMode = ThreadMode.BACKGROUND)
     public void onMessageEvent(TokenPushEvent event) {
-        if (!PreferenceManager.getKeysReInit(getApplicationContext())) {
+        if (!preferences.isKeysReInitEnabled()) {
             PushUtils.reinitKeys();
         } else {
-            PushUtils.pushRegistrationToServer();
+            PushUtils.pushRegistrationToServer(preferences.getPushToken());
         }
     }
 

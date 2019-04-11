@@ -146,8 +146,9 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.activity.Preferences"
-            android:theme="@style/Theme.ownCloud" />
+            android:name=".ui.activity.SettingsActivity"
+            android:theme="@style/Theme.ownCloud" >
+        </activity>
         <activity
             android:name=".ui.preview.PreviewImageActivity"
             android:theme="@style/Theme.ownCloud.Overlay" />
@@ -328,7 +329,7 @@
 
         <activity
             android:name=".ui.activity.CopyToClipboardActivity"
-            android:icon="@drawable/copy_link"
+            android:icon="@drawable/shared_via_link"
             android:label="@string/copy_link" />
         <activity
             android:name=".ui.activity.FolderPickerActivity"

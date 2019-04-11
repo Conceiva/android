@@ -37,8 +37,8 @@
     <string name="prefs_category_general">General</string>
     <string name="prefs_category_more">More</string>
     <string name="prefs_manage_accounts">Manage accounts</string>
-    <string name="prefs_lock">Lock</string>
-    <string name="prefs_lock_title">Lock using</string>
+    <string name="prefs_lock">App passcode</string>
+    <string name="prefs_lock_title">Protect app using</string>
     <string name="prefs_lock_none">None</string>
     <string name="prefs_lock_using_passcode">Passcode</string>
     <string name="prefs_lock_using_device_credentials">Device credentials</string>
@@ -145,7 +145,6 @@
     <string name="uploader_info_dirname">Folder name</string>
     <string name="uploader_upload_in_progress_ticker">Uploading…</string>
     <string name="uploader_upload_in_progress_content">%1$d%% Uploading %2$s</string>
-    <string name="uploader_upload_succeeded_ticker">Uploaded</string>
     <string name="uploader_upload_succeeded_content_single">%1$s uploaded</string>
     <string name="uploader_upload_failed_ticker">Upload failed</string>
     <string name="uploader_upload_failed_content_single">Could not upload %1$s</string>
@@ -862,6 +861,22 @@
     <string name="remove_notification_failed">Failed to remove notification.</string>
     <string name="notification_action_failed">Failed to execute action.</string>
     <string name="remove_push_notification">Remove</string>
+    <string name="new_notification">New Notification</string>
+    <string name="storage_choose_location">Choose storage location</string>
+    <string name="storage_internal_storage">Internal storage</string>
+    <string name="storage_camera">Camera</string>
+    <string name="storage_pictures">Pictures</string>
+    <string name="storage_movies">Movies</string>
+    <string name="storage_music">Music</string>
+    <string name="storage_documents">Documents</string>
+    <string name="storage_downloads">Downloads</string>
+    <string name="io_error">IO error</string>
+    <string name="operation_canceled">Operation has been canceled</string>
+    <string name="authentication_exception">Authentication Exception</string>
+    <string name="shared_avatar_desc">Avatar from shared user</string>
+    <string name="shared_with_you_by">Shared with you by %1$s</string>
+    <string name="reshare_not_allowed">Resharing is not allowed</string>
+
     <string name="imagemeter">ImageMeter</string>
     <string name="ocr">Scan document</string>
     <string name="action_settings">Settings</string>

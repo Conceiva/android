@@ -417,6 +417,7 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity
 
         // show snackbar after 60s to switch back to old login method
         if (showLegacyLogin) {
+            final String finalBaseURL = baseURL;
             new Handler().postDelayed(() -> DisplayUtils.createSnackbar(mLoginWebView,
                                                                         R.string.fallback_weblogin_text,
                                                                         Snackbar.LENGTH_INDEFINITE)
@@ -442,11 +443,11 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity
 
                     initServerPreFragment(null);
 
-                    String baseURLValue = baseURL;
-                    if (baseURLValue.endsWith(WEB_LOGIN)) {
-                        baseURLValue = baseURLValue.replace(WEB_LOGIN, "");
+                    if (finalBaseURL != null) {
+                        mHostUrlInput.setText(finalBaseURL.replace(WEB_LOGIN, ""));
+                    } else {
+                        mHostUrlInput.setText(finalBaseURL);
                     }
-                    mHostUrlInput.setText(baseURLValue);
 
                     checkOcServer();
                 }).show(), 60 * 1000);
@@ -633,7 +634,7 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity
         mAuthTokenType = null;
 
         if (extras != null) {
-            extras.getString(AccountAuthenticator.KEY_AUTH_TOKEN_TYPE);
+            mAuthTokenType = extras.getString(AccountAuthenticator.KEY_AUTH_TOKEN_TYPE);
         }
 
         if (mAuthTokenType == null) {

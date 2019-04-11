@@ -31,6 +31,7 @@ import android.text.TextUtils;
 
 import com.evernote.android.job.Job;
 import com.evernote.android.job.util.support.PersistableBundleCompat;
+import com.nextcloud.client.preferences.PreferenceManager;
 import com.owncloud.android.MainApp;
 import com.owncloud.android.R;
 import com.owncloud.android.authentication.AccountUtils;
@@ -42,7 +43,7 @@ import com.owncloud.android.datamodel.SyncedFolderProvider;
 import com.owncloud.android.files.services.FileUploader;
 import com.owncloud.android.lib.common.utils.Log_OC;
 import com.owncloud.android.operations.UploadFileOperation;
-import com.owncloud.android.ui.activity.Preferences;
+import com.owncloud.android.ui.activity.SettingsActivity;
 import com.owncloud.android.utils.FileStorageUtils;
 import com.owncloud.android.utils.FilesSyncHelper;
 import com.owncloud.android.utils.MimeType;
@@ -103,7 +104,8 @@ public class FilesSyncJob extends Job {
         // Create all the providers we'll need
         final ContentResolver contentResolver = context.getContentResolver();
         final FilesystemDataProvider filesystemDataProvider = new FilesystemDataProvider(contentResolver);
-        SyncedFolderProvider syncedFolderProvider = new SyncedFolderProvider(contentResolver);
+        SyncedFolderProvider syncedFolderProvider = new SyncedFolderProvider(contentResolver,
+            PreferenceManager.fromContext(context));
 
         Locale currentLocale = context.getResources().getConfiguration().locale;
         SimpleDateFormat sFormatter = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss", currentLocale);
@@ -152,7 +154,7 @@ public class FilesSyncJob extends Job {
             if (lightVersion) {
                 needsCharging = resources.getBoolean(R.bool.syncedFolder_light_on_charging);
                 needsWifi = account == null || arbitraryDataProvider.getBooleanValue(account.name,
-                        Preferences.SYNCED_FOLDER_LIGHT_UPLOAD_ON_WIFI);
+                                                                                     SettingsActivity.SYNCED_FOLDER_LIGHT_UPLOAD_ON_WIFI);
                 String uploadActionString = resources.getString(R.string.syncedFolder_light_upload_behaviour);
                 uploadAction = getUploadAction(uploadActionString);
 

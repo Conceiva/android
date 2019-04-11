@@ -55,6 +55,8 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.snackbar.Snackbar;
 import com.handwerkcloud.client.OCRActivity;
 import com.handwerkcloud.client.Util;
+import com.nextcloud.client.di.Injectable;
+import com.nextcloud.client.preferences.AppPreferences;
 import com.owncloud.android.MainApp;
 import com.owncloud.android.R;
 import com.owncloud.android.authentication.AccountUtils;
@@ -62,7 +64,6 @@ import com.owncloud.android.datamodel.ArbitraryDataProvider;
 import com.owncloud.android.datamodel.FileDataStorageManager;
 import com.owncloud.android.datamodel.OCFile;
 import com.owncloud.android.datamodel.VirtualFolderType;
-import com.owncloud.android.db.PreferenceManager;
 import com.owncloud.android.files.FileMenuFilter;
 import com.owncloud.android.lib.common.OwnCloudAccount;
 import com.owncloud.android.lib.common.OwnCloudClient;
@@ -121,6 +122,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
@@ -138,7 +141,9 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
  * TODO refactor to get rid of direct dependency on FileDisplayActivity
  */
 public class OCFileListFragment extends ExtendedListFragment implements
-        OCFileListFragmentInterface, OCFileListBottomSheetActions {
+        OCFileListFragmentInterface,
+        OCFileListBottomSheetActions,
+        Injectable {
 
     private static final String TAG = OCFileListFragment.class.getSimpleName();
 
@@ -170,6 +175,7 @@ public class OCFileListFragment extends ExtendedListFragment implements
 
     private static final int SINGLE_SELECTION = 1;
 
+    @Inject AppPreferences preferences;
     private FileFragment.ContainerActivity mContainerActivity;
 
     private OCFile mFile;
@@ -348,7 +354,7 @@ public class OCFileListFragment extends ExtendedListFragment implements
         mLimitToMimeType = args != null ? args.getString(ARG_MIMETYPE, "") : "";
         boolean hideItemOptions = args != null && args.getBoolean(ARG_HIDE_ITEM_OPTIONS, false);
 
-        mAdapter = new OCFileListAdapter(getActivity(), mContainerActivity, this, hideItemOptions,
+        mAdapter = new OCFileListAdapter(getActivity(), preferences, mContainerActivity, this, hideItemOptions,
                 isGridViewPreferred(mFile));
         setRecyclerViewAdapter(mAdapter);
 
@@ -400,7 +406,7 @@ public class OCFileListFragment extends ExtendedListFragment implements
      * register listener on FAB.
      */
     private void registerFabListener() {
-        FileActivity activity = ((FileActivity) getActivity());
+        FileActivity activity = (FileActivity) getActivity();
         getFabMain().setOnClickListener(v -> {
             new OCFileListBottomSheetDialog(activity, this).show();
         });
@@ -1333,11 +1339,11 @@ public class OCFileListFragment extends ExtendedListFragment implements
      * @return 'true' is folder should be shown in grid mode, 'false' if list mode is preferred.
      */
     public boolean isGridViewPreferred(OCFile folder) {
-        return FOLDER_LAYOUT_GRID.equals(PreferenceManager.getFolderLayout(getActivity(), folder));
+        return FOLDER_LAYOUT_GRID.equals(preferences.getFolderLayout(folder));
     }
 
     public void setListAsPreferred() {
-        PreferenceManager.setFolderLayout(getActivity(), mFile, FOLDER_LAYOUT_LIST);
+        preferences.setFolderLayout(mFile, FOLDER_LAYOUT_LIST);
         switchToListView();
     }
 
@@ -1348,7 +1354,7 @@ public class OCFileListFragment extends ExtendedListFragment implements
     }
 
     public void setGridAsPreferred() {
-        PreferenceManager.setFolderLayout(getActivity(), mFile, FOLDER_LAYOUT_GRID);
+        preferences.setFolderLayout(mFile, FOLDER_LAYOUT_GRID);
         switchToGridView();
     }
 
@@ -1368,7 +1374,7 @@ public class OCFileListFragment extends ExtendedListFragment implements
 
         RecyclerView.LayoutManager layoutManager;
         if (grid) {
-            layoutManager = new GridLayoutManager(getContext(), getColumnSize());
+            layoutManager = new GridLayoutManager(getContext(), getColumnsCount());
             ((GridLayoutManager) layoutManager).setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
                 @Override
                 public int getSpanSize(int position) {

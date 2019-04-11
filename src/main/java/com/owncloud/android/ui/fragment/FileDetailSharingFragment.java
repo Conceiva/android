@@ -24,6 +24,7 @@ import android.accounts.Account;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -38,6 +39,7 @@ import android.widget.TextView;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.owncloud.android.R;
+import com.owncloud.android.authentication.AccountUtils;
 import com.owncloud.android.datamodel.FileDataStorageManager;
 import com.owncloud.android.datamodel.OCFile;
 import com.owncloud.android.lib.common.operations.RemoteOperationResult;
@@ -73,7 +75,8 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
 
-public class FileDetailSharingFragment extends Fragment implements UserListAdapter.ShareeListAdapterListener {
+public class FileDetailSharingFragment extends Fragment implements UserListAdapter.ShareeListAdapterListener,
+    DisplayUtils.AvatarGenerationListener {
 
     private static final String ARG_FILE = "FILE";
     private static final String ARG_ACCOUNT = "ACCOUNT";
@@ -85,6 +88,10 @@ public class FileDetailSharingFragment extends Fragment implements UserListAdapt
     private Account account;
     private OCCapability capabilities;
     private OCShare publicShare;
+
+    private FileOperationsHelper fileOperationsHelper;
+    private FileDisplayActivity fileDisplayActivity;
+    private FileDataStorageManager fileDataStorageManager;
 
     private Unbinder unbinder;
 
@@ -112,9 +119,17 @@ public class FileDetailSharingFragment extends Fragment implements UserListAdapt
     @BindView(R.id.share_by_link_container)
     LinearLayout shareByLinkContainer;
 
-    private FileOperationsHelper fileOperationsHelper;
-    private FileDisplayActivity fileDisplayActivity;
-    private FileDataStorageManager fileDataStorageManager;
+    @BindView(R.id.shared_with_you_container)
+    LinearLayout sharedWithYouContainer;
+
+    @BindView(R.id.shared_with_you_avatar)
+    ImageView sharedWithYouAvatar;
+
+    @BindView(R.id.shared_with_you_username)
+    TextView sharedWithYouUsername;
+
+    @BindView(R.id.shared_with_you_note)
+    TextView sharedWithYouNote;
 
     public static FileDetailSharingFragment newInstance(OCFile file, Account account) {
         FileDetailSharingFragment fragment = new FileDetailSharingFragment();
@@ -196,11 +211,19 @@ public class FileDetailSharingFragment extends Fragment implements UserListAdapt
     }
 
     private void setupView() {
-        setShareByLinkInfo(file.isSharedViaLink());
-        setShareWithUserInfo();
-        FileDetailSharingFragmentHelper.setupSearchView(
-            (SearchManager) fileDisplayActivity.getSystemService(Context.SEARCH_SERVICE), searchView,
-            fileDisplayActivity.getComponentName());
+        setShareWithYou();
+
+        if (file.canReshare()) {
+            setShareByLinkInfo(file.isSharedViaLink());
+            setShareWithUserInfo();
+            FileDetailSharingFragmentHelper.setupSearchView(
+                (SearchManager) fileDisplayActivity.getSystemService(Context.SEARCH_SERVICE), searchView,
+                fileDisplayActivity.getComponentName());
+            ThemeUtils.themeSearchView(getContext(), searchView, false);
+        } else {
+            searchView.setVisibility(View.GONE);
+            noList.setText(R.string.reshare_not_allowed);
+        }
     }
 
     /**
@@ -244,6 +267,29 @@ public class FileDetailSharingFragment extends Fragment implements UserListAdapt
 
         // Update list of users/groups
         updateListOfUserGroups();
+    }
+
+    private void setShareWithYou() {
+        if (AccountUtils.accountOwnsFile(file, account)) {
+            sharedWithYouContainer.setVisibility(View.GONE);
+        } else {
+            sharedWithYouUsername.setText(
+                String.format(getString(R.string.shared_with_you_by), file.getOwnerDisplayName()));
+
+            DisplayUtils.setAvatar(account, file.getOwnerId(), this, getResources().getDimension(
+                R.dimen.file_list_item_avatar_icon_radius), getResources(), sharedWithYouAvatar,
+                getContext());
+            sharedWithYouAvatar.setVisibility(View.VISIBLE);
+
+            String note = file.getNote();
+
+            if (!TextUtils.isEmpty(note)) {
+                sharedWithYouNote.setText(file.getNote());
+                sharedWithYouNote.setVisibility(View.VISIBLE);
+            } else {
+                sharedWithYouNote.setVisibility(View.GONE);
+            }
+        }
     }
 
     private void updateListOfUserGroups() {
@@ -507,7 +553,7 @@ public class FileDetailSharingFragment extends Fragment implements UserListAdapt
      * Takes into account server capabilities before reading database.
      */
     public void refreshPublicShareFromDB() {
-        if (FileDetailSharingFragmentHelper.isPublicShareDisabled(capabilities)) {
+        if (FileDetailSharingFragmentHelper.isPublicShareDisabled(capabilities) || !file.canReshare()) {
             shareByLinkContainer.setVisibility(View.GONE);
         } else {
             // Get public share
@@ -545,5 +591,15 @@ public class FileDetailSharingFragment extends Fragment implements UserListAdapt
 
         outState.putParcelable(FileActivity.EXTRA_FILE, file);
         outState.putParcelable(FileActivity.EXTRA_ACCOUNT, account);
+    }
+
+    @Override
+    public void avatarGenerated(Drawable avatarDrawable, Object callContext) {
+        sharedWithYouAvatar.setImageDrawable(avatarDrawable);
+    }
+
+    @Override
+    public boolean shouldCallGeneratedCallback(String tag, Object callContext) {
+        return false;
     }
 }

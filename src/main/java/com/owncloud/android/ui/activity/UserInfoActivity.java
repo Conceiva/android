@@ -58,6 +58,8 @@ import com.handwerkcloud.client.CompanyFragment;
 import com.handwerkcloud.client.FeaturesOperation;
 import com.handwerkcloud.client.RegisterActivity;
 import com.handwerkcloud.client.UserProfileDataOperation;
+import com.nextcloud.client.di.Injectable;
+import com.nextcloud.client.preferences.AppPreferences;
 import com.owncloud.android.R;
 import com.owncloud.android.authentication.AccountUtils;
 import com.owncloud.android.datamodel.ArbitraryDataProvider;
@@ -92,6 +94,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
 
+import javax.inject.Inject;
+
 import androidx.annotation.ColorInt;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
@@ -111,7 +115,7 @@ import static com.handwerkcloud.client.ProfessionFragment.getBusinessTypeString;
 /**
  * This Activity presents the user information.
  */
-public class UserInfoActivity extends FileActivity {
+public class UserInfoActivity extends FileActivity implements Injectable {
     public static final String KEY_ACCOUNT = "ACCOUNT";
 
     private static final String TAG = UserInfoActivity.class.getSimpleName();
@@ -135,6 +139,7 @@ public class UserInfoActivity extends FileActivity {
 
     @BindString(R.string.user_information_retrieval_error) protected String sorryMessage;
 
+    @Inject AppPreferences preferences;
     private float mCurrentAccountAvatarRadiusDimension;
 
     private Unbinder unbinder;
@@ -148,7 +153,6 @@ public class UserInfoActivity extends FileActivity {
     public void onCreate(Bundle savedInstanceState) {
         Log_OC.v(TAG, "onCreate() start");
         super.onCreate(savedInstanceState);
-
         Bundle bundle = getIntent().getExtras();
 
         account = Parcels.unwrap(bundle.getParcelable(KEY_ACCOUNT));
@@ -330,7 +334,7 @@ public class UserInfoActivity extends FileActivity {
                 && userInfo.getTwitter() == null && userInfo.getWebsite() == null) {
 
             setErrorMessageForMultiList(getString(R.string.userinfo_no_info_headline),
-                    getString(R.string.userinfo_no_info_text), R.drawable.ic_user);
+                getString(R.string.userinfo_no_info_text), R.drawable.ic_user);
         } else {
             emptyContentContainer.setVisibility(View.GONE);
             userInfoView.setVisibility(View.VISIBLE);
@@ -436,7 +440,7 @@ public class UserInfoActivity extends FileActivity {
         public void onStart() {
             super.onStart();
 
-            int color = ThemeUtils.primaryColor(getActivity());
+            int color = ThemeUtils.primaryAccentColor(getActivity());
 
             AlertDialog alertDialog = (AlertDialog) getDialog();
 
@@ -589,7 +593,7 @@ public class UserInfoActivity extends FileActivity {
 
     @Subscribe(threadMode = ThreadMode.BACKGROUND)
     public void onMessageEvent(TokenPushEvent event) {
-        PushUtils.pushRegistrationToServer();
+        PushUtils.pushRegistrationToServer(preferences.getPushToken());
     }
 
 

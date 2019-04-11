@@ -1,3 +1,29 @@
+## 3.6.0 (April, 09, 2019)
+
+- remove "expert mode"
+- show warning if server is unavailable
+- delete notification on server
+- actions in notifications
+- add storage path chooser for local file picker
+- show shared user
+- show notes on sharing
+- min supported server is NC12
+- warn on outdated server: <=NC14
+
+For a full list, please see https://github.com/nextcloud/android/milestone/30
+
+## 3.5.1 (March, 18, 2019)
+
+- fixed SSO dialog
+- abort sync on no connection
+- fix chunked upload
+- fix federated share
+- fix button disabled state in folder sync preferences
+- add storage picker to upload local chooser
+- updated translations
+
+For a full list, please see https://github.com/nextcloud/android/milestone/31
+
 ## 3.5.0 (February, 13, 2019)
 
 - Chunked upload: 1MB on mobile data, 10MB on Wi-Fi

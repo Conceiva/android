@@ -3,13 +3,14 @@ package com.owncloud.android;
 import com.owncloud.android.db.OCUpload;
 import com.owncloud.android.files.services.FileUploader;
 import com.owncloud.android.lib.common.operations.RemoteOperationResult;
+import com.owncloud.android.operations.RemoveFileOperation;
 import com.owncloud.android.operations.UploadFileOperation;
 import com.owncloud.android.utils.FileStorageUtils;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import static junit.framework.TestCase.assertTrue;
 
@@ -27,7 +28,10 @@ public class UploadIT extends AbstractIT {
 
         RemoteOperationResult result = testUpload(ocUpload);
 
-        assertTrue(result.isSuccess());
+        assertTrue(result.toString(), result.isSuccess());
+
+        // cleanup
+        new RemoveFileOperation("/testUpload/", false, account, false, context).execute(client, getStorageManager());
     }
 
     @Test
@@ -37,7 +41,10 @@ public class UploadIT extends AbstractIT {
 
         RemoteOperationResult result = testUpload(ocUpload);
 
-        assertTrue(result.isSuccess());
+        assertTrue(result.toString(), result.isSuccess());
+
+        // cleanup
+        new RemoveFileOperation("/testUpload/", false, account, false, context).execute(client, getStorageManager());
     }
 
     @Test
@@ -47,7 +54,10 @@ public class UploadIT extends AbstractIT {
 
         RemoteOperationResult result = testUpload(ocUpload);
 
-        assertTrue(result.isSuccess());
+        assertTrue(result.toString(), result.isSuccess());
+
+        // cleanup
+        new RemoveFileOperation("/testUpload/", false, account, false, context).execute(client, getStorageManager());
     }
 
     public RemoteOperationResult testUpload(OCUpload ocUpload) {
@@ -91,6 +101,9 @@ public class UploadIT extends AbstractIT {
         newUpload.setRemoteFolderToBeCreated();
 
         RemoteOperationResult result = newUpload.execute(client, getStorageManager());
-        assertTrue(result.isSuccess());
+        assertTrue(result.toString(), result.isSuccess());
+
+        // cleanup
+        new RemoveFileOperation("/testUpload/", false, account, false, context).execute(client, getStorageManager());
     }
 }

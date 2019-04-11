@@ -1,4 +1,4 @@
-/**
+/*
  *   ownCloud Android client application
  *
  *   @author David A. Velasco
@@ -25,9 +25,7 @@ package com.owncloud.android.authentication;
  * 
  * Includes required and optional parameter NAMES used in the 'authorization code' grant type.
  */
-
-public class OAuth2Constants {
-    
+public final class OAuth2Constants {
     /// Parameters to send to the Authorization Endpoint
     public static final String KEY_RESPONSE_TYPE = "response_type";
     public static final String KEY_REDIRECT_URI = "redirect_uri";
@@ -50,5 +48,8 @@ public class OAuth2Constants {
     public static final String KEY_ERROR_DESCRIPTION = "error_description";
     public static final String KEY_ERROR_URI = "error_uri";
     public static final String VALUE_ERROR_ACCESS_DENIED = "access_denied";
-    
+
+    private OAuth2Constants() {
+        // No instance
+    }
 }

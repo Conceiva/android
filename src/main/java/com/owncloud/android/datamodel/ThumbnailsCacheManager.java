@@ -42,7 +42,6 @@ import android.view.Display;
 import android.view.MenuItem;
 import android.view.WindowManager;
 import android.widget.ImageView;
-
 import com.owncloud.android.MainApp;
 import com.owncloud.android.R;
 import com.owncloud.android.lib.common.OwnCloudAccount;
@@ -61,9 +60,10 @@ import com.owncloud.android.utils.ConnectivityUtils;
 import com.owncloud.android.utils.DisplayUtils.AvatarGenerationListener;
 import com.owncloud.android.utils.FileStorageUtils;
 import com.owncloud.android.utils.MimeTypeUtil;
-
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -71,9 +71,6 @@ import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.net.URLEncoder;
 import java.util.List;
-
-import androidx.annotation.Nullable;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
  * Manager for concurrent access to thumbnails cache.
@@ -275,7 +272,7 @@ public final class ThumbnailsCacheManager {
         private Bitmap doResizedImageInBackground() {
             Bitmap thumbnail;
 
-            String imageKey = PREFIX_RESIZED_IMAGE + String.valueOf(file.getRemoteId());
+            String imageKey = PREFIX_RESIZED_IMAGE + file.getRemoteId();
 
             // Check disk cache in background thread
             thumbnail = getBitmapFromDiskCache(imageKey);
@@ -521,7 +518,7 @@ public final class ThumbnailsCacheManager {
         private Bitmap doThumbnailFromOCFileInBackground() {
             Bitmap thumbnail;
             ServerFileInterface file = (ServerFileInterface) mFile;
-            String imageKey = PREFIX_THUMBNAIL + String.valueOf(file.getRemoteId());
+            String imageKey = PREFIX_THUMBNAIL + file.getRemoteId();
 
             // Check disk cache in background thread
             thumbnail = getBitmapFromDiskCache(imageKey);
@@ -559,7 +556,7 @@ public final class ThumbnailsCacheManager {
 
                 if (thumbnail == null) {
                     // check if resized version is available
-                    String resizedImageKey = PREFIX_RESIZED_IMAGE + String.valueOf(file.getRemoteId());
+                    String resizedImageKey = PREFIX_RESIZED_IMAGE + file.getRemoteId();
                     Bitmap resizedImage = getBitmapFromDiskCache(resizedImageKey);
 
                     if (resizedImage != null) {
@@ -673,7 +670,7 @@ public final class ThumbnailsCacheManager {
         private enum Type {IMAGE, VIDEO}
         private final WeakReference<ImageView> mImageViewReference;
         private File mFile;
-        private String mImageKey = null;
+        private String mImageKey;
         private Context mContext;
 
         public MediaThumbnailGenerationTask(ImageView imageView, Context context) {
@@ -867,7 +864,7 @@ public final class ThumbnailsCacheManager {
             return Math.round(r.getDimension(R.dimen.file_avatar_size));
         }
 
-        private @Nullable
+        private @NotNull
         Drawable doAvatarInBackground() {
             Bitmap avatar = null;
 
@@ -932,7 +929,6 @@ public final class ThumbnailsCacheManager {
                             // everything else
                             mClient.exhaustResponse(get.getResponseBodyAsStream());
                             break;
-
                     }
                 } catch (Exception e) {
                     try {
@@ -945,15 +941,17 @@ public final class ThumbnailsCacheManager {
                         get.releaseConnection();
                     }
                 }
-
-                try {
-                    return TextDrawable.createAvatar(mAccount.name, mAvatarRadius);
-                } catch (Exception e) {
-                    Log_OC.e(TAG, "Error generating fallback avatar");
-                }
             }
 
-            return BitmapUtils.bitmapToCircularBitmapDrawable(mResources, avatar);
+            if (avatar == null) {
+                try {
+                    return TextDrawable.createAvatar(mAccount.name, mAvatarRadius);
+                } catch (Exception e1) {
+                    return mResources.getDrawable(R.drawable.ic_user);
+                }
+            } else {
+                return BitmapUtils.bitmapToCircularBitmapDrawable(mResources, avatar);
+            }
         }
     }
 
@@ -1176,7 +1174,7 @@ public final class ThumbnailsCacheManager {
         Point p = getScreenDimension();
         int pxW = p.x;
         int pxH = p.y;
-        String imageKey = PREFIX_RESIZED_IMAGE + String.valueOf(file.getRemoteId());
+        String imageKey = PREFIX_RESIZED_IMAGE + file.getRemoteId();
 
         Bitmap bitmap = BitmapUtils.decodeSampledBitmapFromFile(file.getStoragePath(), pxW, pxH);
 
@@ -1194,7 +1192,7 @@ public final class ThumbnailsCacheManager {
         int pxW;
         int pxH;
         pxW = pxH = getThumbnailDimension();
-        String imageKey = PREFIX_THUMBNAIL + String.valueOf(file.getRemoteId());
+        String imageKey = PREFIX_THUMBNAIL + file.getRemoteId();
 
         GetMethod getMethod = null;
 

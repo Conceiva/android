@@ -29,13 +29,14 @@ import android.util.Base64;
 import android.util.Log;
 
 import com.google.gson.Gson;
+import com.nextcloud.client.preferences.AppPreferences;
+import com.nextcloud.client.preferences.PreferenceManager;
 import com.owncloud.android.MainApp;
 import com.owncloud.android.R;
 import com.owncloud.android.authentication.AccountUtils;
 import com.owncloud.android.datamodel.ArbitraryDataProvider;
 import com.owncloud.android.datamodel.PushConfigurationState;
 import com.owncloud.android.datamodel.SignatureVerification;
-import com.owncloud.android.db.PreferenceManager;
 import com.owncloud.android.lib.common.OwnCloudAccount;
 import com.owncloud.android.lib.common.OwnCloudClient;
 import com.owncloud.android.lib.common.OwnCloudClientManagerFactory;
@@ -193,8 +194,7 @@ public final class PushUtils {
         }
     }
 
-    public static void pushRegistrationToServer() {
-        String token = PreferenceManager.getPushToken(MainApp.getAppContext());
+    public static void pushRegistrationToServer(final String token) {
         arbitraryDataProvider = new ArbitraryDataProvider(MainApp.getAppContext().getContentResolver());
 
         if (!TextUtils.isEmpty(MainApp.getAppContext().getResources().getString(R.string.push_server_url)) &&
@@ -373,14 +373,16 @@ public final class PushUtils {
         FileUtils.deleteQuietly(privateKeyFile);
         FileUtils.deleteQuietly(publicKeyFile);
 
-        pushRegistrationToServer();
-        PreferenceManager.setKeysReInit(context);
+        AppPreferences preferences = PreferenceManager.fromContext(context);
+        String pushToken = preferences.getPushToken();
+        pushRegistrationToServer(pushToken);
+        preferences.setKeysReInitEnabled();
     }
 
     private static void migratePushKeys() {
         Context context = MainApp.getAppContext();
-
-        if (!PreferenceManager.getKeysMigration(context)) {
+        AppPreferences preferences = PreferenceManager.fromContext(context);
+        if (!preferences.isKeysMigrationEnabled()) {
             String oldKeyPath = MainApp.getStoragePath() + File.separator + MainApp.getDataFolder()
                     + File.separator + "nc-keypair";
             File oldPrivateKeyFile = new File(oldKeyPath, "push_key.priv");
@@ -392,7 +394,7 @@ public final class PushUtils {
 
             if ((privateKeyFile.exists() && publicKeyFile.exists()) ||
                     (!oldPrivateKeyFile.exists() && !oldPublicKeyFile.exists())) {
-                PreferenceManager.setKeysMigration(context, true);
+                preferences.setKeysMigrationEnabled(true);
             } else {
                 if (oldPrivateKeyFile.exists()) {
                     FileStorageUtils.moveFile(oldPrivateKeyFile, privateKeyFile);
@@ -403,7 +405,7 @@ public final class PushUtils {
                 }
 
                 if (privateKeyFile.exists() && publicKeyFile.exists()) {
-                    PreferenceManager.setKeysMigration(context, true);
+                    preferences.setKeysMigrationEnabled(true);
                 }
             }
         }

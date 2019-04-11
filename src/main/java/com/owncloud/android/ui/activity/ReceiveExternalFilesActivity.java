@@ -59,11 +59,25 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
+import androidx.annotation.DrawableRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog.Builder;
+import androidx.appcompat.widget.SearchView;
+import androidx.core.content.ContextCompat;
+import androidx.core.graphics.drawable.DrawableCompat;
+import androidx.core.view.MenuItemCompat;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.FragmentManager;
 
+import com.nextcloud.client.di.Injectable;
+import com.nextcloud.client.preferences.AppPreferences;
 import com.owncloud.android.MainApp;
 import com.owncloud.android.R;
 import com.owncloud.android.datamodel.OCFile;
-import com.owncloud.android.db.PreferenceManager;
 import com.owncloud.android.files.services.FileUploader;
 import com.owncloud.android.lib.common.operations.RemoteOperation;
 import com.owncloud.android.lib.common.operations.RemoteOperationResult;
@@ -92,8 +106,8 @@ import com.owncloud.android.utils.ThemeUtils;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -103,26 +117,14 @@ import java.util.List;
 import java.util.Stack;
 import java.util.Vector;
 
-import androidx.annotation.DrawableRes;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.StringRes;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AlertDialog.Builder;
-import androidx.appcompat.widget.SearchView;
-import androidx.core.content.ContextCompat;
-import androidx.core.graphics.drawable.DrawableCompat;
-import androidx.core.view.MenuItemCompat;
-import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.FragmentManager;
+import javax.inject.Inject;
 
 /**
  * This can be used to upload things to an ownCloud instance.
  */
 public class ReceiveExternalFilesActivity extends FileActivity
         implements OnItemClickListener, View.OnClickListener, CopyAndUploadContentUrisTask.OnCopyTmpFilesTaskListener,
-        SortingOrderDialogFragment.OnSortingOrderListener {
+        SortingOrderDialogFragment.OnSortingOrderListener, Injectable {
 
     private static final String TAG = ReceiveExternalFilesActivity.class.getSimpleName();
 
@@ -133,6 +135,7 @@ public class ReceiveExternalFilesActivity extends FileActivity
     public static final String DESKTOP_FILE_SUFFIX = ".desktop";
     public static final int SINGLE_PARENT = 1;
 
+    @Inject AppPreferences preferences;
     private AccountManager mAccountManager;
     private Stack<String> mParents = new Stack<>();
     private List<Parcelable> mStreamsToUpload;
@@ -151,7 +154,7 @@ public class ReceiveExternalFilesActivity extends FileActivity
     private String mSubjectText;
     private String mExtraText;
 
-    private final static String FILENAME_ENCODING = "UTF-8";
+    private final static Charset FILENAME_ENCODING = Charset.forName("UTF-8");
 
     private LinearLayout mEmptyListContainer;
     private TextView mEmptyListMessage;
@@ -252,7 +255,7 @@ public class ReceiveExternalFilesActivity extends FileActivity
 
     @Override
     public void onSortingOrderChosen(FileSortOrder newSortOrder) {
-        PreferenceManager.setSortOrder(getBaseContext(), mFile, newSortOrder);
+        preferences.setSortOrder(mFile, newSortOrder);
         populateDirectoryList();
     }
 
@@ -325,7 +328,7 @@ public class ReceiveExternalFilesActivity extends FileActivity
         }
     }
 
-    public static class DialogInputUploadFilename extends DialogFragment {
+    public static class DialogInputUploadFilename extends DialogFragment implements Injectable {
         private static final String KEY_SUBJECT_TEXT = "SUBJECT_TEXT";
         private static final String KEY_EXTRA_TEXT = "EXTRA_TEXT";
 
@@ -340,6 +343,7 @@ public class ReceiveExternalFilesActivity extends FileActivity
         private int mFileCategory;
 
         private Spinner mSpinner;
+        @Inject AppPreferences preferences;
 
         public static DialogInputUploadFilename newInstance(String subjectText, String extraText) {
             DialogInputUploadFilename dialog = new DialogInputUploadFilename();
@@ -348,6 +352,11 @@ public class ReceiveExternalFilesActivity extends FileActivity
             args.putString(KEY_EXTRA_TEXT, extraText);
             dialog.setArguments(args);
             return dialog;
+        }
+
+        @Override
+        public void onAttach(Context context) {
+            super.onAttach(context);
         }
 
         @NonNull
@@ -401,7 +410,7 @@ public class ReceiveExternalFilesActivity extends FileActivity
                 mFilenameSuffix.add(DESKTOP_FILE_SUFFIX);
                 adapter.add(String.format(str,DESKTOP_FILE_SUFFIX));
 
-                selectPos = PreferenceManager.getUploadUrlFileExtensionUrlSelectedPos(getActivity());
+                selectPos = preferences.getUploadUrlFileExtensionUrlSelectedPos();
                 mFileCategory = CATEGORY_URL;
             } else if (isIntentFromGoogleMap(subjectText, extraText)) {
                 String str = getString(R.string.upload_file_dialog_filetype_googlemap_shortcut);
@@ -421,7 +430,7 @@ public class ReceiveExternalFilesActivity extends FileActivity
                 mFilenameSuffix.add(DESKTOP_FILE_SUFFIX);
                 adapter.add(String.format(str,DESKTOP_FILE_SUFFIX));
 
-                selectPos = PreferenceManager.getUploadMapFileExtensionUrlSelectedPos(getActivity());
+                selectPos = preferences.getUploadMapFileExtensionUrlSelectedPos();
                 mFileCategory = CATEGORY_MAPS_URL;
             }
 
@@ -501,10 +510,10 @@ public class ReceiveExternalFilesActivity extends FileActivity
         private void saveSelection(int selectPos) {
             switch (mFileCategory) {
                 case CATEGORY_URL:
-                    PreferenceManager.setUploadUrlFileExtensionUrlSelectedPos(getActivity(), selectPos);
+                    preferences.setUploadUrlFileExtensionUrlSelectedPos(selectPos);
                     break;
                 case CATEGORY_MAPS_URL:
-                    PreferenceManager.setUploadMapFileExtensionUrlSelectedPos(getActivity(), selectPos);
+                    preferences.setUploadMapFileExtensionUrlSelectedPos(selectPos);
                     break;
                 default:
                     Log_OC.d(TAG, "Simple text snippet only: no selection to be persisted");
@@ -567,14 +576,9 @@ public class ReceiveExternalFilesActivity extends FileActivity
             safeFilename = safeFilename.replaceAll("=", "_");
             safeFilename = safeFilename.replaceAll(",", "_");
 
-            try {
-                int maxLength = 128;
-                if (safeFilename.getBytes(FILENAME_ENCODING).length > maxLength) {
-                    safeFilename = new String(safeFilename.getBytes(FILENAME_ENCODING), 0, maxLength, FILENAME_ENCODING);
-                }
-            } catch (UnsupportedEncodingException e) {
-                Log_OC.e(TAG, "rename failed ", e);
-                return null;
+            int maxLength = 128;
+            if (safeFilename.getBytes(FILENAME_ENCODING).length > maxLength) {
+                safeFilename = new String(safeFilename.getBytes(FILENAME_ENCODING), 0, maxLength, FILENAME_ENCODING);
             }
             return safeFilename;
         }
@@ -757,7 +761,7 @@ public class ReceiveExternalFilesActivity extends FileActivity
 
             if (files.isEmpty()) {
                 setMessageForEmptyList(R.string.file_list_empty_headline, R.string.empty,
-                        R.drawable.ic_list_empty_upload);
+                        R.drawable.uploads);
             } else {
                 mEmptyListContainer.setVisibility(View.GONE);
 
@@ -866,7 +870,7 @@ public class ReceiveExternalFilesActivity extends FileActivity
     }
 
     private List<OCFile> sortFileList(List<OCFile> files) {
-        FileSortOrder sortOrder = PreferenceManager.getSortOrderByFolder(this, mFile);
+        FileSortOrder sortOrder = preferences.getSortOrderByFolder(mFile);
         return sortOrder.sortCloudFiles(files);
     }
 
@@ -948,7 +952,7 @@ public class ReceiveExternalFilesActivity extends FileActivity
         UriUploader.UriUploaderResultCode resultCode = uploader.uploadUris();
 
         // Save the path to shared preferences; even if upload is not possible, user chose the folder
-        PreferenceManager.setLastUploadPath(this, mUploadPath);
+        preferences.setLastUploadPath(mUploadPath);
 
         if (resultCode == UriUploader.UriUploaderResultCode.OK) {
             finish();
@@ -1022,7 +1026,7 @@ public class ReceiveExternalFilesActivity extends FileActivity
         }
 
         if (mParents.empty()) {
-            String lastPath = PreferenceManager.getLastUploadPath(this);
+            String lastPath = preferences.getLastUploadPath();
             // "/" equals root-directory
             if ("/".equals(lastPath)) {
                 mParents.add("");
@@ -1054,8 +1058,11 @@ public class ReceiveExternalFilesActivity extends FileActivity
         }
 
         // tint search event
-        final MenuItem item = menu.findItem(R.id.action_search);
-        SearchView searchView = (SearchView) MenuItemCompat.getActionView(item);
+        final MenuItem searchMenuItem = menu.findItem(R.id.action_search);
+        SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchMenuItem);
+
+        MenuItem newFolderMenuItem = menu.findItem(R.id.action_create_dir);
+        newFolderMenuItem.setEnabled(mFile.canWrite());
 
         // hacky as no default way is provided
         int fontColor = ThemeUtils.fontColor(this);
@@ -1088,7 +1095,7 @@ public class ReceiveExternalFilesActivity extends FileActivity
                 break;
             case R.id.action_sort:
                 SortingOrderDialogFragment mSortingOrderDialogFragment = SortingOrderDialogFragment.newInstance(
-                    PreferenceManager.getSortOrderByFolder(this, mFile));
+                    preferences.getSortOrderByFolder(mFile));
                 mSortingOrderDialogFragment.show(getSupportFragmentManager(),
                         SortingOrderDialogFragment.SORTING_ORDER_FRAGMENT);
                 break;

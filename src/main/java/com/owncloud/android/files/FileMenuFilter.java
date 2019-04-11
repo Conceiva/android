@@ -165,7 +165,7 @@ public class FileMenuFilter {
     private void filter(List<Integer> toShow, List<Integer> toHide, boolean inSingleFileFragment) {
         boolean synchronizing = anyFileSynchronizing();
         OCCapability capability = mComponentsGetter.getStorageManager().getCapability(mAccount.name);
-        boolean endToEndEncryptionEnabled = capability != null && capability.getEndToEndEncryption().isTrue();
+        boolean endToEndEncryptionEnabled = capability.getEndToEndEncryption().isTrue();
 
         filterDownload(toShow, toHide, synchronizing);
         filterRename(toShow, toHide, synchronizing);
@@ -447,10 +447,6 @@ public class FileMenuFilter {
     private boolean isSingleMedia() {
         OCFile file = mFiles.iterator().next();
         return isSingleSelection() && (MimeTypeUtil.isVideo(file) || MimeTypeUtil.isAudio(file));
-    }
-
-    private boolean allFiles() {
-        return mFiles != null && !containsFolder();
     }
 
     private boolean containsEncryptedFile() {

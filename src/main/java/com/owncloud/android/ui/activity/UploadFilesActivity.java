@@ -42,14 +42,17 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.google.android.material.button.MaterialButton;
+import com.nextcloud.client.di.Injectable;
+import com.nextcloud.client.preferences.AppPreferences;
 import com.owncloud.android.R;
-import com.owncloud.android.db.PreferenceManager;
 import com.owncloud.android.files.services.FileUploader;
 import com.owncloud.android.lib.common.utils.Log_OC;
+import com.owncloud.android.ui.adapter.StoragePathAdapter;
 import com.owncloud.android.ui.asynctasks.CheckAvailableSpaceTask;
 import com.owncloud.android.ui.dialog.ConfirmationDialogFragment;
 import com.owncloud.android.ui.dialog.ConfirmationDialogFragment.ConfirmationDialogFragmentListener;
 import com.owncloud.android.ui.dialog.IndeterminateProgressDialog;
+import com.owncloud.android.ui.dialog.LocalStoragePathPickerDialogFragment;
 import com.owncloud.android.ui.dialog.SortingOrderDialogFragment;
 import com.owncloud.android.ui.fragment.ExtendedListFragment;
 import com.owncloud.android.ui.fragment.LocalFileListFragment;
@@ -60,6 +63,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
@@ -67,7 +72,6 @@ import androidx.appcompat.widget.AppCompatSpinner;
 import androidx.appcompat.widget.SearchView;
 import androidx.core.view.MenuItemCompat;
 import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
@@ -78,7 +82,7 @@ import androidx.fragment.app.FragmentTransaction;
 public class UploadFilesActivity extends FileActivity implements
     LocalFileListFragment.ContainerActivity, ActionBar.OnNavigationListener,
     OnClickListener, ConfirmationDialogFragmentListener, SortingOrderDialogFragment.OnSortingOrderListener,
-    CheckAvailableSpaceTask.CheckAvailableSpaceListener {
+    CheckAvailableSpaceTask.CheckAvailableSpaceListener, StoragePathAdapter.StoragePathAdapterListener, Injectable {
 
     private static final String SORT_ORDER_DIALOG_TAG = "SORT_ORDER_DIALOG";
     private static final int SINGLE_DIR = 1;
@@ -115,7 +119,10 @@ public class UploadFilesActivity extends FileActivity implements
     private static final String WAIT_DIALOG_TAG = "WAIT";
     private static final String QUERY_TO_MOVE_DIALOG_TAG = "QUERY_TO_MOVE";
     public static final String REQUEST_CODE_KEY = "requestCode";
+
+    @Inject AppPreferences preferences;
     private int requestCode;
+    private LocalStoragePathPickerDialogFragment dialog;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -133,7 +140,7 @@ public class UploadFilesActivity extends FileActivity implements
                     .getExternalStorageDirectory().getAbsolutePath()));
             mSelectAll = savedInstanceState.getBoolean(UploadFilesActivity.KEY_ALL_SELECTED, false);
         } else {
-            String lastUploadFrom = PreferenceManager.getUploadFromLocalLastPath(this);
+            String lastUploadFrom = preferences.getUploadFromLocalLastPath();
 
             if (!lastUploadFrom.isEmpty()) {
                 mCurrentDir = new File(lastUploadFrom);
@@ -152,12 +159,7 @@ public class UploadFilesActivity extends FileActivity implements
 
         // Drop-down navigation
         mDirectories = new CustomArrayAdapter<>(this, R.layout.support_simple_spinner_dropdown_item);
-        File currDir = mCurrentDir;
-        while(currDir != null && currDir.getParentFile() != null) {
-            mDirectories.add(currDir.getName());
-            currDir = currDir.getParentFile();
-        }
-        mDirectories.add(File.separator);
+        fillDirectoryDropdown();
 
         // Inflate and set the layout view
         setContentView(R.layout.upload_files_layout);
@@ -179,7 +181,7 @@ public class UploadFilesActivity extends FileActivity implements
         mUploadBtn.getBackground().setColorFilter(ThemeUtils.primaryColor(this, true), PorterDuff.Mode.SRC_ATOP);
         mUploadBtn.setOnClickListener(this);
 
-        int localBehaviour = PreferenceManager.getUploaderBehaviour(this);
+        int localBehaviour = preferences.getUploaderBehaviour();
 
         // file upload spinner
         mBehaviourSpinner = findViewById(R.id.upload_files_spinner_behaviour);
@@ -201,15 +203,15 @@ public class UploadFilesActivity extends FileActivity implements
 
         // Action bar setup
         ActionBar actionBar = getSupportActionBar();
-        actionBar.setHomeButtonEnabled(true);   // mandatory since Android ICS, according to the official documentation
-        actionBar.setDisplayHomeAsUpEnabled(mCurrentDir != null && mCurrentDir.getName() != null);
-        actionBar.setDisplayShowTitleEnabled(false);
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-        actionBar.setListNavigationCallbacks(mDirectories, this);
-
-        Drawable backArrow = getResources().getDrawable(R.drawable.ic_arrow_back);
 
         if (actionBar != null) {
+            actionBar.setHomeButtonEnabled(true);   // mandatory since Android ICS, according to the official documentation
+            actionBar.setDisplayHomeAsUpEnabled(mCurrentDir != null && mCurrentDir.getName() != null);
+            actionBar.setDisplayShowTitleEnabled(false);
+            actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+            actionBar.setListNavigationCallbacks(mDirectories, this);
+
+            Drawable backArrow = getResources().getDrawable(R.drawable.ic_arrow_back);
             actionBar.setHomeAsUpIndicator(ThemeUtils.tintDrawable(backArrow, ThemeUtils.fontColor(this)));
         }
 
@@ -222,6 +224,15 @@ public class UploadFilesActivity extends FileActivity implements
         checkWritableFolder(mCurrentDir);
 
         Log_OC.d(TAG, "onCreate() end");
+    }
+
+    private void fillDirectoryDropdown() {
+        File currentDir = mCurrentDir;
+        while (currentDir != null && currentDir.getParentFile() != null) {
+            mDirectories.add(currentDir.getName());
+            currentDir = currentDir.getParentFile();
+        }
+        mDirectories.add(File.separator);
     }
 
     /**
@@ -289,7 +300,7 @@ public class UploadFilesActivity extends FileActivity implements
                 ft.addToBackStack(null);
 
                 SortingOrderDialogFragment mSortingOrderDialogFragment = SortingOrderDialogFragment.newInstance(
-                    PreferenceManager.getSortOrderByType(this, FileSortOrder.Type.uploadFilesView));
+                    preferences.getSortOrderByType(FileSortOrder.Type.uploadFilesView));
                 mSortingOrderDialogFragment.show(ft, SORT_ORDER_DIALOG_TAG);
 
                 break;
@@ -306,11 +317,23 @@ public class UploadFilesActivity extends FileActivity implements
                 }
                 break;
             }
+            case R.id.action_choose_storage_path: {
+                showLocalStoragePathPickerDialog();
+                break;
+            }
             default:
                 retval = super.onOptionsItemSelected(item);
                 break;
         }
         return retval;
+    }
+
+    private void showLocalStoragePathPickerDialog() {
+        FragmentManager fm = getSupportFragmentManager();
+        FragmentTransaction ft = fm.beginTransaction();
+        ft.addToBackStack(null);
+        dialog = LocalStoragePathPickerDialogFragment.newInstance();
+        dialog.show(ft, LocalStoragePathPickerDialogFragment.LOCAL_STORAGE_PATH_PICKER_FRAGMENT);
     }
 
     @Override
@@ -354,6 +377,13 @@ public class UploadFilesActivity extends FileActivity implements
                 finish();
                 return;
             }
+
+            File parentFolder = mCurrentDir.getParentFile();
+            if (!parentFolder.canRead()) {
+                showLocalStoragePathPickerDialog();
+                return;
+            }
+
             popDirname();
             mFileListFragment.onNavigateUp();
             mCurrentDir = mFileListFragment.getCurrentDirectory();
@@ -450,7 +480,7 @@ public class UploadFilesActivity extends FileActivity implements
                 data.putExtra(EXTRA_CHOSEN_FILES, new String[]{filesToUpload[0]});
                 setResult(RESULT_OK_AND_MOVE, data);
 
-                PreferenceManager.setUploaderBehaviour(getApplicationContext(), FileUploader.LOCAL_BEHAVIOUR_MOVE);
+                preferences.setUploaderBehaviour(FileUploader.LOCAL_BEHAVIOUR_MOVE);
             } else {
                 data.putExtra(EXTRA_CHOSEN_FILES, mFileListFragment.getCheckedFilePaths());
 
@@ -470,8 +500,7 @@ public class UploadFilesActivity extends FileActivity implements
                 }
 
                 // store behaviour
-                PreferenceManager.setUploaderBehaviour(getApplicationContext(),
-                                                       mBehaviourSpinner.getSelectedItemPosition());
+                preferences.setUploaderBehaviour(mBehaviourSpinner.getSelectedItemPosition());
             }
 
             finish();
@@ -485,6 +514,20 @@ public class UploadFilesActivity extends FileActivity implements
             );
             dialog.setOnConfirmationListener(this);
             dialog.show(getSupportFragmentManager(), QUERY_TO_MOVE_DIALOG_TAG);
+        }
+    }
+
+    @Override
+    public void chosenPath(String path) {
+        if (getListOfFilesFragment() instanceof LocalFileListFragment) {
+            File file = new File(path);
+            ((LocalFileListFragment) getListOfFilesFragment()).listDirectory(file);
+            onDirectoryClick(file);
+
+            mCurrentDir = new File(path);
+            mDirectories.clear();
+
+            fillDirectoryDropdown();
         }
     }
 
@@ -543,7 +586,7 @@ public class UploadFilesActivity extends FileActivity implements
 
         if (canWriteIntoFolder) {
             textView.setText(getString(R.string.uploader_upload_files_behaviour));
-            int localBehaviour = PreferenceManager.getUploaderBehaviour(this);
+            int localBehaviour = preferences.getUploaderBehaviour();
             mBehaviourSpinner.setSelection(localBehaviour);
         } else {
             mBehaviourSpinner.setSelection(1);
@@ -591,8 +634,9 @@ public class UploadFilesActivity extends FileActivity implements
             finish();
 
         } else if (v.getId() == R.id.upload_files_btn_upload) {
-            PreferenceManager.setUploadFromLocalLastPath(this, mCurrentDir.getAbsolutePath());
-
+            if(mCurrentDir != null) {
+                preferences.setUploadFromLocalLastPath(mCurrentDir.getAbsolutePath());
+            }
             if (mLocalFolderPickerMode) {
                 Intent data = new Intent();
                 if (mCurrentDir != null) {
@@ -652,11 +696,19 @@ public class UploadFilesActivity extends FileActivity implements
     }
 
     private ExtendedListFragment getListOfFilesFragment() {
-        Fragment listOfFiles = mFileListFragment;
-        if (listOfFiles != null) {
-            return (ExtendedListFragment) listOfFiles;
+        if (mFileListFragment == null) {
+            Log_OC.e(TAG, "Access to unexisting list of files fragment!!");
         }
-        Log_OC.e(TAG, "Access to unexisting list of files fragment!!");
-        return null;
+
+        return mFileListFragment;
+    }
+
+    @Override
+    protected void onStop() {
+        if (dialog != null) {
+            dialog.dismissAllowingStateLoss();
+        }
+
+        super.onStop();
     }
 }

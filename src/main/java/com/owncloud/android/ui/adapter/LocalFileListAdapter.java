@@ -31,9 +31,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.nextcloud.client.preferences.AppPreferences;
 import com.owncloud.android.R;
 import com.owncloud.android.datamodel.ThumbnailsCacheManager;
-import com.owncloud.android.db.PreferenceManager;
 import com.owncloud.android.lib.common.utils.Log_OC;
 import com.owncloud.android.ui.interfaces.LocalFileListFragmentInterface;
 import com.owncloud.android.utils.DisplayUtils;
@@ -60,6 +60,7 @@ public class LocalFileListAdapter extends RecyclerView.Adapter<RecyclerView.View
     private static final String TAG = LocalFileListAdapter.class.getSimpleName();
 
     private static final int showFilenameColumnThreshold = 4;
+    private AppPreferences preferences;
     private Context mContext;
     private List<File> mFiles = new ArrayList<>();
     private List<File> mFilesAll = new ArrayList<>();
@@ -73,7 +74,8 @@ public class LocalFileListAdapter extends RecyclerView.Adapter<RecyclerView.View
     private static final int VIEWTYPE_IMAGE = 2;
 
     public LocalFileListAdapter(boolean localFolderPickerMode, File directory,
-                                LocalFileListFragmentInterface localFileListFragmentInterface, Context context) {
+                                LocalFileListFragmentInterface localFileListFragmentInterface, AppPreferences preferences, Context context) {
+        this.preferences = preferences;
         mContext = context;
         mLocalFolderPicker = localFolderPickerMode;
         swapDirectory(directory);
@@ -126,7 +128,7 @@ public class LocalFileListAdapter extends RecyclerView.Adapter<RecyclerView.View
 
         Log_OC.d(TAG, "Returning " + result.size() + " selected files");
 
-        return result.toArray(new String[result.size()]);
+        return result.toArray(new String[0]);
     }
 
     @Override
@@ -192,7 +194,7 @@ public class LocalFileListAdapter extends RecyclerView.Adapter<RecyclerView.View
                     itemVH.fileName.setText(file.getName());
 
                     if (gridView && (MimeTypeUtil.isImage(file) || MimeTypeUtil.isVideo(file) ||
-                        localFileListFragmentInterface.getColumnSize() > showFilenameColumnThreshold)) {
+                        localFileListFragmentInterface.getColumnsCount() > showFilenameColumnThreshold)) {
                         itemVH.fileName.setVisibility(View.GONE);
                     } else {
                         itemVH.fileName.setVisibility(View.VISIBLE);
@@ -317,11 +319,11 @@ public class LocalFileListAdapter extends RecyclerView.Adapter<RecyclerView.View
             }
         }
 
-        FileSortOrder sortOrder = PreferenceManager.getSortOrderByType(mContext, FileSortOrder.Type.localFileListView);
+        FileSortOrder sortOrder = preferences.getSortOrderByType(FileSortOrder.Type.localFileListView);
         mFiles = sortOrder.sortLocalFiles(mFiles);
 
         // Fetch preferences for showing hidden files
-        boolean showHiddenFiles = PreferenceManager.showHiddenFilesEnabled(mContext);
+        boolean showHiddenFiles = preferences.isShowHiddenFilesEnabled();
         if (!showHiddenFiles) {
             mFiles = filterHiddenFiles(mFiles);
         }
@@ -333,7 +335,7 @@ public class LocalFileListAdapter extends RecyclerView.Adapter<RecyclerView.View
     }
 
     public void setSortOrder(FileSortOrder sortOrder) {
-        PreferenceManager.setSortOrder(mContext, FileSortOrder.Type.localFileListView, sortOrder);
+        preferences.setSortOrder(FileSortOrder.Type.localFileListView, sortOrder);
         mFiles = sortOrder.sortLocalFiles(mFiles);
         notifyDataSetChanged();
     }

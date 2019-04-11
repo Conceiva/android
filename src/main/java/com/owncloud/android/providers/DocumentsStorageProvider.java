@@ -28,7 +28,6 @@ import android.annotation.TargetApi;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.graphics.Point;
@@ -38,13 +37,13 @@ import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
-import android.preference.PreferenceManager;
 import android.provider.DocumentsProvider;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.evernote.android.job.JobRequest;
 import com.evernote.android.job.util.Device;
+import com.nextcloud.client.preferences.AppPreferences;
 import com.owncloud.android.MainApp;
 import com.owncloud.android.R;
 import com.owncloud.android.authentication.AccountUtils;
@@ -67,7 +66,7 @@ import com.owncloud.android.operations.RenameFileOperation;
 import com.owncloud.android.operations.SynchronizeFileOperation;
 import com.owncloud.android.operations.UploadFileOperation;
 import com.owncloud.android.ui.activity.ConflictsResolveActivity;
-import com.owncloud.android.ui.activity.Preferences;
+import com.owncloud.android.ui.activity.SettingsActivity;
 import com.owncloud.android.utils.FileStorageUtils;
 import com.owncloud.android.utils.UriUtils;
 
@@ -93,10 +92,10 @@ public class DocumentsStorageProvider extends DocumentsProvider {
 
     @Override
     public Cursor queryRoots(String[] projection) throws FileNotFoundException {
-
-        SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(MainApp.getAppContext());
-        if (Preferences.LOCK_PASSCODE.equals(appPrefs.getString(Preferences.PREFERENCE_LOCK, "")) ||
-            Preferences.LOCK_DEVICE_CREDENTIALS.equals(appPrefs.getString(Preferences.PREFERENCE_LOCK, ""))) {
+        Context context = MainApp.getAppContext();
+        AppPreferences preferences = com.nextcloud.client.preferences.PreferenceManager.fromContext(context);
+        if (SettingsActivity.LOCK_PASSCODE.equals(preferences.getLockPreference()) ||
+            SettingsActivity.LOCK_DEVICE_CREDENTIALS.equals(preferences.getLockPreference())) {
             return new FileCursor();
         }
 
@@ -116,7 +115,6 @@ public class DocumentsStorageProvider extends DocumentsProvider {
         final long docId = Long.parseLong(documentId);
         updateCurrentStorageManagerIfNeeded(docId);
 
-        final FileCursor result = new FileCursor(projection);
         if (currentStorageManager == null) {
 
             for (Map.Entry<Long, FileDataStorageManager> entry : rootIdToStorageManager.entrySet()) {
@@ -131,6 +129,7 @@ public class DocumentsStorageProvider extends DocumentsProvider {
             throw new FileNotFoundException("File with id " + documentId + " not found");
         }
 
+        final FileCursor result = new FileCursor(projection);
         OCFile file = currentStorageManager.getFileById(docId);
         if (file != null) {
             result.addFile(file);
@@ -147,16 +146,14 @@ public class DocumentsStorageProvider extends DocumentsProvider {
         final long folderId = Long.parseLong(parentDocumentId);
         updateCurrentStorageManagerIfNeeded(folderId);
 
-        final OCFile browsedDir = currentStorageManager.getFileById(folderId);
-
-        Account account = currentStorageManager.getAccount();
-
         Context context = getContext();
 
         if (context == null) {
             throw new FileNotFoundException("Context may not be null");
         }
 
+        Account account = currentStorageManager.getAccount();
+        final OCFile browsedDir = currentStorageManager.getFileById(folderId);
         if (Device.getNetworkType(context).equals(JobRequest.NetworkType.UNMETERED)) {
             RemoteOperationResult result = new RefreshFolderOperation(browsedDir, System.currentTimeMillis(), false,
                                                                       false, true, currentStorageManager, account,
@@ -189,13 +186,13 @@ public class DocumentsStorageProvider extends DocumentsProvider {
             throw new FileNotFoundException("File not found: " + documentId);
         }
 
-        Account account = currentStorageManager.getAccount();
         Context context = getContext();
 
         if (context == null) {
             throw new FileNotFoundException("Context may not be null!");
         }
 
+        Account account = currentStorageManager.getAccount();
         if (!ocFile.isDown()) {
             Intent i = new Intent(getContext(), FileDownloader.class);
             i.putExtra(FileDownloader.EXTRA_ACCOUNT, account);
@@ -254,7 +251,7 @@ public class DocumentsStorageProvider extends DocumentsProvider {
 
         File file = new File(ocFile.getStoragePath());
         int accessMode = ParcelFileDescriptor.parseMode(mode);
-        boolean isWrite = (mode.indexOf('w') != -1);
+        boolean isWrite = mode.indexOf('w') != -1;
 
         final OCFile oldFile = ocFile;
         final OCFile newFile = ocFile;

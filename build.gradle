@@ -4,6 +4,7 @@
 // Due to this, the files layout is not the usual in new projects created with Android Studio / gradle. This file
 // merges declarations usually split in two separates build.gradle file, one for global settings of the project in
 // its root folder, another one for the app module in subfolder of root.
+import com.github.spotbugs.SpotBugsTask
 
 buildscript {
     repositories {
@@ -12,13 +13,17 @@ buildscript {
         maven {
             url 'https://oss.sonatype.org/content/repositories/snapshots/'
         }
+        maven {
+            url 'https://plugins.gradle.org/m2/'
+        }
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.3.1'
-        classpath('com.dicedmelon.gradle:jacoco-android:0.1.3') {
+        classpath 'com.android.tools.build:gradle:3.3.2'
+        classpath('com.dicedmelon.gradle:jacoco-android:0.1.4') {
             exclude group: 'org.codehaus.groovy', module: 'groovy-all'
         }
+        classpath 'gradle.plugin.com.github.spotbugs:spotbugs-gradle-plugin:1.6.6'
     }
 }
 
@@ -27,6 +32,7 @@ apply plugin: 'checkstyle'
 apply plugin: 'pmd'
 apply plugin: 'findbugs'
 apply plugin: 'jacoco-android'
+apply plugin: "com.github.spotbugs"
 
 configurations.all {
     exclude group: 'com.google.firebase', module: 'firebase-core'
@@ -68,12 +74,16 @@ if (taskRequest.contains("Gplay") || taskRequest.contains("findbugs") || taskReq
     apply from: 'gplay.gradle'
 }
 
+spotbugs {
+    toolVersion = '3.1.12'
+}
+
 android {
     lintOptions {
         abortOnError false
         htmlReport true
         htmlOutput file("$project.buildDir/reports/lint/lint.html")
-        disable 'MissingTranslation', 'GradleDependency'
+        disable 'MissingTranslation', 'GradleDependency', 'VectorPath', 'IconMissingDensityFolder', 'IconDensities'
     }
 
     dexOptions {
@@ -86,12 +96,11 @@ android {
         minSdkVersion 14
         targetSdkVersion 28
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-
         // arguments to be passed to functional tests
-        testInstrumentationRunnerArgument "TEST_USER", "\"$System.env.OCTEST_APP_USERNAME\""
-        testInstrumentationRunnerArgument "TEST_PASSWORD", "\"$System.env.OCTEST_APP_PASSWORD\""
-        testInstrumentationRunnerArgument "TEST_SERVER_URL", "\"$System.env.OCTEST_SERVER_BASE_URL\""
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunnerArgument "TEST_SERVER_URL", "${NC_TEST_SERVER_BASEURL}"
+        testInstrumentationRunnerArgument "TEST_SERVER_USERNAME", "${NC_TEST_SERVER_USERNAME}"
+        testInstrumentationRunnerArgument "TEST_SERVER_PASSWORD", "${NC_TEST_SERVER_PASSWORD}"
 
         multiDexEnabled true
 
@@ -124,8 +133,8 @@ android {
             versionDev {
                 applicationId "com.handwerkcloud.android.beta"
                 dimension "default"
-                versionCode 20190216
-                versionName "20190216"
+                versionCode 20190410
+                versionName "20190410"
             }
         }
 
@@ -198,6 +207,31 @@ android {
         }
     }
 
+    android.applicationVariants.all { variant ->
+        String variantName = variant.name
+        String capVariantName = variantName.substring(0, 1).toUpperCase() + variantName.substring(1);
+        tasks.register("spotbugs${capVariantName}", SpotBugsTask) {
+            ignoreFailures = false
+            effort = "max"
+            reportLevel = "medium"
+            classes = fileTree("$project.buildDir/intermediates/javac/${variantName}/compile${capVariantName}JavaWithJavac/classes/")
+            excludeFilter = file("${project.rootDir}/findbugs-filter.xml")
+            pluginClasspath = project.configurations.spotbugsPlugins
+            source = fileTree('src/main/java')
+            classpath = files()
+            include '**/*.java'
+            exclude '**/gen/**'
+
+            reports {
+                xml.enabled = false
+                html.enabled = true
+                html {
+                    destination = file("$project.buildDir/reports/spotbugs/spotbugs.html")
+                }
+            }
+        }
+    }
+
     check.dependsOn 'checkstyle', 'findbugs', 'pmd', 'lint'
 
     compileOptions {
@@ -255,16 +289,19 @@ dependencies {
         exclude group: "com.android.support"
     }
     implementation 'com.caverock:androidsvg:1.3'
-    implementation 'androidx.annotation:annotation:1.0.1'
+    implementation 'androidx.annotation:annotation:1.0.2'
     implementation 'com.google.code.gson:gson:2.8.5'
 
     // dependencies for local unit tests
     testImplementation 'junit:junit:4.12'
-    testImplementation 'org.mockito:mockito-core:2.24.0'
+
+    testImplementation 'org.mockito:mockito-core:2.26.0'
+    testImplementation 'androidx.test:core:1.1.0'
 
     // dependencies for instrumented tests
 
     // JUnit4 Rules
+    androidTestImplementation 'androidx.test.ext:junit:1.1.0'
     androidTestImplementation 'androidx.test:rules:1.1.1'
 
     // Android JUnit Runner
@@ -285,8 +322,15 @@ dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.6'
     annotationProcessor "org.projectlombok:lombok:1.18.6"
     androidTestImplementation 'tools.fastlane:screengrab:1.2.0'
-    findbugsPlugins 'com.h3xstream.findsecbugs:findsecbugs-plugin:1.8.0'
-    findbugsPlugins 'com.mebigfatguy.fb-contrib:fb-contrib:7.4.3'
+
+    spotbugsPlugins 'com.h3xstream.findsecbugs:findsecbugs-plugin:1.9.0'
+    spotbugsPlugins 'com.mebigfatguy.fb-contrib:fb-contrib:7.4.3'
+
+    implementation 'com.google.dagger:dagger:2.22.1'
+    implementation 'com.google.dagger:dagger-android:2.22.1'
+    implementation 'com.google.dagger:dagger-android-support:2.22.1'
+    annotationProcessor 'com.google.dagger:dagger-compiler:2.22.1'
+    annotationProcessor 'com.google.dagger:dagger-android-processor:2.22.1'
 
     //    jacocoAnt "org.jacoco:org.jacoco.ant:${jacocoVersion}"
 

@@ -30,11 +30,11 @@ import com.owncloud.android.MainApp;
  * Meta-Class that holds various static field information
  */
 public class ProviderMeta {
-
     public static final String DB_NAME = "filelist";
-    public static final int DB_VERSION = 42;
+    public static final int DB_VERSION = 44;
 
     private ProviderMeta() {
+        // No instance
     }
 
     static public class ProviderTableMeta implements BaseColumns {
@@ -106,6 +106,9 @@ public class ProviderMeta {
         public static final String FILE_MOUNT_TYPE = "mount_type";
         public static final String FILE_HAS_PREVIEW = "has_preview";
         public static final String FILE_UNREAD_COMMENTS_COUNT = "unread_comments_count";
+        public static final String FILE_OWNER_ID = "owner_id";
+        public static final String FILE_OWNER_DISPLAY_NAME = "owner_display_name";
+        public static final String FILE_NOTE = "note";
 
         public static final String[] FILE_ALL_COLUMNS = {
             _ID, FILE_PARENT, FILE_NAME, FILE_CREATION, FILE_MODIFIED,
@@ -241,5 +244,9 @@ public class ProviderMeta {
         public static final String FILESYSTEM_FILE_SENT_FOR_UPLOAD = "upload_triggered";
         public static final String FILESYSTEM_SYNCED_FOLDER_ID = "syncedfolder_id";
         public static final String FILESYSTEM_CRC32 = "crc32";
+
+        private ProviderTableMeta() {
+            // No instance
+        }
     }
 }

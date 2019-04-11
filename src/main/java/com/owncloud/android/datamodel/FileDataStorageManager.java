@@ -62,6 +62,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import lombok.Getter;
 import lombok.Setter;
@@ -205,6 +206,9 @@ public class FileDataStorageManager {
         cv.put(ProviderTableMeta.FILE_IS_DOWNLOADING, file.isDownloading());
         cv.put(ProviderTableMeta.FILE_ETAG_IN_CONFLICT, file.getEtagInConflict());
         cv.put(ProviderTableMeta.FILE_UNREAD_COMMENTS_COUNT, file.getUnreadCommentsCount());
+        cv.put(ProviderTableMeta.FILE_OWNER_ID, file.getOwnerId());
+        cv.put(ProviderTableMeta.FILE_OWNER_DISPLAY_NAME, file.getOwnerDisplayName());
+        cv.put(ProviderTableMeta.FILE_NOTE, file.getNote());
 
         boolean sameRemotePath = fileExists(file.getRemotePath());
         if (sameRemotePath ||
@@ -344,10 +348,11 @@ public class FileDataStorageManager {
 
         // prepare operations to remove files in the given folder
         String where = ProviderTableMeta.FILE_ACCOUNT_OWNER + AND + ProviderTableMeta.FILE_PATH + "=?";
-        String[] whereArgs;
+        String[] whereArgs = new String[2];
         for (OCFile file : filesToRemove) {
             if (file.getParentId() == folder.getFileId()) {
-                whereArgs = new String[]{account.name, file.getRemotePath()};
+                whereArgs[0] = account.name;
+                whereArgs[1] = file.getRemotePath();
                 if (file.isFolder()) {
                     operations.add(ContentProviderOperation.newDelete(
                             ContentUris.withAppendedId(ProviderTableMeta.CONTENT_URI_DIR, file.getFileId()))
@@ -443,6 +448,9 @@ public class FileDataStorageManager {
         cv.put(ProviderTableMeta.FILE_FAVORITE, folder.isFavorite());
         cv.put(ProviderTableMeta.FILE_IS_ENCRYPTED, folder.isEncrypted());
         cv.put(ProviderTableMeta.FILE_UNREAD_COMMENTS_COUNT, folder.getUnreadCommentsCount());
+        cv.put(ProviderTableMeta.FILE_OWNER_ID, folder.getOwnerId());
+        cv.put(ProviderTableMeta.FILE_OWNER_DISPLAY_NAME, folder.getOwnerDisplayName());
+        cv.put(ProviderTableMeta.FILE_NOTE, folder.getNote());
 
         return cv;
     }
@@ -479,6 +487,9 @@ public class FileDataStorageManager {
         cv.put(ProviderTableMeta.FILE_MOUNT_TYPE, file.getMountType().ordinal());
         cv.put(ProviderTableMeta.FILE_HAS_PREVIEW, file.isPreviewAvailable() ? 1 : 0);
         cv.put(ProviderTableMeta.FILE_UNREAD_COMMENTS_COUNT, file.getUnreadCommentsCount());
+        cv.put(ProviderTableMeta.FILE_OWNER_ID, file.getOwnerId());
+        cv.put(ProviderTableMeta.FILE_OWNER_DISPLAY_NAME, file.getOwnerDisplayName());
+        cv.put(ProviderTableMeta.FILE_NOTE, file.getNote());
 
         return cv;
     }
@@ -975,6 +986,9 @@ public class FileDataStorageManager {
                     c.getColumnIndex(ProviderTableMeta.FILE_MOUNT_TYPE))]);
             file.setPreviewAvailable(c.getInt(c.getColumnIndex(ProviderTableMeta.FILE_HAS_PREVIEW)) == 1);
             file.setUnreadCommentsCount(c.getInt(c.getColumnIndex(ProviderTableMeta.FILE_UNREAD_COMMENTS_COUNT)));
+            file.setOwnerId(c.getString(c.getColumnIndex(ProviderTableMeta.FILE_OWNER_ID)));
+            file.setOwnerDisplayName(c.getString(c.getColumnIndex(ProviderTableMeta.FILE_OWNER_DISPLAY_NAME)));
+            file.setNote(c.getString(c.getColumnIndex(ProviderTableMeta.FILE_NOTE)));
         }
 
         return file;
@@ -982,7 +996,7 @@ public class FileDataStorageManager {
 
     // Methods for Shares
     public boolean saveShare(OCShare share) {
-        boolean overriden = false;
+        boolean overridden = false;
         ContentValues cv = new ContentValues();
         cv.put(ProviderTableMeta.OCSHARES_FILE_SOURCE, share.getFileSource());
         cv.put(ProviderTableMeta.OCSHARES_ITEM_SOURCE, share.getItemSource());
@@ -1003,7 +1017,7 @@ public class FileDataStorageManager {
         cv.put(ProviderTableMeta.OCSHARES_HIDE_DOWNLOAD, share.isHideFileDownload());
 
         if (shareExistsForRemoteId(share.getRemoteId())) {// for renamed files; no more delete and create
-            overriden = true;
+            overridden = true;
             if (getContentResolver() != null) {
                 getContentResolver().update(ProviderTableMeta.CONTENT_URI_SHARE, cv,
                         ProviderTableMeta.OCSHARES_ID_REMOTE_SHARED + "=?",
@@ -1034,7 +1048,7 @@ public class FileDataStorageManager {
             }
         }
 
-        return overriden;
+        return overridden;
     }
 
     /**
@@ -1457,7 +1471,7 @@ public class FileDataStorageManager {
         // Reset flags & Remove shares for this files
         String filePath = "";
         for (OCShare share : shares) {
-            if (filePath != share.getPath()) {
+            if (!filePath.equals(share.getPath())) {
                 filePath = share.getPath();
                 resetShareFlagInAFile(filePath);
                 operations = prepareRemoveSharesInFile(filePath, operations);
@@ -1569,9 +1583,10 @@ public class FileDataStorageManager {
             List<OCShare> shares, ArrayList<ContentProviderOperation> operations) {
 
         if (shares != null) {
+            ContentValues cv;
             // prepare operations to insert or update files to save in the given folder
             for (OCShare share : shares) {
-                ContentValues cv = new ContentValues();
+                cv = new ContentValues();
                 cv.put(ProviderTableMeta.OCSHARES_FILE_SOURCE, share.getFileSource());
                 cv.put(ProviderTableMeta.OCSHARES_ITEM_SOURCE, share.getItemSource());
                 cv.put(ProviderTableMeta.OCSHARES_SHARE_TYPE, share.getShareType().getValue());
@@ -2009,6 +2024,7 @@ public class FileDataStorageManager {
         return c;
     }
 
+    @NonNull
     public OCCapability getCapability(String accountName) {
         OCCapability capability;
         Cursor c = getCapabilityCursorForAccount(accountName);
@@ -2124,10 +2140,10 @@ public class FileDataStorageManager {
     public void saveVirtuals(VirtualFolderType type, List<ContentValues> values) {
 
         if (getContentResolver() != null) {
-            getContentResolver().bulkInsert(ProviderTableMeta.CONTENT_URI_VIRTUAL, values.toArray(new ContentValues[values.size()]));
+            getContentResolver().bulkInsert(ProviderTableMeta.CONTENT_URI_VIRTUAL, values.toArray(new ContentValues[0]));
         } else {
             try {
-                getContentProviderClient().bulkInsert(ProviderTableMeta.CONTENT_URI_VIRTUAL, values.toArray(new ContentValues[values.size()]));
+                getContentProviderClient().bulkInsert(ProviderTableMeta.CONTENT_URI_VIRTUAL, values.toArray(new ContentValues[0]));
             } catch (RemoteException e) {
                 Log_OC.e(TAG, FAILED_TO_INSERT_MSG + e.getMessage(), e);
             }

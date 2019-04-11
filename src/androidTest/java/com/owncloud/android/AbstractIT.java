@@ -6,6 +6,8 @@ import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.net.Uri;
+import android.os.Bundle;
 
 import com.owncloud.android.datamodel.FileDataStorageManager;
 import com.owncloud.android.lib.common.OwnCloudClient;
@@ -13,6 +15,9 @@ import com.owncloud.android.lib.common.OwnCloudClientFactory;
 import com.owncloud.android.lib.common.accounts.AccountUtils;
 import com.owncloud.android.utils.FileStorageUtils;
 
+import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.methods.GetMethod;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 
@@ -20,8 +25,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import androidx.test.InstrumentationRegistry;
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
+
 
 /**
  * Common base for all integration tests
@@ -34,14 +40,15 @@ public abstract class AbstractIT {
     static Account account;
     protected static Context context;
 
-    private static final String username = "test";
-    private static final String password = "test";
-    private static final String baseUrl = "server";
-
     @BeforeClass
     public static void beforeAll() {
         try {
-            context = InstrumentationRegistry.getTargetContext();
+            context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+            Bundle arguments = androidx.test.platform.app.InstrumentationRegistry.getArguments();
+
+            Uri baseUrl = Uri.parse(arguments.getString("TEST_SERVER_URL"));
+            String username = arguments.getString("TEST_SERVER_USERNAME");
+            String password = arguments.getString("TEST_SERVER_PASSWORD");
 
             Account temp = new Account(username + "@" + baseUrl, MainApp.getAccountType(context));
 
@@ -51,7 +58,7 @@ public abstract class AbstractIT {
                 accountManager.setUserData(temp, AccountUtils.Constants.KEY_OC_ACCOUNT_VERSION,
                         Integer.toString(com.owncloud.android.authentication.AccountUtils.ACCOUNT_VERSION));
                 accountManager.setUserData(temp, AccountUtils.Constants.KEY_OC_VERSION, "14.0.0.0");
-                accountManager.setUserData(temp, AccountUtils.Constants.KEY_OC_BASE_URL, "http://" + baseUrl);
+                accountManager.setUserData(temp, AccountUtils.Constants.KEY_OC_BASE_URL, baseUrl.toString());
                 accountManager.setUserData(temp, AccountUtils.Constants.KEY_USER_ID, username);
             }
 
@@ -65,6 +72,8 @@ public abstract class AbstractIT {
             client = OwnCloudClientFactory.createOwnCloudClient(account, context);
 
             createDummyFiles();
+
+            waitForServer(client, baseUrl);
         } catch (OperationCanceledException e) {
             e.printStackTrace();
         } catch (AuthenticatorException e) {
@@ -99,5 +108,27 @@ public abstract class AbstractIT {
         }
         writer.flush();
         writer.close();
+    }
+
+    private static void waitForServer(OwnCloudClient client, Uri baseUrl) {
+        GetMethod get = new GetMethod(baseUrl + "/status.php");
+
+        try {
+            int i = 0;
+            while (client.executeMethod(get) != HttpStatus.SC_OK && i < 3) {
+                System.out.println("wait…");
+                Thread.sleep(60 * 1000);
+                i++;
+            }
+
+            if (i == 3) {
+                Assert.fail("Server not ready!");
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }
