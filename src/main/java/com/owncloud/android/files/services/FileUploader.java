@@ -105,12 +105,14 @@ public class FileUploader extends Service
     private static final String UPLOADS_ADDED_MESSAGE = "UPLOADS_ADDED";
     private static final String UPLOAD_START_MESSAGE = "UPLOAD_START";
     private static final String UPLOAD_FINISH_MESSAGE = "UPLOAD_FINISH";
+    private static final String UPLOAD_FAILED_MESSAGE = "UPLOAD_FAILED";
     public static final String EXTRA_UPLOAD_RESULT = "RESULT";
     public static final String EXTRA_REMOTE_PATH = "REMOTE_PATH";
     public static final String EXTRA_OLD_REMOTE_PATH = "OLD_REMOTE_PATH";
     public static final String EXTRA_OLD_FILE_PATH = "OLD_FILE_PATH";
     public static final String EXTRA_LINKED_TO_PATH = "LINKED_TO";
     public static final String ACCOUNT_NAME = "ACCOUNT_NAME";
+    public static final String EXTRA_ERROR_TEXT = "EXTRA_ERROR_TEXT";
 
     private static final int FOREGROUND_SERVICE_ID = 411;
 
@@ -197,6 +199,10 @@ public class FileUploader extends Service
 
     public static String getUploadFinishMessage() {
         return FileUploader.class.getName() + UPLOAD_FINISH_MESSAGE;
+    }
+
+    public static String getUploadFailedMessage() {
+        return FileUploader.class.getName() + UPLOAD_FAILED_MESSAGE;
     }
 
     @Override
@@ -1255,6 +1261,9 @@ public class FileUploader extends Service
                 ));
 
             } else {
+
+                sendBroadcastUploadFailed(mCurrentUpload, uploadResult);
+
                 //in case of failure, do not show details file view (because there is no file!)
                 Intent showUploadListIntent = new Intent(this, UploadListActivity.class);
                 showUploadListIntent.putExtra(FileActivity.EXTRA_FILE, upload.getFile());
@@ -1334,6 +1343,38 @@ public class FileUploader extends Service
         }
         end.setPackage(getPackageName());
         sendStickyBroadcast(end);
+    }
+
+    /**
+     * Sends a broadcast in order to the interested activities can update their
+     * view
+     *
+     * TODO - no more broadcasts, replace with a callback to subscribed listeners
+     *
+     * @param upload                 Finished upload operation
+     * @param uploadResult           Result of the upload operation
+     */
+    private void sendBroadcastUploadFailed(
+        UploadFileOperation upload,
+        RemoteOperationResult uploadResult) {
+
+        Intent end = new Intent(getUploadFailedMessage());
+        end.putExtra(EXTRA_REMOTE_PATH, upload.getRemotePath()); // real remote
+        // path, after
+        // possible
+        // automatic
+        // renaming
+        if (upload.wasRenamed()) {
+            end.putExtra(EXTRA_OLD_REMOTE_PATH, upload.getOldFile().getRemotePath());
+        }
+        end.putExtra(EXTRA_OLD_FILE_PATH, upload.getOriginalStoragePath());
+        end.putExtra(ACCOUNT_NAME, upload.getAccount().name);
+        end.putExtra(EXTRA_UPLOAD_RESULT, uploadResult.isSuccess());
+        String content = ErrorMessageAdapter.getErrorCauseMessage(uploadResult, upload, getResources());
+        end.putExtra(EXTRA_ERROR_TEXT, content);
+
+        end.setPackage(getPackageName());
+        sendBroadcast(end);
     }
 
     /**

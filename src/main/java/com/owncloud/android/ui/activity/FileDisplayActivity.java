@@ -146,6 +146,8 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import static com.owncloud.android.files.services.FileUploader.EXTRA_ERROR_TEXT;
+
 /**
  * Displays, what files the user has available in his ownCloud. This is the main view.
  */
@@ -160,6 +162,7 @@ public class FileDisplayActivity extends HookActivity
 
     private SyncBroadcastReceiver mSyncBroadcastReceiver;
     private UploadFinishReceiver mUploadFinishReceiver;
+    private UploadFailedReceiver mUploadFailedReceiver;
     private DownloadFinishReceiver mDownloadFinishReceiver;
     private RemoteOperationResult mLastSslUntrustedServerResult;
 
@@ -1285,6 +1288,11 @@ public class FileDisplayActivity extends HookActivity
         mUploadFinishReceiver = new UploadFinishReceiver();
         registerReceiver(mUploadFinishReceiver, uploadIntentFilter);
 
+        // Listen for upload failed messages
+        IntentFilter uploadFailedIntentFilter = new IntentFilter(FileUploader.getUploadFailedMessage());
+        mUploadFailedReceiver = new UploadFailedReceiver();
+        registerReceiver(mUploadFailedReceiver, uploadFailedIntentFilter);
+
         // Listen for download messages
         IntentFilter downloadIntentFilter = new IntentFilter(
                 FileDownloader.getDownloadAddedMessage());
@@ -1320,6 +1328,10 @@ public class FileDisplayActivity extends HookActivity
         if (mUploadFinishReceiver != null) {
             unregisterReceiver(mUploadFinishReceiver);
             mUploadFinishReceiver = null;
+        }
+        if (mUploadFailedReceiver != null) {
+            unregisterReceiver(mUploadFailedReceiver);
+            mUploadFailedReceiver = null;
         }
         if (mDownloadFinishReceiver != null) {
             unregisterReceiver(mDownloadFinishReceiver);
@@ -1572,7 +1584,28 @@ public class FileDisplayActivity extends HookActivity
             return currentDir != null && currentDir.getRemotePath().startsWith(linkedToRemotePath);
         }
     }
+    /**
+     * Once the file upload has finished -> update view
+     */
+    private class UploadFailedReceiver extends BroadcastReceiver {
+        /**
+         * Once the file upload has failed -> update view
+         *
+         * {@link BroadcastReceiver} to enable upload feedback in UI
+         */
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Snackbar.make(findViewById(android.R.id.content), intent.getStringExtra(EXTRA_ERROR_TEXT), Snackbar.LENGTH_INDEFINITE)
+                .setAction(R.string.retry, new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        FileUploader.UploadRequester requester = new FileUploader.UploadRequester();
+                        new Thread(() -> requester.retryFailedUploads(view.getContext(), null, null)).start();
+                    }
+                }).show();
 
+        }
+    }
 
     /**
      * Class waiting for broadcast events from the {@link FileDownloader} service.
