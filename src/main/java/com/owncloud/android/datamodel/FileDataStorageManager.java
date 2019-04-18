@@ -941,32 +941,6 @@ public class FileDataStorageManager {
         return c;
     }
 
-    private Cursor getFileCursorForSharedValue(String key, String value) {
-        Cursor c;
-        if (getContentResolver() != null) {
-            c = getContentResolver()
-                .query(ProviderTableMeta.CONTENT_URI,
-                       null,
-                       key + AND
-                           + ProviderTableMeta.FILE_ACCOUNT_OWNER
-                           + "!=?",
-                       new String[]{value, account.name}, null);
-        } else {
-            try {
-                c = getContentProviderClient().query(
-                    ProviderTableMeta.CONTENT_URI,
-                    null,
-                    key + AND + ProviderTableMeta.FILE_ACCOUNT_OWNER
-                        + "!=?", new String[]{value, account.name},
-                    null);
-            } catch (RemoteException e) {
-                Log_OC.e(TAG, "Could not get file details: " + e.getMessage(), e);
-                c = null;
-            }
-        }
-        return c;
-    }
-
     @Nullable
     private OCFile createFileInstanceFromVirtual(Cursor c) {
         OCFile file = null;
