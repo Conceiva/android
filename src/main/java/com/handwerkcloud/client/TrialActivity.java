@@ -63,7 +63,7 @@ public class TrialActivity extends AppCompatActivity {
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext.get());
             long currentTime = SystemClock.elapsedRealtime();
             long lastCheck = preferences.getLong("lastTrialCheck", 0);
-            if (currentTime < lastCheck + CHECK_INTERVAL) {
+            if (lastCheck != 0 && currentTime < lastCheck + CHECK_INTERVAL) {
                 return null;
             }
 

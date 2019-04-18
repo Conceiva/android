@@ -42,9 +42,8 @@
 
         <ImageView
             android:id="@+id/tools"
-            android:layout_width="wrap_content"
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/timesaving_margin_top"
             android:layout_marginLeft="10dp"
             android:layout_below="@+id/intro"
             android:src="@drawable/hc_tools"/>
@@ -55,7 +54,9 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/intro"
             android:layout_toRightOf="@+id/tools"
-            android:layout_margin="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="5dp"
             android:gravity="center_vertical"
             android:text="@string/trial_expired"
             android:textColor="@color/black"
@@ -68,7 +69,9 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/trial_text"
             android:layout_toRightOf="@+id/tools"
-            android:layout_margin="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="5dp"
             android:gravity="center_vertical"
             android:text="@string/trial_purchase_desc"
             android:textColor="@color/black"
@@ -79,7 +82,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/trial_purchase_desc"
-            android:layout_margin="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="5dp"
             android:gravity="center_vertical"
             android:text="@string/account_remove_1_day_remaining"
             android:textColor="@color/black"
@@ -91,7 +96,6 @@
             android:gravity="center"
             android:orientation="horizontal"
             android:layout_alignParentBottom="true"
-            android:layout_marginBottom="10dp"
             android:padding="@dimen/standard_padding">
 
             <com.google.android.material.button.MaterialButton

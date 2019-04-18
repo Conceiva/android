@@ -441,6 +441,9 @@ public class FileDisplayActivity extends HookActivity
                 }
             }
             if (file == null) {
+                file = getStorageManager().getFolderSharedWithMe();
+            }
+            if (file == null) {
                 // fall back to root folder
                 file = getStorageManager().getFileByPath(OCFile.ROOT_PATH);  // never returns null
             }
