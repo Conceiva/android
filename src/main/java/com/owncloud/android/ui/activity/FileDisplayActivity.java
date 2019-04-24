@@ -1262,6 +1262,10 @@ public class FileDisplayActivity extends HookActivity
             setFile(startFile);
         }
 
+        if (getFile() != null) {
+            updateActionBarTitleAndHomeButton(getFile());
+        }
+
         revertBottomNavigationBarToAllFiles();
 
         // refresh list of files
