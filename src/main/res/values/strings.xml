@@ -938,10 +938,12 @@
     <string name="size_1000">1000+</string>
     <string name="scan_failed">Failed to scan image</string>
     <string name="trial_title">HANDWERKCLOUD TRIAL</string>
+    <string name="account_title">HANDWERKCLOUD</string>
     <string name="trial_purchase">Purchase</string>
     <string name="trial_continue">Continue</string>
     <string name="trial_active">Your trial is active.</string>
     <string name="trial_ended">Your trial has expired.</string>
+    <string name="group_expired">Your account has expired.</string>
     <string name="trial_expired">Thankyou for trying HandwerkCloud, your trial has now expired. </string>
     <string name="trial_purchase_desc">To continue using HandwerkCloud tap the purchase button or visit the website.</string>
     <plurals name="trial_days_remaining">
@@ -954,6 +956,8 @@
     </plurals>
     <string name="trial_end_date">Trial end date</string>
     <string name="trial_end">Trial Ends %1$s</string>
+    <string name="group_expires_date">Account expiry date</string>
+    <string name="group_expires">Account Expires %1$s</string>
     <string name="trial_1_day_remaining">You have 1 day remaining in your trial.</string>
     <string name="account_remove_1_day_remaining">You have 1 day remaining before your account and files are removed from HandwerkCloud.</string>
     <string name="role_owner">Owner</string>

@@ -24,6 +24,7 @@ import com.owncloud.android.lib.common.OwnCloudAccount;
 import com.owncloud.android.lib.common.OwnCloudClient;
 import com.owncloud.android.lib.common.OwnCloudClientManagerFactory;
 import com.owncloud.android.lib.common.operations.RemoteOperationResult;
+import com.owncloud.android.lib.resources.status.OCCapability;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -40,6 +41,8 @@ public class TrialActivity extends AppCompatActivity {
     public static final String EXTRA_TRIAL_END_TIME = "EXTRA_TRIAL_END_TIME";
     public static final String EXTRA_TRIAL_END = "EXTRA_TRIAL_END";
     public static String EXTRA_TRIAL_EXPIRED = "EXTRA_TRIAL_EXPIRED";
+    public static String EXTRA_GROUP_EXPIRED = "EXTRA_GROUP_EXPIRED";
+    public static String EXTRA_SHOP_URL = "EXTRA_SHOP_URL";
     public static final String EXTRA_ACCOUNT_REMOVE_REMAINING_SEC = "EXTRA_ACCOUNT_REMOVE_REMAINING_SEC";
     private static final long CHECK_INTERVAL = 60 * 60 * 1000;
 
@@ -104,7 +107,19 @@ public class TrialActivity extends AppCompatActivity {
                         SharedPreferences.Editor editor = preferences.edit();
                         editor.putLong("lastTrialCheck", currentTime);
                         editor.commit();
+                        GetRemoteHCCapabilitiesOperation getCapabilities = new GetRemoteHCCapabilitiesOperation();
+                        RemoteOperationResult result = getCapabilities.execute(client);
 
+                        if (result.isSuccess()
+                            && result.getData() != null && result.getData().size() > 0) {
+                            // Read data from the result
+                            HCCapability capability = (HCCapability) result.getData().get(0);
+                            try {
+                                data.put("shop_url", capability.getShopUrl());
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
                         return data;
                     }
 
@@ -121,11 +136,24 @@ public class TrialActivity extends AppCompatActivity {
             }
 
             try {
+                boolean nextGroupExpiration = data.has("next_group_expiration");
                 boolean isTrial = data.getBoolean("is_trial");
-                if (isTrial) {
+
+                if (nextGroupExpiration) {
+                    JSONObject nextGroupExpObj = data.getJSONObject("next_group_expiration");
+                    boolean groupExpired = nextGroupExpObj.getBoolean("group_expired");
+                    if (groupExpired) {
+                        Intent trialIntent = new Intent(mContext.get(), TrialActivity.class);
+                        trialIntent.putExtra(EXTRA_GROUP_EXPIRED, groupExpired);
+                        trialIntent.putExtra(EXTRA_SHOP_URL, data.optString("shop_url"));
+                        mContext.get().startActivity(trialIntent);
+                    }
+                }
+                else if (isTrial) {
                     Intent trialIntent = new Intent(mContext.get(), TrialActivity.class);
                     boolean trialExpired = data.getBoolean("trial_expired");
                     trialIntent.putExtra(EXTRA_TRIAL_EXPIRED, trialExpired);
+                    trialIntent.putExtra(EXTRA_SHOP_URL, data.optString("shop_url"));
 
                     if (data.has("account_remove_remaining_sec")) {
                         int accountRemoveRemainingSec = data.getInt("account_remove_remaining_sec");
@@ -174,11 +202,13 @@ public class TrialActivity extends AppCompatActivity {
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         TrialFragment fragment = new TrialFragment();
         Bundle args = new Bundle();
+        args.putBoolean(EXTRA_GROUP_EXPIRED, intent.getBooleanExtra(EXTRA_GROUP_EXPIRED, false));
         args.putBoolean(EXTRA_TRIAL_EXPIRED, intent.getBooleanExtra(EXTRA_TRIAL_EXPIRED, false));
         args.putInt(EXTRA_ACCOUNT_REMOVE_REMAINING_SEC, intent.getIntExtra(EXTRA_ACCOUNT_REMOVE_REMAINING_SEC, 0));
         args.putInt(EXTRA_TRIAL_REMAINING_SEC, intent.getIntExtra(EXTRA_TRIAL_REMAINING_SEC, 0));
         args.putInt(EXTRA_TRIAL_END_TIME, intent.getIntExtra(EXTRA_TRIAL_END_TIME, 0));
         args.putString(EXTRA_TRIAL_END, intent.getStringExtra(EXTRA_TRIAL_END));
+        args.putString(EXTRA_SHOP_URL, intent.getStringExtra(EXTRA_SHOP_URL));
         fragment.setArguments(args);
         fragmentTransaction.add(R.id.fragment_container, fragment);
         fragmentTransaction.commit();

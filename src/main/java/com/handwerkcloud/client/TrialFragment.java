@@ -16,6 +16,8 @@ import org.w3c.dom.Text;
 import androidx.fragment.app.Fragment;
 
 import static com.handwerkcloud.client.TrialActivity.EXTRA_ACCOUNT_REMOVE_REMAINING_SEC;
+import static com.handwerkcloud.client.TrialActivity.EXTRA_GROUP_EXPIRED;
+import static com.handwerkcloud.client.TrialActivity.EXTRA_SHOP_URL;
 import static com.handwerkcloud.client.TrialActivity.EXTRA_TRIAL_END;
 import static com.handwerkcloud.client.TrialActivity.EXTRA_TRIAL_END_TIME;
 import static com.handwerkcloud.client.TrialActivity.EXTRA_TRIAL_EXPIRED;
@@ -32,12 +34,15 @@ public class TrialFragment extends Fragment {
 
         Bundle args = getArguments();
 
+        boolean groupExpired = args.getBoolean(EXTRA_GROUP_EXPIRED, false);
         boolean trialExpired = args.getBoolean(EXTRA_TRIAL_EXPIRED, false);
         int accountRemoveRemainingSec = args.getInt(EXTRA_ACCOUNT_REMOVE_REMAINING_SEC, 0);
         int trialRemainingSec = args.getInt(EXTRA_TRIAL_REMAINING_SEC, 0);
         int trialEndTime = args.getInt(EXTRA_TRIAL_END_TIME, 0);
         String trialEnd = args.getString(EXTRA_TRIAL_END, "");
+        final String shopUrl = args.getString(EXTRA_SHOP_URL, "");
 
+        TextView introText = view.findViewById(R.id.intro);
         TextView trialText = view.findViewById(R.id.trial_text);
         TextView accountRemoveText = view.findViewById(R.id.account_remove_text);
         TextView trialPurchaseDesc = view.findViewById(R.id.trial_purchase_desc);
@@ -47,7 +52,11 @@ public class TrialFragment extends Fragment {
         trialPurchase.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent purchaseIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(WEBSITE_URL));
+                String actionUrl = shopUrl;
+                if (actionUrl.length() == 0) {
+                    actionUrl = WEBSITE_URL;
+                }
+                Intent purchaseIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(actionUrl));
                 startActivity(purchaseIntent);
             }
         });
@@ -59,16 +68,38 @@ public class TrialFragment extends Fragment {
             }
         });
 
-        if (trialExpired) {
+        if (groupExpired) {
+            introText.setText(R.string.account_title);
+            trialContinue.setVisibility(View.GONE);
+            trialText.setText(R.string.group_expired);
+            trialPurchaseDesc.setVisibility(View.VISIBLE);
+            if (accountRemoveRemainingSec != 0) {
+                int days = accountRemoveRemainingSec / 60 / 60 / 24;
+                if (days > 0) {
+                    accountRemoveText.setText(getResources().getQuantityString(R.plurals.account_remove_days_remaining, days, days));
+                } else {
+                    accountRemoveText.setText(R.string.account_remove_1_day_remaining);
+                }
+            }
+            else {
+                accountRemoveText.setVisibility(View.GONE);
+            }
+        }
+        else if (trialExpired) {
             trialContinue.setVisibility(View.GONE);
             trialText.setText(R.string.trial_expired);
             trialPurchaseDesc.setVisibility(View.VISIBLE);
-            int days = accountRemoveRemainingSec / 60 / 60 / 24;
-            if (days > 0) {
-                accountRemoveText.setText(getResources().getQuantityString(R.plurals.account_remove_days_remaining, days, days));
+            if (accountRemoveRemainingSec != 0) {
+                int days = accountRemoveRemainingSec / 60 / 60 / 24;
+                if (days > 0) {
+                    accountRemoveText.setText(getResources().getQuantityString(R.plurals.account_remove_days_remaining, days, days));
+                }
+                else {
+                    accountRemoveText.setText(R.string.account_remove_1_day_remaining);
+                }
             }
             else {
-                accountRemoveText.setText(R.string.account_remove_1_day_remaining);
+                accountRemoveText.setVisibility(View.GONE);
             }
         }
         else {

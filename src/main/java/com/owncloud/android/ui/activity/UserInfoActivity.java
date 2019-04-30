@@ -363,13 +363,25 @@ public class UserInfoActivity extends FileActivity implements Injectable {
         List<UserInfoDetailsItem> result = new LinkedList<>();
 
         try {
+            if (featuresInfo != null && featuresInfo.has("next_group_expiration")) {
+                JSONObject groupExpObj = featuresInfo.getJSONObject("next_group_expiration");
+                if (!groupExpObj.getBoolean("group_expired")) {
+                    Date expiresDate = fromISO8601UTC(groupExpObj.getString("expires"));
+                    DateFormat dateFormat = android.text.format.DateFormat.getMediumDateFormat(getApplicationContext());
+                    String expiresDateString = dateFormat.format(expiresDate);
+                    addToListIfNeeded(result, R.drawable.baseline_calendar_today_24, String.format(getResources().getString(R.string.group_expires), expiresDateString), R.string.group_expires_date);
+                }
+                else {
+                    result.add(new UserInfoDetailsItem(R.drawable.baseline_info_24, getResources().getString(R.string.group_expired), getResources().getString(R.string.group_expired)));
+                }
+            }
             if (featuresInfo != null && featuresInfo.getBoolean("is_trial")) {
                 if (featuresInfo.getBoolean("trial_expired")) {
                     result.add(new UserInfoDetailsItem(R.drawable.baseline_info_24, getResources().getString(R.string.trial_ended), getResources().getString(R.string.trial_ended)));
                 }
                 else if (featuresInfo.has("trial_end")) {
                     Date endDate = fromISO8601UTC(featuresInfo.getString("trial_end"));
-                    DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getApplicationContext());
+                    DateFormat dateFormat = android.text.format.DateFormat.getMediumDateFormat(getApplicationContext());
                     String endDateString = dateFormat.format(endDate);
                     result.add(new UserInfoDetailsItem(R.drawable.baseline_info_24, getResources().getString(R.string.trial_active), getResources().getString(R.string.trial_active)));
                     addToListIfNeeded(result, R.drawable.baseline_calendar_today_24, String.format(getResources().getString(R.string.trial_end), endDateString), R.string.trial_end_date);
