@@ -944,7 +944,7 @@
     <string name="trial_active">Your trial is active.</string>
     <string name="trial_ended">Your trial has expired.</string>
     <string name="group_expired">Your account has expired.</string>
-    <string name="trial_expired">Thankyou for trying HandwerkCloud, your trial has now expired. </string>
+    <string name="trial_expired">Thank you for trying HandwerkCloud.  Your trial has now expired. </string>
     <string name="trial_purchase_desc">To continue using HandwerkCloud tap the purchase button or visit the website.</string>
     <plurals name="trial_days_remaining">
         <item quantity="one">You have %1$d day remaining in your trial.</item>

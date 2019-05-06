@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.material.button.MaterialButton;
@@ -42,7 +43,7 @@ public class TrialFragment extends Fragment {
         String trialEnd = args.getString(EXTRA_TRIAL_END, "");
         final String shopUrl = args.getString(EXTRA_SHOP_URL, "");
 
-        TextView introText = view.findViewById(R.id.intro);
+        ImageView timer = view.findViewById(R.id.timer);
         TextView trialText = view.findViewById(R.id.trial_text);
         TextView accountRemoveText = view.findViewById(R.id.account_remove_text);
         TextView trialPurchaseDesc = view.findViewById(R.id.trial_purchase_desc);
@@ -69,7 +70,7 @@ public class TrialFragment extends Fragment {
         });
 
         if (groupExpired) {
-            introText.setText(R.string.account_title);
+            timer.setImageResource(R.drawable.timer_off);
             trialContinue.setVisibility(View.GONE);
             trialText.setText(R.string.group_expired);
             trialPurchaseDesc.setVisibility(View.VISIBLE);
@@ -86,6 +87,7 @@ public class TrialFragment extends Fragment {
             }
         }
         else if (trialExpired) {
+            timer.setImageResource(R.drawable.timer_off);
             trialContinue.setVisibility(View.GONE);
             trialText.setText(R.string.trial_expired);
             trialPurchaseDesc.setVisibility(View.VISIBLE);

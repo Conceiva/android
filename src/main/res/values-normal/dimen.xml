@@ -6,4 +6,5 @@
     <dimen name="icon_size_land">48dp</dimen>
     <dimen name="intro_margin_top">60dp</dimen>
     <dimen name="timesaving_margin_top">20dp</dimen>
+    <dimen name="timer_image">140dp</dimen>
 </resources>

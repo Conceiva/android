@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/cement_background"
+    android:background="@color/primary"
     tools:context=".TrialFragment">
 
     <RelativeLayout
@@ -12,6 +12,7 @@
         android:layout_height="match_parent">
 
         <LinearLayout
+            android:id="@+id/banner"
             android:layout_width="match_parent"
             android:layout_height="40dp"
             android:background="@color/primary"
@@ -23,37 +24,21 @@
                 android:src="@drawable/hc_logo"/>
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/intro"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_marginStart="20dp"
-            android:layout_marginLeft="20dp"
-            android:layout_marginTop="@dimen/intro_margin_top"
-            android:layout_marginEnd="20dp"
-            android:layout_marginRight="20dp"
-            android:layout_marginBottom="20dp"
-            android:text="@string/trial_title"
-            android:textAlignment="center"
-            android:textColor="@color/black"
-            android:textStyle="bold"
-            android:textSize="20sp" />
-
         <ImageView
-            android:id="@+id/tools"
+            android:id="@+id/timer"
             android:layout_width="200dp"
-            android:layout_height="wrap_content"
+            android:layout_height="300px"
             android:layout_marginLeft="10dp"
-            android:layout_below="@+id/intro"
-            android:src="@drawable/hc_tools"/>
+            android:layout_below="@+id/banner"
+            android:tint="@color/white"
+            android:src="@drawable/timer"/>
 
         <TextView
             android:id="@+id/trial_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/intro"
-            android:layout_toRightOf="@+id/tools"
+            android:layout_below="@+id/banner"
+            android:layout_toRightOf="@+id/timer"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
             android:layout_marginTop="5dp"
@@ -68,7 +53,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/trial_text"
-            android:layout_toRightOf="@+id/tools"
+            android:layout_toRightOf="@+id/timer"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
             android:layout_marginTop="5dp"
@@ -82,6 +67,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/trial_purchase_desc"
+            android:layout_toRightOf="@+id/timer"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
             android:layout_marginTop="5dp"
@@ -99,9 +85,9 @@
             android:padding="@dimen/standard_padding">
 
             <com.google.android.material.button.MaterialButton
-                android:theme="@style/OutlinedButton"
+                android:theme="@style/Button.Login"
                 android:id="@+id/trial_purchase"
-                android:layout_width="fill_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
                 android:layout_weight="1"
@@ -112,8 +98,8 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/trial_continue"
-                android:theme="@style/Button.Primary"
-                android:layout_width="fill_parent"
+                android:theme="@style/OutlineLogindButton"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
                 android:layout_weight="1"
