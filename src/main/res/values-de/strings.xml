@@ -799,13 +799,13 @@
     <string name="skip_intro"><u>Intro überspringen</u></string>
     <string name="intro2">DIE APP, DIE IHR HANDWERK VERSTEHT.</string>
     <string name="intro_time_management">Zeitmanagement, Projektmanagement</string>
-    <string name="intro_photometric">Fotometrische Vermessung</string>
+    <string name="intro_photometric">Digitales Aufmass</string>
     <string name="intro_filestorage">Bestandswesen</string>
     <string name="intro_datamanagement">Datenverwaltung, Belegerfassung &amp; -erkennung</string>
     <string name="intro_calendar">Kalender, Einsatzplanung</string>
     <string name="intro_andmore">Und vieles mehr</string>
     <string name="intro3">FÜR ALLE GENAU DIE PASSENDE LÖSUNG.</string>
-    <string name="intro_select_profession">Wir Ihnen personalisierte und genau auf Ihre Branche abgestimmte Inhalte zur Verfügung stellen können.</string>
+    <string name="intro_select_profession">Wählen Sie Ihren Beruf aus, damit wir Ihnen personalisierte und genau auf Ihre Branche abgestimmte Inhalte zur Verfügung stellen können.</string>
     <string name="choose_profession">Wählen Sie Ihren Beruf:</string>
     <string name="carpenter">SCHREINER</string>
     <string name="stovebuilder">OFENBAUER</string>
@@ -830,7 +830,7 @@
     <string name="address_hint">Adresse eingeben</string>
     <string name="add_to_imagemeter">Zu ImageMeter hinzufügen</string>
     <string name="string_next">Weiter</string>
-    <string name="string_prev">Vorige</string>
+    <string name="string_prev">Zurück</string>
     <string name="string_finish">Fertig</string>
     <string name="edit_account">Konto bearbeiten</string>
     <string name="camera">Kamera</string>

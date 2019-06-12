@@ -53,8 +53,8 @@
     <array name="whatsnew_urls"></array>
 
     <!-- Colors -->
-    <color name="primary">#449fde</color>
-    <color name="primary_dark">#449fde</color>
+    <color name="primary">#3cb4e5</color>
+    <color name="primary_dark">#3cb4e5</color>
     <color name="color_accent">#B3B3B3</color>
     <color name="login_text_color">@color/white</color>
     <color name="login_text_hint_color">#7fC0E3</color>
