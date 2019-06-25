@@ -44,6 +44,7 @@ public class ProfessionFragment extends Fragment implements RegisterActivity.OnU
     LinearLayout bricklayer;
     LinearLayout roofer;
     LinearLayout stuccoer;
+    LinearLayout architect;
     LinearLayout other;
     public ProfessionFragment() {
     }
@@ -203,6 +204,14 @@ public class ProfessionFragment extends Fragment implements RegisterActivity.OnU
             }
         });
 
+        architect = view.findViewById(R.id.architect);
+        architect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                selectProfession(R.string.architect, RegisterActivity.ARCHITECT, view);
+            }
+        });
+
         other = view.findViewById(R.id.other);
         other.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -303,6 +312,9 @@ public class ProfessionFragment extends Fragment implements RegisterActivity.OnU
                 }
                 else if (values[i].compareTo(RegisterActivity.STUCCOER) == 0) {
                     selectProfession(R.string.stuccoer, RegisterActivity.STUCCOER, stuccoer);
+                }
+                else if (values[i].compareTo(RegisterActivity.ARCHITECT) == 0) {
+                    selectProfession(R.string.architect, RegisterActivity.ARCHITECT, architect);
                 }
                 else if (values[i].compareTo(RegisterActivity.OTHER) == 0) {
                     selectProfession(R.string.other, RegisterActivity.OTHER, other);
